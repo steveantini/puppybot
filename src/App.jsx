@@ -1,71 +1,43 @@
-import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom'
-import Dashboard from './pages/Dashboard'
-import LogEntry from './pages/LogEntry'
-import History from './pages/History'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { DataProvider } from './context/DataContext';
+import BottomNav from './components/BottomNav';
+import Dashboard from './pages/Dashboard';
+import History from './pages/History';
+import Stats from './pages/Stats';
+import PuppyProfile from './pages/PuppyProfile';
+import HealthTracker from './pages/HealthTracker';
 
 function App() {
   return (
-    <BrowserRouter>
-      <div className="min-h-screen bg-amber-50">
-        {/* Navigation */}
-        <nav className="bg-white border-b border-amber-200 shadow-sm">
-          <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-            <h1 className="text-xl font-bold text-amber-800 tracking-tight">
-              🐾 PuppyBot
-            </h1>
-            <div className="flex gap-1">
-              <NavLink
-                to="/"
-                end
-                className={({ isActive }) =>
-                  `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-amber-100 text-amber-900'
-                      : 'text-amber-700 hover:bg-amber-50'
-                  }`
-                }
-              >
-                Dashboard
-              </NavLink>
-              <NavLink
-                to="/log"
-                className={({ isActive }) =>
-                  `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-amber-100 text-amber-900'
-                      : 'text-amber-700 hover:bg-amber-50'
-                  }`
-                }
-              >
-                Log Entry
-              </NavLink>
-              <NavLink
-                to="/history"
-                className={({ isActive }) =>
-                  `px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-amber-100 text-amber-900'
-                      : 'text-amber-700 hover:bg-amber-50'
-                  }`
-                }
-              >
-                History
-              </NavLink>
+    <DataProvider>
+      <BrowserRouter>
+        <div className="min-h-screen bg-stone-50">
+          {/* Header */}
+          <header className="bg-white/90 backdrop-blur-sm border-b border-stone-100 sticky top-0 z-50">
+            <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-center">
+              <h1 className="text-lg font-bold text-stone-800 tracking-tight flex items-center gap-1.5">
+                <span className="text-xl">🐾</span> PuppyBot
+              </h1>
             </div>
-          </div>
-        </nav>
+          </header>
 
-        {/* Page content */}
-        <main className="max-w-4xl mx-auto px-4 py-6">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/log" element={<LogEntry />} />
-            <Route path="/history" element={<History />} />
-          </Routes>
-        </main>
-      </div>
-    </BrowserRouter>
-  )
+          {/* Page content */}
+          <main className="max-w-lg mx-auto px-4 py-4 pb-24">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/history" element={<History />} />
+              <Route path="/stats" element={<Stats />} />
+              <Route path="/profile" element={<PuppyProfile />} />
+              <Route path="/health" element={<HealthTracker />} />
+            </Routes>
+          </main>
+
+          {/* Bottom Navigation */}
+          <BottomNav />
+        </div>
+      </BrowserRouter>
+    </DataProvider>
+  );
 }
 
-export default App
+export default App;
