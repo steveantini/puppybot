@@ -1,23 +1,36 @@
 import { useState } from 'react';
 import { useData } from '../../context/DataContext';
-import { getCurrentTime, formatTime } from '../../utils/helpers';
+import { getCurrentTime, getTodayKey, formatTime } from '../../utils/helpers';
 
 export default function WakeUpForm({ onClose }) {
-  const { setWakeUpTime, setBedTime, todayLog } = useData();
+  const { setWakeUpTime, setBedTime, getDayLogByDate } = useData();
+  const [date, setDate] = useState(getTodayKey());
   const [mode, setMode] = useState('wake');
   const [time, setTime] = useState(getCurrentTime());
 
+  const dayLog = getDayLogByDate(date);
+
   const handleSave = () => {
     if (mode === 'wake') {
-      setWakeUpTime(time);
+      setWakeUpTime(time, date);
     } else {
-      setBedTime(time);
+      setBedTime(time, date);
     }
     onClose();
   };
 
   return (
     <div className="space-y-5">
+      <div>
+        <label className="block text-sm font-medium text-stone-600 mb-1.5">Date</label>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-stone-800 focus:outline-none focus:ring-2 focus:ring-sky-300"
+        />
+      </div>
+
       <div className="flex gap-2">
         <button
           onClick={() => setMode('wake')}
@@ -51,15 +64,15 @@ export default function WakeUpForm({ onClose }) {
         />
       </div>
 
-      {todayLog.wakeUpTimes?.length > 0 && mode === 'wake' && (
+      {dayLog.wakeUpTimes?.length > 0 && mode === 'wake' && (
         <div className="text-xs text-stone-400">
-          Already logged: {todayLog.wakeUpTimes.map((w) => formatTime(w.time)).join(', ')}
+          Already logged: {dayLog.wakeUpTimes.map((w) => formatTime(w.time)).join(', ')}
         </div>
       )}
 
-      {todayLog.bedTime && mode === 'bed' && (
+      {dayLog.bedTime && mode === 'bed' && (
         <div className="text-xs text-stone-400">
-          Current bed time: {formatTime(todayLog.bedTime)} (will be replaced)
+          Current bed time: {formatTime(dayLog.bedTime)} (will be replaced)
         </div>
       )}
 

@@ -1,24 +1,35 @@
 import { useState } from 'react';
 import { useData } from '../../context/DataContext';
-import { getCurrentTime } from '../../utils/helpers';
+import { getCurrentTime, getTodayKey } from '../../utils/helpers';
 
 const foodAmounts = ['1/4 cup', '1/3 cup', '1/2 cup', '3/4 cup', '1 cup'];
 const eatenAmounts = ['None', '1/4 of it', '1/2 of it', '3/4 of it', 'All of it'];
 
 export default function MealForm({ onClose }) {
   const { addMeal } = useData();
+  const [date, setDate] = useState(getTodayKey());
   const [time, setTime] = useState(getCurrentTime());
   const [foodGiven, setFoodGiven] = useState('');
   const [foodEaten, setFoodEaten] = useState('');
   const [notes, setNotes] = useState('');
 
   const handleSave = () => {
-    addMeal({ time, foodGiven, foodEaten, notes: notes.trim() || undefined });
+    addMeal({ time, foodGiven, foodEaten, notes: notes.trim() || undefined }, date);
     onClose();
   };
 
   return (
     <div className="space-y-5">
+      <div>
+        <label className="block text-sm font-medium text-stone-600 mb-1.5">Date</label>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-stone-800 focus:outline-none focus:ring-2 focus:ring-sky-300"
+        />
+      </div>
+
       <div>
         <label className="block text-sm font-medium text-stone-600 mb-1.5">Time</label>
         <input

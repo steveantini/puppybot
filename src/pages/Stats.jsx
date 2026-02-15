@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { getLastNDays, formatShortDate } from '../utils/helpers';
+import { exportStatsPdf } from '../utils/pdfExport';
 import {
   BarChart,
   Bar,
@@ -12,7 +13,7 @@ import {
   LineChart,
   Line,
 } from 'recharts';
-import { TrendingUp, BarChart3 } from 'lucide-react';
+import { TrendingUp, BarChart3, FileDown } from 'lucide-react';
 
 export default function Stats() {
   const { allLogs } = useData();
@@ -26,7 +27,7 @@ export default function Stats() {
       return {
         date: formatShortDate(date),
         good: breaks.filter((p) => p.pee === 'good' || p.poop === 'good').length,
-        accidents: breaks.filter((p) => p.pee === 'accident').length,
+        accidents: breaks.filter((p) => p.pee === 'accident' || p.poop === 'accident').length,
         total: breaks.length,
       };
     });
@@ -66,9 +67,27 @@ export default function Stats() {
 
   const hasData = Object.keys(allLogs).length > 0;
 
+  const handleExportPdf = () => {
+    exportStatsPdf(pottyData, mealData, napData, {
+      successRate,
+      totalPotty: totalPotty7d,
+      totalAccidents: totalAccidents7d,
+    });
+  };
+
   return (
     <div className="space-y-4 pb-4">
-      <h2 className="text-xl font-bold text-stone-800">Stats & Trends</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold text-stone-800">Stats & Trends</h2>
+        {hasData && (
+          <button
+            onClick={handleExportPdf}
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-sky-500 rounded-xl hover:bg-sky-600 transition-colors shadow-sm"
+          >
+            <FileDown size={16} /> Export PDF
+          </button>
+        )}
+      </div>
 
       {!hasData ? (
         <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-8 text-center">

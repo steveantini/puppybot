@@ -1,20 +1,31 @@
 import { useState } from 'react';
 import { useData } from '../../context/DataContext';
-import { getCurrentTime } from '../../utils/helpers';
+import { getCurrentTime, getTodayKey } from '../../utils/helpers';
 
 export default function NapForm({ onClose }) {
   const { addNap } = useData();
+  const [date, setDate] = useState(getTodayKey());
   const [startTime, setStartTime] = useState(getCurrentTime());
   const [endTime, setEndTime] = useState('');
   const [notes, setNotes] = useState('');
 
   const handleSave = () => {
-    addNap({ startTime, endTime, notes: notes.trim() || undefined });
+    addNap({ startTime, endTime, notes: notes.trim() || undefined }, date);
     onClose();
   };
 
   return (
     <div className="space-y-5">
+      <div>
+        <label className="block text-sm font-medium text-stone-600 mb-1.5">Date</label>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-stone-800 focus:outline-none focus:ring-2 focus:ring-sky-300"
+        />
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-sm font-medium text-stone-600 mb-1.5">Start Time</label>

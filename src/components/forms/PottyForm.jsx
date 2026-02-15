@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useData } from '../../context/DataContext';
-import { getCurrentTime } from '../../utils/helpers';
+import { getCurrentTime, getTodayKey } from '../../utils/helpers';
 
 export default function PottyForm({ onClose }) {
   const { addPottyBreak } = useData();
+  const [date, setDate] = useState(getTodayKey());
   const [time, setTime] = useState(getCurrentTime());
   const [pee, setPee] = useState(null);
   const [poop, setPoop] = useState(null);
@@ -11,12 +12,22 @@ export default function PottyForm({ onClose }) {
   const [notes, setNotes] = useState('');
 
   const handleSave = () => {
-    addPottyBreak({ time, pee, poop, ringBell, notes: notes.trim() || undefined });
+    addPottyBreak({ time, pee, poop, ringBell, notes: notes.trim() || undefined }, date);
     onClose();
   };
 
   return (
     <div className="space-y-5">
+      <div>
+        <label className="block text-sm font-medium text-stone-600 mb-1.5">Date</label>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-stone-800 focus:outline-none focus:ring-2 focus:ring-sky-300"
+        />
+      </div>
+
       <div>
         <label className="block text-sm font-medium text-stone-600 mb-1.5">Time</label>
         <input
@@ -65,6 +76,16 @@ export default function PottyForm({ onClose }) {
             }`}
           >
             Good
+          </button>
+          <button
+            onClick={() => setPoop(poop === 'accident' ? null : 'accident')}
+            className={`px-4 py-2.5 rounded-xl text-sm font-medium border transition-all flex-1 ${
+              poop === 'accident'
+                ? 'bg-rose-50 text-rose-500 border-rose-300'
+                : 'bg-white border-stone-200 text-stone-400'
+            }`}
+          >
+            Accident
           </button>
         </div>
       </div>

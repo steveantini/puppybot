@@ -57,6 +57,7 @@ export default function Dashboard() {
     if (p.pee === 'good') details.push('Pee ✓');
     if (p.pee === 'accident') details.push('Pee ✗');
     if (p.poop === 'good') details.push('Poop ✓');
+    if (p.poop === 'accident') details.push('Poop ✗');
     if (p.ringBell) details.push('Bell 🔔');
     timelineEntries.push({
       type: 'potty',

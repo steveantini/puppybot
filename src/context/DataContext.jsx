@@ -43,58 +43,74 @@ export function DataProvider({ children }) {
     setPuppy(updated);
   }, [puppy]);
 
-  const updateTodayLog = useCallback((updater) => {
-    const key = getTodayKey();
-    setTodayLog((prev) => {
-      const updated = typeof updater === 'function' ? updater(prev) : { ...prev, ...updater };
-      storageSaveDayLog(key, updated);
-      setAllLogs((prevLogs) => ({ ...prevLogs, [key]: updated }));
-      return updated;
+  // Generic function to update any day's log
+  const updateDayLog = useCallback((date, updater) => {
+    setAllLogs((prevLogs) => {
+      const currentLog = prevLogs[date] || createEmptyDayLog(date);
+      const updated = typeof updater === 'function' ? updater(currentLog) : { ...currentLog, ...updater };
+      storageSaveDayLog(date, updated);
+      // If updating today, also sync todayLog state
+      if (date === getTodayKey()) {
+        setTodayLog(updated);
+      }
+      return { ...prevLogs, [date]: updated };
     });
   }, []);
 
-  const addPottyBreak = useCallback((entry) => {
-    updateTodayLog((prev) => ({
-      ...prev,
-      pottyBreaks: [...prev.pottyBreaks, { ...entry, id: generateId() }],
-    }));
-  }, [updateTodayLog]);
+  // Keep backward-compatible updateTodayLog
+  const updateTodayLog = useCallback((updater) => {
+    updateDayLog(getTodayKey(), updater);
+  }, [updateDayLog]);
 
-  const addMeal = useCallback((entry) => {
-    updateTodayLog((prev) => ({
+  const addPottyBreak = useCallback((entry, date) => {
+    const targetDate = date || getTodayKey();
+    updateDayLog(targetDate, (prev) => ({
       ...prev,
-      meals: [...prev.meals, { ...entry, id: generateId() }],
+      pottyBreaks: [...(prev.pottyBreaks || []), { ...entry, id: generateId() }],
     }));
-  }, [updateTodayLog]);
+  }, [updateDayLog]);
 
-  const addNap = useCallback((entry) => {
-    updateTodayLog((prev) => ({
+  const addMeal = useCallback((entry, date) => {
+    const targetDate = date || getTodayKey();
+    updateDayLog(targetDate, (prev) => ({
       ...prev,
-      naps: [...prev.naps, { ...entry, id: generateId() }],
+      meals: [...(prev.meals || []), { ...entry, id: generateId() }],
     }));
-  }, [updateTodayLog]);
+  }, [updateDayLog]);
 
-  const setWakeUpTime = useCallback((time) => {
-    updateTodayLog((prev) => ({
+  const addNap = useCallback((entry, date) => {
+    const targetDate = date || getTodayKey();
+    updateDayLog(targetDate, (prev) => ({
       ...prev,
-      wakeUpTimes: [...prev.wakeUpTimes, { id: generateId(), time }],
+      naps: [...(prev.naps || []), { ...entry, id: generateId() }],
     }));
-  }, [updateTodayLog]);
+  }, [updateDayLog]);
 
-  const setBedTime = useCallback((time) => {
-    updateTodayLog((prev) => ({
+  const setWakeUpTime = useCallback((time, date) => {
+    const targetDate = date || getTodayKey();
+    updateDayLog(targetDate, (prev) => ({
+      ...prev,
+      wakeUpTimes: [...(prev.wakeUpTimes || []), { id: generateId(), time }],
+    }));
+  }, [updateDayLog]);
+
+  const setBedTime = useCallback((time, date) => {
+    const targetDate = date || getTodayKey();
+    updateDayLog(targetDate, (prev) => ({
       ...prev,
       bedTime: time,
     }));
-  }, [updateTodayLog]);
+  }, [updateDayLog]);
 
-  const updateSkills = useCallback((skills) => {
-    updateTodayLog((prev) => ({ ...prev, skills }));
-  }, [updateTodayLog]);
+  const updateSkills = useCallback((skills, date) => {
+    const targetDate = date || getTodayKey();
+    updateDayLog(targetDate, (prev) => ({ ...prev, skills }));
+  }, [updateDayLog]);
 
-  const updateNotes = useCallback((notes) => {
-    updateTodayLog((prev) => ({ ...prev, notes }));
-  }, [updateTodayLog]);
+  const updateNotes = useCallback((notes, date) => {
+    const targetDate = date || getTodayKey();
+    updateDayLog(targetDate, (prev) => ({ ...prev, notes }));
+  }, [updateDayLog]);
 
   const addHealthRecord = useCallback((record) => {
     const updated = [...healthRecords, { ...record, id: generateId() }];
@@ -139,6 +155,7 @@ export function DataProvider({ children }) {
     addWeightEntry,
     todayLog,
     updateTodayLog,
+    updateDayLog,
     addPottyBreak,
     addMeal,
     addNap,
