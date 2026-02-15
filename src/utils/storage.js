@@ -1,33 +1,6 @@
-const KEYS = {
-  PUPPY: 'puppybot_puppy',
-  LOGS: 'puppybot_logs',
-  HEALTH: 'puppybot_health',
-};
+import { supabase } from './supabase';
 
-export function getPuppy() {
-  const data = localStorage.getItem(KEYS.PUPPY);
-  return data ? JSON.parse(data) : null;
-}
-
-export function savePuppy(puppy) {
-  localStorage.setItem(KEYS.PUPPY, JSON.stringify(puppy));
-}
-
-export function getAllLogs() {
-  const data = localStorage.getItem(KEYS.LOGS);
-  return data ? JSON.parse(data) : {};
-}
-
-export function getDayLog(date) {
-  const logs = getAllLogs();
-  return logs[date] || createEmptyDayLog(date);
-}
-
-export function saveDayLog(date, dayLog) {
-  const logs = getAllLogs();
-  logs[date] = dayLog;
-  localStorage.setItem(KEYS.LOGS, JSON.stringify(logs));
-}
+// ─── Pure helpers (no DB) ────────────────────────────────────
 
 export function createEmptyDayLog(date) {
   return {
@@ -42,11 +15,174 @@ export function createEmptyDayLog(date) {
   };
 }
 
-export function getHealthRecords() {
-  const data = localStorage.getItem(KEYS.HEALTH);
-  return data ? JSON.parse(data) : [];
+// ─── PUPPY ───────────────────────────────────────────────────
+
+export async function fetchPuppy() {
+  const { data: puppy, error } = await supabase
+    .from('puppies')
+    .select('*')
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!puppy) return null;
+
+  // Fetch weight logs for this puppy
+  const { data: weightLogs, error: wErr } = await supabase
+    .from('weight_logs')
+    .select('*')
+    .eq('puppy_id', puppy.id)
+    .order('date');
+
+  if (wErr) throw wErr;
+
+  return {
+    id: puppy.id,
+    name: puppy.name,
+    breed: puppy.breed,
+    birthday: puppy.birthday,
+    photoUrl: puppy.photo_url,
+    weightLog: (weightLogs || []).map((w) => ({
+      id: w.id,
+      date: w.date,
+      weight: Number(w.weight),
+    })),
+  };
 }
 
-export function saveHealthRecords(records) {
-  localStorage.setItem(KEYS.HEALTH, JSON.stringify(records));
+export async function savePuppy(puppyData) {
+  const row = {
+    name: puppyData.name || null,
+    breed: puppyData.breed || null,
+    birthday: puppyData.birthday || null,
+    photo_url: puppyData.photoUrl || null,
+  };
+
+  if (puppyData.id) {
+    const { error } = await supabase
+      .from('puppies')
+      .update(row)
+      .eq('id', puppyData.id);
+    if (error) throw error;
+    return puppyData.id;
+  } else {
+    const { data, error } = await supabase
+      .from('puppies')
+      .insert(row)
+      .select()
+      .single();
+    if (error) throw error;
+    return data.id;
+  }
+}
+
+export async function addWeightLog(puppyId, entry) {
+  const { data, error } = await supabase
+    .from('weight_logs')
+    .insert({
+      puppy_id: puppyId,
+      date: entry.date,
+      weight: entry.weight,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return { id: data.id, date: data.date, weight: Number(data.weight) };
+}
+
+// ─── DAILY LOGS ──────────────────────────────────────────────
+
+export async function fetchAllLogs() {
+  const { data, error } = await supabase
+    .from('daily_logs')
+    .select('*')
+    .order('date', { ascending: false });
+
+  if (error) throw error;
+
+  const logs = {};
+  (data || []).forEach((row) => {
+    logs[row.date] = {
+      date: row.date,
+      wakeUpTimes: row.wake_up_times || [],
+      bedTime: row.bed_time || null,
+      pottyBreaks: row.potty_breaks || [],
+      naps: row.naps || [],
+      meals: row.meals || [],
+      skills: row.skills || '',
+      notes: row.notes || '',
+    };
+  });
+  return logs;
+}
+
+export async function upsertDayLog(date, dayLog) {
+  const { error } = await supabase.from('daily_logs').upsert(
+    {
+      date,
+      wake_up_times: dayLog.wakeUpTimes || [],
+      bed_time: dayLog.bedTime || null,
+      potty_breaks: dayLog.pottyBreaks || [],
+      naps: dayLog.naps || [],
+      meals: dayLog.meals || [],
+      skills: dayLog.skills || '',
+      notes: dayLog.notes || '',
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'date' }
+  );
+  if (error) throw error;
+}
+
+// ─── HEALTH RECORDS ──────────────────────────────────────────
+
+export async function fetchHealthRecords() {
+  const { data, error } = await supabase
+    .from('health_records')
+    .select('*')
+    .order('date', { ascending: false });
+
+  if (error) throw error;
+
+  return (data || []).map((r) => ({
+    id: r.id,
+    type: r.type,
+    date: r.date,
+    title: r.title,
+    description: r.description || '',
+    notes: r.notes || '',
+  }));
+}
+
+export async function insertHealthRecord(record) {
+  const { data, error } = await supabase
+    .from('health_records')
+    .insert({
+      type: record.type,
+      date: record.date,
+      title: record.title,
+      description: record.description || '',
+      notes: record.notes || '',
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return {
+    id: data.id,
+    type: data.type,
+    date: data.date,
+    title: data.title,
+    description: data.description || '',
+    notes: data.notes || '',
+  };
+}
+
+export async function deleteHealthRecordById(id) {
+  const { error } = await supabase
+    .from('health_records')
+    .delete()
+    .eq('id', id);
+  if (error) throw error;
 }

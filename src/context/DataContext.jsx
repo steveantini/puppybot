@@ -1,12 +1,13 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import {
-  getPuppy,
+  fetchPuppy,
   savePuppy as storageSavePuppy,
-  getDayLog,
-  saveDayLog as storageSaveDayLog,
-  getAllLogs,
-  getHealthRecords,
-  saveHealthRecords as storageSaveHealthRecords,
+  addWeightLog as storageAddWeightLog,
+  fetchAllLogs,
+  upsertDayLog,
+  fetchHealthRecords,
+  insertHealthRecord,
+  deleteHealthRecordById,
   createEmptyDayLog,
 } from '../utils/storage';
 import { getTodayKey, generateId } from '../utils/helpers';
@@ -14,42 +15,104 @@ import { getTodayKey, generateId } from '../utils/helpers';
 const DataContext = createContext(null);
 
 export function DataProvider({ children }) {
-  const [puppy, setPuppy] = useState(() => getPuppy());
-  const [todayLog, setTodayLog] = useState(() => getDayLog(getTodayKey()));
-  const [allLogs, setAllLogs] = useState(() => getAllLogs());
-  const [healthRecords, setHealthRecords] = useState(() => getHealthRecords());
+  const [puppy, setPuppy] = useState(null);
+  const [todayLog, setTodayLog] = useState(createEmptyDayLog(getTodayKey()));
+  const [allLogs, setAllLogs] = useState({});
+  const [healthRecords, setHealthRecords] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Refresh today's log when date changes
+  // ─── Initial data load from Supabase ─────────────────────
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      try {
+        const [puppyData, logsData, healthData] = await Promise.all([
+          fetchPuppy(),
+          fetchAllLogs(),
+          fetchHealthRecords(),
+        ]);
+
+        if (cancelled) return;
+
+        if (puppyData) setPuppy(puppyData);
+        setAllLogs(logsData);
+        setHealthRecords(healthData);
+
+        const todayKey = getTodayKey();
+        setTodayLog(logsData[todayKey] || createEmptyDayLog(todayKey));
+      } catch (err) {
+        console.error('Failed to load data from Supabase:', err);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Refresh today's log when date changes (midnight rollover)
   useEffect(() => {
     const interval = setInterval(() => {
       const key = getTodayKey();
       if (todayLog.date !== key) {
-        setTodayLog(getDayLog(key));
+        setTodayLog(allLogs[key] || createEmptyDayLog(key));
       }
     }, 60000);
     return () => clearInterval(interval);
-  }, [todayLog.date]);
+  }, [todayLog.date, allLogs]);
 
-  const updatePuppy = useCallback((data) => {
+  // ─── Puppy ───────────────────────────────────────────────
+
+  const updatePuppy = useCallback(async (data) => {
     const updated = { ...puppy, ...data };
-    storageSavePuppy(updated);
     setPuppy(updated);
+    try {
+      const id = await storageSavePuppy(updated);
+      if (!updated.id && id) {
+        setPuppy((prev) => ({ ...prev, id }));
+      }
+    } catch (err) {
+      console.error('Failed to save puppy:', err);
+    }
   }, [puppy]);
 
-  const addWeightEntry = useCallback((entry) => {
-    const weightLog = [...(puppy?.weightLog || []), { ...entry, id: generateId() }];
-    const updated = { ...puppy, weightLog };
-    storageSavePuppy(updated);
-    setPuppy(updated);
+  const addWeightEntry = useCallback(async (entry) => {
+    const tempId = generateId();
+    const tempEntry = { ...entry, id: tempId };
+    setPuppy((prev) => ({
+      ...prev,
+      weightLog: [...(prev?.weightLog || []), tempEntry],
+    }));
+    try {
+      if (puppy?.id) {
+        const saved = await storageAddWeightLog(puppy.id, entry);
+        setPuppy((prev) => ({
+          ...prev,
+          weightLog: prev.weightLog.map((w) => (w.id === tempId ? saved : w)),
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to save weight entry:', err);
+    }
   }, [puppy]);
 
-  // Generic function to update any day's log
+  // ─── Day logs ────────────────────────────────────────────
+
   const updateDayLog = useCallback((date, updater) => {
     setAllLogs((prevLogs) => {
       const currentLog = prevLogs[date] || createEmptyDayLog(date);
-      const updated = typeof updater === 'function' ? updater(currentLog) : { ...currentLog, ...updater };
-      storageSaveDayLog(date, updated);
-      // If updating today, also sync todayLog state
+      const updated =
+        typeof updater === 'function'
+          ? updater(currentLog)
+          : { ...currentLog, ...updater };
+
+      // Persist to Supabase (fire-and-forget with error logging)
+      upsertDayLog(date, updated).catch((err) =>
+        console.error('Failed to save day log:', err)
+      );
+
       if (date === getTodayKey()) {
         setTodayLog(updated);
       }
@@ -57,99 +120,158 @@ export function DataProvider({ children }) {
     });
   }, []);
 
-  // Keep backward-compatible updateTodayLog
-  const updateTodayLog = useCallback((updater) => {
-    updateDayLog(getTodayKey(), updater);
-  }, [updateDayLog]);
+  const updateTodayLog = useCallback(
+    (updater) => {
+      updateDayLog(getTodayKey(), updater);
+    },
+    [updateDayLog]
+  );
 
-  const addPottyBreak = useCallback((entry, date) => {
-    const targetDate = date || getTodayKey();
-    updateDayLog(targetDate, (prev) => ({
-      ...prev,
-      pottyBreaks: [...(prev.pottyBreaks || []), { ...entry, id: generateId() }],
-    }));
-  }, [updateDayLog]);
+  const addPottyBreak = useCallback(
+    (entry, date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({
+        ...prev,
+        pottyBreaks: [
+          ...(prev.pottyBreaks || []),
+          { ...entry, id: generateId() },
+        ],
+      }));
+    },
+    [updateDayLog]
+  );
 
-  const addMeal = useCallback((entry, date) => {
-    const targetDate = date || getTodayKey();
-    updateDayLog(targetDate, (prev) => ({
-      ...prev,
-      meals: [...(prev.meals || []), { ...entry, id: generateId() }],
-    }));
-  }, [updateDayLog]);
+  const addMeal = useCallback(
+    (entry, date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({
+        ...prev,
+        meals: [...(prev.meals || []), { ...entry, id: generateId() }],
+      }));
+    },
+    [updateDayLog]
+  );
 
-  const addNap = useCallback((entry, date) => {
-    const targetDate = date || getTodayKey();
-    updateDayLog(targetDate, (prev) => ({
-      ...prev,
-      naps: [...(prev.naps || []), { ...entry, id: generateId() }],
-    }));
-  }, [updateDayLog]);
+  const addNap = useCallback(
+    (entry, date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({
+        ...prev,
+        naps: [...(prev.naps || []), { ...entry, id: generateId() }],
+      }));
+    },
+    [updateDayLog]
+  );
 
-  const setWakeUpTime = useCallback((time, date) => {
-    const targetDate = date || getTodayKey();
-    updateDayLog(targetDate, (prev) => ({
-      ...prev,
-      wakeUpTimes: [...(prev.wakeUpTimes || []), { id: generateId(), time }],
-    }));
-  }, [updateDayLog]);
+  const setWakeUpTime = useCallback(
+    (time, date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({
+        ...prev,
+        wakeUpTimes: [
+          ...(prev.wakeUpTimes || []),
+          { id: generateId(), time },
+        ],
+      }));
+    },
+    [updateDayLog]
+  );
 
-  const setBedTime = useCallback((time, date) => {
-    const targetDate = date || getTodayKey();
-    updateDayLog(targetDate, (prev) => ({
-      ...prev,
-      bedTime: time,
-    }));
-  }, [updateDayLog]);
+  const setBedTime = useCallback(
+    (time, date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({
+        ...prev,
+        bedTime: time,
+      }));
+    },
+    [updateDayLog]
+  );
 
-  const updateSkills = useCallback((skills, date) => {
-    const targetDate = date || getTodayKey();
-    updateDayLog(targetDate, (prev) => ({ ...prev, skills }));
-  }, [updateDayLog]);
+  const updateSkills = useCallback(
+    (skills, date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({ ...prev, skills }));
+    },
+    [updateDayLog]
+  );
 
-  const updateNotes = useCallback((notes, date) => {
-    const targetDate = date || getTodayKey();
-    updateDayLog(targetDate, (prev) => ({ ...prev, notes }));
-  }, [updateDayLog]);
+  const updateNotes = useCallback(
+    (notes, date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({ ...prev, notes }));
+    },
+    [updateDayLog]
+  );
 
-  const addHealthRecord = useCallback((record) => {
-    const updated = [...healthRecords, { ...record, id: generateId() }];
-    storageSaveHealthRecords(updated);
-    setHealthRecords(updated);
-  }, [healthRecords]);
+  // ─── Health records ──────────────────────────────────────
 
-  const deleteHealthRecord = useCallback((id) => {
-    const updated = healthRecords.filter((r) => r.id !== id);
-    storageSaveHealthRecords(updated);
-    setHealthRecords(updated);
-  }, [healthRecords]);
+  const addHealthRecord = useCallback(async (record) => {
+    const tempId = generateId();
+    const tempRecord = { ...record, id: tempId };
+    setHealthRecords((prev) => [...prev, tempRecord]);
+    try {
+      const saved = await insertHealthRecord(record);
+      setHealthRecords((prev) =>
+        prev.map((r) => (r.id === tempId ? saved : r))
+      );
+    } catch (err) {
+      console.error('Failed to save health record:', err);
+    }
+  }, []);
 
-  const deletePottyBreak = useCallback((id) => {
-    updateTodayLog((prev) => ({
-      ...prev,
-      pottyBreaks: prev.pottyBreaks.filter((p) => p.id !== id),
-    }));
-  }, [updateTodayLog]);
+  const deleteHealthRecord = useCallback(async (id) => {
+    setHealthRecords((prev) => prev.filter((r) => r.id !== id));
+    try {
+      await deleteHealthRecordById(id);
+    } catch (err) {
+      console.error('Failed to delete health record:', err);
+    }
+  }, []);
 
-  const deleteMeal = useCallback((id) => {
-    updateTodayLog((prev) => ({
-      ...prev,
-      meals: prev.meals.filter((m) => m.id !== id),
-    }));
-  }, [updateTodayLog]);
+  // ─── Delete items from today's log ───────────────────────
 
-  const deleteNap = useCallback((id) => {
-    updateTodayLog((prev) => ({
-      ...prev,
-      naps: prev.naps.filter((n) => n.id !== id),
-    }));
-  }, [updateTodayLog]);
+  const deletePottyBreak = useCallback(
+    (id) => {
+      updateTodayLog((prev) => ({
+        ...prev,
+        pottyBreaks: prev.pottyBreaks.filter((p) => p.id !== id),
+      }));
+    },
+    [updateTodayLog]
+  );
 
-  const getDayLogByDate = useCallback((date) => {
-    return allLogs[date] || createEmptyDayLog(date);
-  }, [allLogs]);
+  const deleteMeal = useCallback(
+    (id) => {
+      updateTodayLog((prev) => ({
+        ...prev,
+        meals: prev.meals.filter((m) => m.id !== id),
+      }));
+    },
+    [updateTodayLog]
+  );
+
+  const deleteNap = useCallback(
+    (id) => {
+      updateTodayLog((prev) => ({
+        ...prev,
+        naps: prev.naps.filter((n) => n.id !== id),
+      }));
+    },
+    [updateTodayLog]
+  );
+
+  const getDayLogByDate = useCallback(
+    (date) => {
+      return allLogs[date] || createEmptyDayLog(date);
+    },
+    [allLogs]
+  );
+
+  // ─── Context value ──────────────────────────────────────
 
   const value = {
+    isLoading,
     puppy,
     updatePuppy,
     addWeightEntry,
@@ -174,9 +296,7 @@ export function DataProvider({ children }) {
   };
 
   return (
-    <DataContext.Provider value={value}>
-      {children}
-    </DataContext.Provider>
+    <DataContext.Provider value={value}>{children}</DataContext.Provider>
   );
 }
 
