@@ -81,38 +81,41 @@ export default function Stats() {
       ) : (
         <>
           {/* Summary Cards */}
-          <div className="grid grid-cols-3 gap-2.5">
-            <div className="bg-white rounded-2xl p-3 text-center border border-stone-100 shadow-sm">
-              <div className="text-2xl font-bold text-emerald-600">
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white rounded-2xl p-4 text-center border border-stone-100 shadow-sm">
+              <div className="text-3xl font-bold text-emerald-600">
                 {successRate}%
               </div>
-              <div className="text-[11px] text-stone-500">
+              <div className="text-xs text-stone-500 mt-1">
                 Potty Success (7d)
               </div>
             </div>
-            <div className="bg-white rounded-2xl p-3 text-center border border-stone-100 shadow-sm">
-              <div className="text-2xl font-bold text-sky-600">
+            <div className="bg-white rounded-2xl p-4 text-center border border-stone-100 shadow-sm">
+              <div className="text-3xl font-bold text-sky-600">
                 {totalPotty7d}
               </div>
-              <div className="text-[11px] text-stone-500">
+              <div className="text-xs text-stone-500 mt-1">
                 Total Potty (7d)
               </div>
             </div>
-            <div className="bg-white rounded-2xl p-3 text-center border border-stone-100 shadow-sm">
-              <div className="text-2xl font-bold text-rose-500">
+            <div className="bg-white rounded-2xl p-4 text-center border border-stone-100 shadow-sm">
+              <div className="text-3xl font-bold text-rose-500">
                 {totalAccidents7d}
               </div>
-              <div className="text-[11px] text-stone-500">Accidents (7d)</div>
+              <div className="text-xs text-stone-500 mt-1">Accidents (7d)</div>
             </div>
           </div>
 
+          {/* Charts grid - side by side on desktop */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
           {/* Potty Chart */}
-          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4">
+          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 sm:p-6">
             <h3 className="font-semibold text-stone-800 mb-3 flex items-center gap-2">
               <TrendingUp size={16} className="text-stone-400" />
               Potty Breaks (7 Days)
             </h3>
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={240}>
               <BarChart data={pottyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
                 <XAxis
@@ -149,12 +152,12 @@ export default function Stats() {
           </div>
 
           {/* Meals Chart */}
-          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4">
+          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 sm:p-6">
             <h3 className="font-semibold text-stone-800 mb-3 flex items-center gap-2">
               <TrendingUp size={16} className="text-stone-400" />
               Meals (7 Days)
             </h3>
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={240}>
               <BarChart data={mealData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
                 <XAxis
@@ -190,22 +193,24 @@ export default function Stats() {
             </ResponsiveContainer>
           </div>
 
-          {/* Naps Chart */}
-          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4">
+          </div>{/* end charts grid */}
+
+          {/* Naps Chart - full width */}
+          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 sm:p-6">
             <h3 className="font-semibold text-stone-800 mb-3 flex items-center gap-2">
               <TrendingUp size={16} className="text-stone-400" />
               Naps (7 Days)
             </h3>
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={240}>
               <LineChart data={napData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
                 <XAxis
                   dataKey="date"
-                  tick={{ fontSize: 10 }}
+                  tick={{ fontSize: 11 }}
                   stroke="#a8a29e"
                 />
                 <YAxis
-                  tick={{ fontSize: 10 }}
+                  tick={{ fontSize: 11 }}
                   stroke="#a8a29e"
                   allowDecimals={false}
                 />

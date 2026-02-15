@@ -53,7 +53,7 @@ export default function History() {
           >
             <button
               onClick={() => setExpandedDate(isExpanded ? null : date)}
-              className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-stone-50/50 transition-colors"
+              className="w-full px-4 sm:px-6 py-4 flex items-center justify-between hover:bg-stone-50/50 transition-colors"
             >
               <div className="text-left">
                 <div className="font-semibold text-stone-800 text-sm">
@@ -79,7 +79,7 @@ export default function History() {
             </button>
 
             {isExpanded && (
-              <div className="border-t border-stone-100 px-4 py-3 space-y-4">
+              <div className="border-t border-stone-100 px-4 sm:px-6 py-4 space-y-4">
                 {/* Wake/Bed Times */}
                 {(log.wakeUpTimes?.length > 0 || log.bedTime) && (
                   <div>

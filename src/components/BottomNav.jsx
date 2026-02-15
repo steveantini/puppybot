@@ -34,7 +34,7 @@ function NavItem({ to, icon: Icon, label }) {
 export default function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-stone-200 z-50">
-      <div className="max-w-lg mx-auto flex items-center justify-around py-1 px-2 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
+      <div className="max-w-5xl mx-auto flex items-center justify-around py-1 px-2 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
         {navItems.map((item) => (
           <NavItem key={item.to} {...item} />
         ))}

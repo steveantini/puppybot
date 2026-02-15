@@ -143,28 +143,31 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-3 gap-2.5">
-        <div className="bg-white rounded-2xl p-3 text-center border border-stone-100 shadow-sm">
-          <Droplets className="mx-auto text-sky-400" size={20} />
-          <div className="text-xl font-bold text-stone-800 mt-1">{pottyCount}</div>
-          <div className="text-[11px] text-stone-500">
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-white rounded-2xl p-4 text-center border border-stone-100 shadow-sm">
+          <Droplets className="mx-auto text-sky-400" size={22} />
+          <div className="text-2xl font-bold text-stone-800 mt-1">{pottyCount}</div>
+          <div className="text-xs text-stone-500">
             Potty{pottyGood > 0 ? ` (${pottyGood} good)` : ''}
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-3 text-center border border-stone-100 shadow-sm">
-          <UtensilsCrossed className="mx-auto text-amber-400" size={20} />
-          <div className="text-xl font-bold text-stone-800 mt-1">{mealCount}</div>
-          <div className="text-[11px] text-stone-500">Meals</div>
+        <div className="bg-white rounded-2xl p-4 text-center border border-stone-100 shadow-sm">
+          <UtensilsCrossed className="mx-auto text-amber-400" size={22} />
+          <div className="text-2xl font-bold text-stone-800 mt-1">{mealCount}</div>
+          <div className="text-xs text-stone-500">Meals</div>
         </div>
-        <div className="bg-white rounded-2xl p-3 text-center border border-stone-100 shadow-sm">
-          <Moon className="mx-auto text-indigo-400" size={20} />
-          <div className="text-xl font-bold text-stone-800 mt-1">{napCount}</div>
-          <div className="text-[11px] text-stone-500">Naps</div>
+        <div className="bg-white rounded-2xl p-4 text-center border border-stone-100 shadow-sm">
+          <Moon className="mx-auto text-indigo-400" size={22} />
+          <div className="text-2xl font-bold text-stone-800 mt-1">{napCount}</div>
+          <div className="text-xs text-stone-500">Naps</div>
         </div>
       </div>
 
+      {/* Main content area - side by side on desktop */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
       {/* Timeline */}
-      <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
+      <div className="lg:col-span-2 bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
         <div className="px-4 py-3 border-b border-stone-100">
           <h3 className="font-semibold text-stone-800">Today&apos;s Timeline</h3>
         </div>
@@ -215,8 +218,9 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Skills & Notes Summary */}
-      {(todayLog.skills || todayLog.notes) && (
+      {/* Skills & Notes Summary (sidebar on desktop) */}
+      <div className="space-y-4">
+      {(todayLog.skills || todayLog.notes) ? (
         <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 space-y-2">
           {todayLog.skills && (
             <div>
@@ -235,11 +239,20 @@ export default function Dashboard() {
             </div>
           )}
         </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 text-center text-stone-400 text-sm">
+          <PenLine className="mx-auto text-stone-300 mb-2" size={20} />
+          <p>No skills or notes yet today.</p>
+          <p className="text-xs mt-1">Tap &quot;Notes&quot; below to add.</p>
+        </div>
       )}
+      </div>
+
+      </div>{/* end grid */}
 
       {/* Quick Add Buttons */}
-      <div className="sticky bottom-[68px] z-40 bg-gradient-to-t from-stone-50 via-stone-50/95 to-stone-50/0 pt-6 -mx-4 px-4">
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="sticky bottom-[68px] z-40 bg-gradient-to-t from-stone-50 via-stone-50/95 to-stone-50/0 pt-6 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 scrollbar-hide justify-start sm:justify-center">
           {quickAddButtons.map((btn) => {
             const Icon = btn.icon;
             return (

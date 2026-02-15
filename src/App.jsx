@@ -14,7 +14,7 @@ function App() {
         <div className="min-h-screen bg-stone-50">
           {/* Header */}
           <header className="bg-white/90 backdrop-blur-sm border-b border-stone-100 sticky top-0 z-50">
-            <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-center">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-center">
               <h1 className="text-lg font-bold text-stone-800 tracking-tight flex items-center gap-1.5">
                 <span className="text-xl">🐾</span> PuppyBot
               </h1>
@@ -22,7 +22,7 @@ function App() {
           </header>
 
           {/* Page content */}
-          <main className="max-w-lg mx-auto px-4 py-4 pb-24">
+          <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/history" element={<History />} />

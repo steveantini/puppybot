@@ -70,6 +70,8 @@ export default function PuppyProfile() {
     <div className="space-y-4 pb-4">
       <h2 className="text-xl font-bold text-stone-800">Puppy Profile</h2>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
       {/* Photo & Basic Info */}
       <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
         <div className="bg-gradient-to-br from-sky-100 to-sky-50 p-6 flex flex-col items-center">
@@ -169,7 +171,7 @@ export default function PuppyProfile() {
       </div>
 
       {/* Weight Log */}
-      <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden h-fit">
         <div className="px-4 py-3 border-b border-stone-100 flex items-center justify-between">
           <h3 className="font-semibold text-stone-800 flex items-center gap-2">
             <Scale size={16} className="text-stone-400" />
@@ -212,6 +214,8 @@ export default function PuppyProfile() {
           </div>
         )}
       </div>
+
+      </div>{/* end grid */}
 
       <Modal
         isOpen={showWeightModal}

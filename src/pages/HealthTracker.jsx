@@ -116,7 +116,7 @@ export default function HealthTracker() {
           <p className="text-stone-400 mt-3">No health records yet.</p>
         </div>
       ) : (
-        <div className="space-y-2.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {sorted.map((record) => {
             const typeInfo = getTypeInfo(record.type);
             const Icon = typeInfo.icon;
