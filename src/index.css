@@ -13,14 +13,23 @@
   --color-sand-800: #37302A;
   --color-sand-900: #2A231D;
 
-  --color-steel-50: #F0F4F7;
-  --color-steel-100: #DCE5EC;
-  --color-steel-200: #B9CCD9;
-  --color-steel-300: #8EAFC2;
-  --color-steel-400: #6B96AD;
-  --color-steel-500: #527E96;
-  --color-steel-600: #42677B;
-  --color-steel-700: #345163;
+  --color-steel-50: #EFF4F8;
+  --color-steel-100: #D8E4EE;
+  --color-steel-200: #B4CCDC;
+  --color-steel-300: #85ADBE;
+  --color-steel-400: #5D8FA6;
+  --color-steel-500: #48778F;
+  --color-steel-600: #3B6179;
+  --color-steel-700: #2E4D60;
+
+  --color-warm-50: #FBF7F1;
+  --color-warm-100: #F3EBE0;
+  --color-warm-200: #E4D5C2;
+  --color-warm-300: #CFBA9F;
+  --color-warm-400: #B59B7A;
+  --color-warm-500: #9F8362;
+  --color-warm-600: #7D6548;
+  --color-warm-700: #5E4B35;
 
   --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
 }
@@ -35,6 +44,7 @@ body {
   overscroll-behavior-y: contain;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color: #2A231D;
 }
 
 * {
@@ -77,7 +87,7 @@ input[type="date"] {
 @keyframes fade-in {
   from {
     opacity: 0;
-    transform: translate(-50%, -48%) scale(0.98);
+    transform: translate(-50%, -48%) scale(0.97);
   }
   to {
     opacity: 1;
@@ -101,6 +111,11 @@ input[type="date"] {
   to { opacity: 1; }
 }
 
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
 .animate-slide-up {
   animation: slide-up 0.32s cubic-bezier(0.32, 0.72, 0, 1);
 }
@@ -111,6 +126,10 @@ input[type="date"] {
 
 .animate-backdrop {
   animation: backdrop-in 0.2s ease-out;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
 }
 
 @media (min-width: 768px) {

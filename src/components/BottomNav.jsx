@@ -25,12 +25,12 @@ function NavItem({ to, icon: Icon, label }) {
             }`}
           />
           <span className={`text-[10px] mt-1 transition-colors ${
-            isActive ? 'font-semibold text-steel-600' : 'font-medium text-sand-400'
+            isActive ? 'font-bold text-steel-600' : 'font-medium text-sand-400'
           }`}>
             {label}
           </span>
           {isActive && (
-            <span className="absolute top-0.5 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-steel-500" />
+            <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[2.5px] rounded-full bg-steel-500" />
           )}
         </div>
       )}
@@ -40,7 +40,7 @@ function NavItem({ to, icon: Icon, label }) {
 
 export default function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-sand-200/60 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-sand-200 z-50 shadow-[0_-1px_3px_rgba(0,0,0,0.04)]">
       <div className="max-w-5xl mx-auto flex items-center justify-around py-1 px-2 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
         {navItems.map((item) => (
           <NavItem key={item.to} {...item} />

@@ -76,21 +76,21 @@ export default function Stats() {
   };
 
   const tooltipStyle = {
-    borderRadius: '10px',
+    borderRadius: '12px',
     border: '1px solid #EBE6DE',
     fontSize: '12px',
     fontFamily: 'DM Sans, system-ui, sans-serif',
-    boxShadow: '0 4px 12px rgba(42, 35, 29, 0.06)',
+    boxShadow: '0 4px 16px rgba(42, 35, 29, 0.08)',
   };
 
   return (
     <div className="space-y-4 pb-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-sand-800 tracking-tight">Stats & Trends</h2>
+        <h2 className="text-xl font-bold text-sand-900">Stats & Trends</h2>
         {hasData && (
           <button
             onClick={handleExportPdf}
-            className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-white bg-steel-500 rounded-lg hover:bg-steel-600 transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-steel-500 rounded-xl hover:bg-steel-600 transition-colors shadow-sm"
           >
             <FileDown size={15} /> Export PDF
           </button>
@@ -98,9 +98,9 @@ export default function Stats() {
       </div>
 
       {!hasData ? (
-        <div className="bg-white rounded-xl border border-sand-200/70 p-10 text-center">
+        <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-12 text-center">
           <BarChart3 className="mx-auto text-sand-300" size={36} />
-          <p className="text-sand-400 mt-3 text-sm">No data yet.</p>
+          <p className="text-sand-500 mt-3 text-sm">No data yet.</p>
           <p className="text-sand-300 text-xs mt-1">
             Start logging to see trends!
           </p>
@@ -109,34 +109,34 @@ export default function Stats() {
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-white rounded-xl p-4 text-center border border-sand-200/70">
-              <div className="text-3xl font-semibold text-emerald-600">
+            <div className="bg-white rounded-2xl p-4 text-center border border-sand-200/80 shadow-sm">
+              <div className="text-3xl font-bold text-emerald-600">
                 {successRate}%
               </div>
-              <div className="text-[11px] text-sand-400 font-medium mt-1">
+              <div className="text-[11px] text-sand-500 font-medium mt-1">
                 Potty Success (7d)
               </div>
             </div>
-            <div className="bg-white rounded-xl p-4 text-center border border-sand-200/70">
-              <div className="text-3xl font-semibold text-steel-600">
+            <div className="bg-white rounded-2xl p-4 text-center border border-sand-200/80 shadow-sm">
+              <div className="text-3xl font-bold text-steel-600">
                 {totalPotty7d}
               </div>
-              <div className="text-[11px] text-sand-400 font-medium mt-1">
+              <div className="text-[11px] text-sand-500 font-medium mt-1">
                 Total Potty (7d)
               </div>
             </div>
-            <div className="bg-white rounded-xl p-4 text-center border border-sand-200/70">
-              <div className="text-3xl font-semibold text-rose-500">
+            <div className="bg-white rounded-2xl p-4 text-center border border-sand-200/80 shadow-sm">
+              <div className="text-3xl font-bold text-rose-500">
                 {totalAccidents7d}
               </div>
-              <div className="text-[11px] text-sand-400 font-medium mt-1">Accidents (7d)</div>
+              <div className="text-[11px] text-sand-500 font-medium mt-1">Accidents (7d)</div>
             </div>
           </div>
 
           {/* Charts grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="bg-white rounded-xl border border-sand-200/70 p-4 sm:p-5">
-              <h3 className="text-[13px] font-semibold text-sand-700 mb-4 flex items-center gap-2 uppercase tracking-wide">
+            <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+              <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
                 <TrendingUp size={14} className="text-sand-400" />
                 Potty Breaks (7 Days)
               </h3>
@@ -158,20 +158,20 @@ export default function Stats() {
                     dataKey="good"
                     fill="#5BA87A"
                     name="Good"
-                    radius={[3, 3, 0, 0]}
+                    radius={[4, 4, 0, 0]}
                   />
                   <Bar
                     dataKey="accidents"
                     fill="#D4726A"
                     name="Accidents"
-                    radius={[3, 3, 0, 0]}
+                    radius={[4, 4, 0, 0]}
                   />
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
-            <div className="bg-white rounded-xl border border-sand-200/70 p-4 sm:p-5">
-              <h3 className="text-[13px] font-semibold text-sand-700 mb-4 flex items-center gap-2 uppercase tracking-wide">
+            <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+              <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
                 <TrendingUp size={14} className="text-sand-400" />
                 Meals (7 Days)
               </h3>
@@ -191,15 +191,15 @@ export default function Stats() {
                   <Tooltip contentStyle={tooltipStyle} />
                   <Bar
                     dataKey="meals"
-                    fill="#C4956A"
+                    fill="#9F8362"
                     name="Meals"
-                    radius={[3, 3, 0, 0]}
+                    radius={[4, 4, 0, 0]}
                   />
                   <Bar
                     dataKey="fullyEaten"
                     fill="#5BA87A"
                     name="Fully Eaten"
-                    radius={[3, 3, 0, 0]}
+                    radius={[4, 4, 0, 0]}
                   />
                 </BarChart>
               </ResponsiveContainer>
@@ -207,8 +207,8 @@ export default function Stats() {
           </div>
 
           {/* Naps Chart */}
-          <div className="bg-white rounded-xl border border-sand-200/70 p-4 sm:p-5">
-            <h3 className="text-[13px] font-semibold text-sand-700 mb-4 flex items-center gap-2 uppercase tracking-wide">
+          <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+            <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
               <TrendingUp size={14} className="text-sand-400" />
               Naps (7 Days)
             </h3>
@@ -229,9 +229,9 @@ export default function Stats() {
                 <Line
                   type="monotone"
                   dataKey="naps"
-                  stroke="#7B82A8"
-                  strokeWidth={2}
-                  dot={{ fill: '#7B82A8', r: 3.5, strokeWidth: 0 }}
+                  stroke="#48778F"
+                  strokeWidth={2.5}
+                  dot={{ fill: '#48778F', r: 4, strokeWidth: 0 }}
                   name="Naps"
                 />
               </LineChart>

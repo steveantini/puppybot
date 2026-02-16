@@ -68,26 +68,26 @@ export default function PuppyProfile() {
 
   return (
     <div className="space-y-4 pb-4">
-      <h2 className="text-lg font-semibold text-sand-800 tracking-tight">Puppy Profile</h2>
+      <h2 className="text-xl font-bold text-sand-900">Puppy Profile</h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Photo & Basic Info */}
-        <div className="bg-white rounded-xl border border-sand-200/70 overflow-hidden">
-          <div className="bg-gradient-to-br from-steel-50 to-sand-100 p-6 flex flex-col items-center">
+        <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm overflow-hidden">
+          <div className="bg-gradient-to-br from-steel-50 to-sand-100 p-8 flex flex-col items-center">
             <div className="relative">
               {photoUrl ? (
                 <img
                   src={photoUrl}
                   alt={name}
-                  className="w-24 h-24 rounded-full object-cover border-[3px] border-white shadow-md"
+                  className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg"
                 />
               ) : (
-                <div className="w-24 h-24 rounded-full bg-white border-[3px] border-white shadow-md flex items-center justify-center">
-                  <Dog size={34} className="text-sand-300" />
+                <div className="w-28 h-28 rounded-full bg-white border-4 border-white shadow-lg flex items-center justify-center">
+                  <Dog size={38} className="text-sand-300" />
                 </div>
               )}
-              <label className="absolute bottom-0 right-0 w-8 h-8 bg-steel-500 rounded-full flex items-center justify-center cursor-pointer shadow-md hover:bg-steel-600 transition-colors">
-                <Camera size={13} className="text-white" />
+              <label className="absolute bottom-0 right-0 w-9 h-9 bg-steel-500 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-steel-600 transition-colors">
+                <Camera size={14} className="text-white" />
                 <input
                   type="file"
                   accept="image/*"
@@ -97,15 +97,15 @@ export default function PuppyProfile() {
               </label>
             </div>
             {!isEditing && puppy?.name && (
-              <div className="mt-3 text-center">
-                <h3 className="text-xl font-semibold text-sand-800">
+              <div className="mt-4 text-center">
+                <h3 className="text-2xl font-bold text-sand-900">
                   {puppy.name}
                 </h3>
                 {puppy.breed && (
-                  <p className="text-sm text-sand-500">{puppy.breed}</p>
+                  <p className="text-sm text-sand-600 mt-0.5">{puppy.breed}</p>
                 )}
                 {puppy.birthday && (
-                  <p className="text-xs text-sand-400 mt-0.5">
+                  <p className="text-xs text-sand-400 mt-1">
                     {calculateAge(puppy.birthday)}
                   </p>
                 )}
@@ -114,9 +114,9 @@ export default function PuppyProfile() {
           </div>
 
           {isEditing ? (
-            <div className="p-4 space-y-4">
+            <div className="p-5 space-y-4">
               <div>
-                <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">
+                <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">
                   Name
                 </label>
                 <input
@@ -124,11 +124,11 @@ export default function PuppyProfile() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Puppy's name"
-                  className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+                  className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">
+                <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">
                   Breed
                 </label>
                 <input
@@ -136,32 +136,32 @@ export default function PuppyProfile() {
                   value={breed}
                   onChange={(e) => setBreed(e.target.value)}
                   placeholder="e.g., Golden Retriever"
-                  className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+                  className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">
+                <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">
                   Birthday
                 </label>
                 <input
                   type="date"
                   value={birthday}
                   onChange={(e) => setBirthday(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+                  className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
                 />
               </div>
               <button
                 onClick={handleSaveProfile}
-                className="w-full py-2.5 bg-steel-500 hover:bg-steel-600 text-white font-medium rounded-lg transition-colors"
+                className="w-full py-3 bg-steel-500 hover:bg-steel-600 text-white font-semibold rounded-xl transition-colors shadow-sm"
               >
                 Save Profile
               </button>
             </div>
           ) : (
-            <div className="p-4">
+            <div className="p-5">
               <button
                 onClick={() => setIsEditing(true)}
-                className="w-full py-2.5 border border-sand-200 text-sand-600 font-medium rounded-lg hover:bg-sand-50 transition-colors text-sm"
+                className="w-full py-2.5 border border-sand-200 text-sand-700 font-semibold rounded-xl hover:bg-sand-50 transition-colors text-sm"
               >
                 Edit Profile
               </button>
@@ -170,30 +170,30 @@ export default function PuppyProfile() {
         </div>
 
         {/* Weight Log */}
-        <div className="bg-white rounded-xl border border-sand-200/70 overflow-hidden h-fit">
-          <div className="px-4 py-3.5 border-b border-sand-100 flex items-center justify-between">
-            <h3 className="text-[13px] font-semibold text-sand-700 flex items-center gap-2 uppercase tracking-wide">
+        <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm overflow-hidden h-fit">
+          <div className="px-5 py-3.5 border-b border-sand-100 flex items-center justify-between">
+            <h3 className="text-xs font-semibold text-sand-500 flex items-center gap-2 uppercase tracking-widest">
               <Scale size={14} className="text-sand-400" />
               Weight Log
             </h3>
             <button
               onClick={() => setShowWeightModal(true)}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-steel-600 bg-steel-50 rounded-lg hover:bg-steel-100 transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-steel-600 bg-steel-50 rounded-lg hover:bg-steel-100 transition-colors"
             >
               <Plus size={13} /> Add
             </button>
           </div>
 
           {sortedWeights.length === 0 ? (
-            <div className="p-8 text-center text-sand-400 text-sm">
+            <div className="p-10 text-center text-sand-400 text-sm">
               No weight entries yet.
             </div>
           ) : (
-            <div className="divide-y divide-sand-100/60">
+            <div className="divide-y divide-sand-100">
               {[...sortedWeights].reverse().map((entry) => (
                 <div
                   key={entry.id}
-                  className="px-4 py-3 flex items-center justify-between"
+                  className="px-5 py-3.5 flex items-center justify-between hover:bg-sand-50/50 transition-colors"
                 >
                   <span className="text-sm text-sand-500">
                     {new Date(entry.date + 'T12:00:00').toLocaleDateString(
@@ -205,7 +205,7 @@ export default function PuppyProfile() {
                       }
                     )}
                   </span>
-                  <span className="font-medium text-sand-800">
+                  <span className="font-semibold text-sand-900">
                     {entry.weight} lbs
                   </span>
                 </div>
@@ -222,18 +222,18 @@ export default function PuppyProfile() {
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">
+            <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">
               Date
             </label>
             <input
               type="date"
               value={weightDate}
               onChange={(e) => setWeightDate(e.target.value)}
-              className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+              className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">
+            <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">
               Weight (lbs)
             </label>
             <input
@@ -242,15 +242,15 @@ export default function PuppyProfile() {
               value={weightValue}
               onChange={(e) => setWeightValue(e.target.value)}
               placeholder="e.g., 12.5"
-              className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+              className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
             />
           </div>
           <button
             onClick={handleAddWeight}
             disabled={!weightValue}
-            className={`w-full py-2.5 font-medium rounded-lg transition-colors ${
+            className={`w-full py-3 font-semibold rounded-xl transition-colors ${
               weightValue
-                ? 'bg-steel-500 hover:bg-steel-600 text-white'
+                ? 'bg-steel-500 hover:bg-steel-600 text-white shadow-sm'
                 : 'bg-sand-100 text-sand-300 cursor-not-allowed'
             }`}
           >

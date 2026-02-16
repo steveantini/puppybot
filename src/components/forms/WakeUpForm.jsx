@@ -22,21 +22,21 @@ export default function WakeUpForm({ onClose }) {
   return (
     <div className="space-y-5">
       <div>
-        <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">Date</label>
+        <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Date</label>
         <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+          className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
         />
       </div>
 
       <div className="flex gap-2">
         <button
           onClick={() => setMode('wake')}
-          className={`flex-1 py-2.5 rounded-lg text-sm font-medium border transition-all ${
+          className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
             mode === 'wake'
-              ? 'bg-orange-50 text-orange-600 border-orange-300'
+              ? 'bg-warm-50 text-warm-700 border-warm-300'
               : 'bg-white border-sand-200 text-sand-400 hover:border-sand-300'
           }`}
         >
@@ -44,9 +44,9 @@ export default function WakeUpForm({ onClose }) {
         </button>
         <button
           onClick={() => setMode('bed')}
-          className={`flex-1 py-2.5 rounded-lg text-sm font-medium border transition-all ${
+          className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
             mode === 'bed'
-              ? 'bg-indigo-50 text-indigo-600 border-indigo-300'
+              ? 'bg-steel-50 text-steel-600 border-steel-300'
               : 'bg-white border-sand-200 text-sand-400 hover:border-sand-300'
           }`}
         >
@@ -55,12 +55,12 @@ export default function WakeUpForm({ onClose }) {
       </div>
 
       <div>
-        <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">Time</label>
+        <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Time</label>
         <input
           type="time"
           value={time}
           onChange={(e) => setTime(e.target.value)}
-          className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+          className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
         />
       </div>
 
@@ -78,7 +78,7 @@ export default function WakeUpForm({ onClose }) {
 
       <button
         onClick={handleSave}
-        className="w-full py-2.5 bg-steel-500 hover:bg-steel-600 text-white font-medium rounded-lg transition-colors active:scale-[0.98]"
+        className="w-full py-3 bg-steel-500 hover:bg-steel-600 text-white font-semibold rounded-xl transition-colors active:scale-[0.98] shadow-sm"
       >
         Save {mode === 'wake' ? 'Wake Up' : 'Bed'} Time
       </button>

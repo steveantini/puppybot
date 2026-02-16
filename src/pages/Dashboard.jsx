@@ -18,11 +18,11 @@ import {
 } from 'lucide-react';
 
 const quickAddButtons = [
-  { id: 'potty', label: 'Potty', icon: Droplets, color: 'bg-steel-50 text-steel-600 border-steel-200' },
-  { id: 'meal', label: 'Meal', icon: UtensilsCrossed, color: 'bg-amber-50 text-amber-700 border-amber-200' },
-  { id: 'nap', label: 'Nap', icon: Moon, color: 'bg-indigo-50 text-indigo-600 border-indigo-200' },
-  { id: 'wake', label: 'Wake / Bed', icon: Sun, color: 'bg-orange-50 text-orange-600 border-orange-200' },
-  { id: 'notes', label: 'Notes', icon: PenLine, color: 'bg-sand-100 text-sand-600 border-sand-300' },
+  { id: 'potty', label: 'Potty', icon: Droplets, color: 'bg-steel-50 text-steel-600 border-steel-200 hover:bg-steel-100' },
+  { id: 'meal', label: 'Meal', icon: UtensilsCrossed, color: 'bg-warm-50 text-warm-700 border-warm-200 hover:bg-warm-100' },
+  { id: 'nap', label: 'Nap', icon: Moon, color: 'bg-steel-50 text-steel-700 border-steel-200 hover:bg-steel-100' },
+  { id: 'wake', label: 'Wake / Bed', icon: Sun, color: 'bg-sand-100 text-sand-700 border-sand-300 hover:bg-sand-200' },
+  { id: 'notes', label: 'Notes', icon: PenLine, color: 'bg-sand-100 text-sand-600 border-sand-300 hover:bg-sand-200' },
 ];
 
 export default function Dashboard() {
@@ -46,8 +46,8 @@ export default function Dashboard() {
       time: w.time,
       data: w,
       icon: Sun,
-      color: 'text-orange-500',
-      bgColor: 'bg-orange-50',
+      color: 'text-warm-500',
+      bgColor: 'bg-warm-50',
       label: 'Wake Up',
     });
   });
@@ -78,8 +78,8 @@ export default function Dashboard() {
       time: m.time,
       data: m,
       icon: UtensilsCrossed,
-      color: 'text-amber-600',
-      bgColor: 'bg-amber-50',
+      color: 'text-warm-600',
+      bgColor: 'bg-warm-50',
       label: 'Meal',
       detail: `${m.foodGiven || ''}${m.foodEaten ? ' → ' + m.foodEaten : ''}`,
       id: m.id,
@@ -92,8 +92,8 @@ export default function Dashboard() {
       time: n.startTime,
       data: n,
       icon: Moon,
-      color: 'text-indigo-500',
-      bgColor: 'bg-indigo-50',
+      color: 'text-steel-600',
+      bgColor: 'bg-steel-50',
       label: 'Nap',
       detail: `${formatTime(n.startTime)} – ${formatTime(n.endTime)}`,
       id: n.id,
@@ -105,8 +105,8 @@ export default function Dashboard() {
       type: 'bed',
       time: todayLog.bedTime,
       icon: BedDouble,
-      color: 'text-indigo-500',
-      bgColor: 'bg-indigo-50',
+      color: 'text-steel-600',
+      bgColor: 'bg-steel-50',
       label: 'Bed Time',
     });
   }
@@ -128,66 +128,66 @@ export default function Dashboard() {
 
   return (
     <div className="pb-4 space-y-5">
-      {/* Time & Greeting */}
-      <div className="text-center pt-1">
-        <div className="text-4xl font-light text-sand-800 tabular-nums tracking-tight">
+      {/* Greeting & Clock */}
+      <div className="text-center pt-2">
+        <p className="text-sand-500 text-sm">
+          {getGreeting()}
+          {puppy?.name ? `, ${puppy.name}'s family` : ''} &middot;{' '}
+          {formatDate(today)}
+        </p>
+        <div className="text-lg font-medium text-sand-500 tabular-nums tracking-tight mt-1">
           {currentTime.toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
           })}
         </div>
-        <p className="text-sand-400 text-sm mt-1.5">
-          {getGreeting()}
-          {puppy?.name ? `, ${puppy.name}'s family` : ''} &middot;{' '}
-          {formatDate(today)}
-        </p>
       </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white rounded-xl p-4 text-center border border-sand-200/70">
+        <div className="bg-white rounded-2xl p-4 text-center border border-sand-200/80 shadow-sm">
           <Droplets className="mx-auto text-steel-400" size={20} />
-          <div className="text-2xl font-semibold text-sand-800 mt-1.5">{pottyCount}</div>
-          <div className="text-[11px] text-sand-400 font-medium">
+          <div className="text-2xl font-bold text-sand-900 mt-1.5">{pottyCount}</div>
+          <div className="text-[11px] text-sand-500 font-medium">
             Potty{pottyGood > 0 ? ` (${pottyGood} good)` : ''}
           </div>
         </div>
-        <div className="bg-white rounded-xl p-4 text-center border border-sand-200/70">
-          <UtensilsCrossed className="mx-auto text-amber-400" size={20} />
-          <div className="text-2xl font-semibold text-sand-800 mt-1.5">{mealCount}</div>
-          <div className="text-[11px] text-sand-400 font-medium">Meals</div>
+        <div className="bg-white rounded-2xl p-4 text-center border border-sand-200/80 shadow-sm">
+          <UtensilsCrossed className="mx-auto text-warm-400" size={20} />
+          <div className="text-2xl font-bold text-sand-900 mt-1.5">{mealCount}</div>
+          <div className="text-[11px] text-sand-500 font-medium">Meals</div>
         </div>
-        <div className="bg-white rounded-xl p-4 text-center border border-sand-200/70">
-          <Moon className="mx-auto text-indigo-400" size={20} />
-          <div className="text-2xl font-semibold text-sand-800 mt-1.5">{napCount}</div>
-          <div className="text-[11px] text-sand-400 font-medium">Naps</div>
+        <div className="bg-white rounded-2xl p-4 text-center border border-sand-200/80 shadow-sm">
+          <Moon className="mx-auto text-steel-400" size={20} />
+          <div className="text-2xl font-bold text-sand-900 mt-1.5">{napCount}</div>
+          <div className="text-[11px] text-sand-500 font-medium">Naps</div>
         </div>
       </div>
 
       {/* Main content area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Timeline */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-sand-200/70 overflow-hidden">
-          <div className="px-4 py-3.5 border-b border-sand-100">
-            <h3 className="text-[13px] font-semibold text-sand-700 uppercase tracking-wide">Today&apos;s Timeline</h3>
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-sand-200/80 shadow-sm overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-sand-100">
+            <h3 className="text-xs font-semibold text-sand-500 uppercase tracking-widest">Today&apos;s Timeline</h3>
           </div>
           {timelineEntries.length === 0 ? (
-            <div className="px-4 py-12 text-center text-sand-400 text-sm">
-              <p>No entries yet today.</p>
+            <div className="px-5 py-14 text-center">
+              <p className="text-sand-400 text-sm">No entries yet today.</p>
               <p className="mt-1 text-sand-300 text-xs">Use the buttons below to start logging!</p>
             </div>
           ) : (
-            <div className="divide-y divide-sand-100/60">
+            <div className="divide-y divide-sand-100">
               {timelineEntries.map((entry, i) => {
                 const Icon = entry.icon;
                 return (
-                  <div key={`${entry.type}-${entry.time}-${i}`} className="px-4 py-3 flex items-start gap-3 group">
-                    <div className={`mt-0.5 p-1.5 rounded-lg ${entry.bgColor} ${entry.color}`}>
+                  <div key={`${entry.type}-${entry.time}-${i}`} className="px-5 py-3.5 flex items-start gap-3 group hover:bg-sand-50/50 transition-colors">
+                    <div className={`mt-0.5 p-2 rounded-xl ${entry.bgColor} ${entry.color}`}>
                       <Icon size={15} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-sand-800 text-sm">
+                        <span className="font-semibold text-sand-900 text-sm">
                           {entry.label}
                         </span>
                         <span className="text-xs text-sand-400">
@@ -221,28 +221,28 @@ export default function Dashboard() {
         {/* Skills & Notes Summary */}
         <div className="space-y-4">
           {(todayLog.skills || todayLog.notes) ? (
-            <div className="bg-white rounded-xl border border-sand-200/70 p-4 space-y-3">
+            <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5 space-y-3">
               {todayLog.skills && (
                 <div>
-                  <span className="text-[11px] font-semibold text-sand-400 uppercase tracking-wide">
+                  <span className="text-xs font-semibold text-sand-500 uppercase tracking-widest">
                     Skills
                   </span>
-                  <p className="text-sm text-sand-700 mt-0.5 leading-relaxed">{todayLog.skills}</p>
+                  <p className="text-sm text-sand-800 mt-1 leading-relaxed">{todayLog.skills}</p>
                 </div>
               )}
               {todayLog.notes && (
                 <div>
-                  <span className="text-[11px] font-semibold text-sand-400 uppercase tracking-wide">
+                  <span className="text-xs font-semibold text-sand-500 uppercase tracking-widest">
                     Notes
                   </span>
-                  <p className="text-sm text-sand-700 mt-0.5 leading-relaxed">{todayLog.notes}</p>
+                  <p className="text-sm text-sand-800 mt-1 leading-relaxed">{todayLog.notes}</p>
                 </div>
               )}
             </div>
           ) : (
-            <div className="bg-white rounded-xl border border-sand-200/70 p-5 text-center">
-              <PenLine className="mx-auto text-sand-300 mb-2" size={18} />
-              <p className="text-sand-400 text-sm">No skills or notes yet today.</p>
+            <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-6 text-center">
+              <PenLine className="mx-auto text-sand-300 mb-2" size={20} />
+              <p className="text-sand-500 text-sm">No skills or notes yet today.</p>
               <p className="text-xs mt-1 text-sand-300">Tap &quot;Notes&quot; below to add.</p>
             </div>
           )}
@@ -258,7 +258,7 @@ export default function Dashboard() {
               <button
                 key={btn.id}
                 onClick={() => setActiveModal(btn.id)}
-                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl border text-sm font-medium whitespace-nowrap transition-all active:scale-[0.97] ${btn.color}`}
+                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl border text-sm font-semibold whitespace-nowrap transition-all active:scale-[0.97] shadow-sm ${btn.color}`}
               >
                 <Icon size={15} />
                 {btn.label}

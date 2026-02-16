@@ -19,31 +19,31 @@ export default function PottyForm({ onClose }) {
   return (
     <div className="space-y-5">
       <div>
-        <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">Date</label>
+        <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Date</label>
         <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+          className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
         />
       </div>
 
       <div>
-        <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">Time</label>
+        <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Time</label>
         <input
           type="time"
           value={time}
           onChange={(e) => setTime(e.target.value)}
-          className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+          className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
         />
       </div>
 
       <div>
-        <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">Pee</label>
+        <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Pee</label>
         <div className="flex gap-2">
           <button
             onClick={() => setPee(pee === 'good' ? null : 'good')}
-            className={`px-4 py-2.5 rounded-lg text-sm font-medium border transition-all flex-1 ${
+            className={`px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all flex-1 ${
               pee === 'good'
                 ? 'bg-emerald-50 text-emerald-600 border-emerald-300'
                 : 'bg-white border-sand-200 text-sand-400 hover:border-sand-300'
@@ -53,7 +53,7 @@ export default function PottyForm({ onClose }) {
           </button>
           <button
             onClick={() => setPee(pee === 'accident' ? null : 'accident')}
-            className={`px-4 py-2.5 rounded-lg text-sm font-medium border transition-all flex-1 ${
+            className={`px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all flex-1 ${
               pee === 'accident'
                 ? 'bg-rose-50 text-rose-500 border-rose-300'
                 : 'bg-white border-sand-200 text-sand-400 hover:border-sand-300'
@@ -65,11 +65,11 @@ export default function PottyForm({ onClose }) {
       </div>
 
       <div>
-        <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">Poop</label>
+        <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Poop</label>
         <div className="flex gap-2">
           <button
             onClick={() => setPoop(poop === 'good' ? null : 'good')}
-            className={`px-4 py-2.5 rounded-lg text-sm font-medium border transition-all flex-1 ${
+            className={`px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all flex-1 ${
               poop === 'good'
                 ? 'bg-emerald-50 text-emerald-600 border-emerald-300'
                 : 'bg-white border-sand-200 text-sand-400 hover:border-sand-300'
@@ -79,7 +79,7 @@ export default function PottyForm({ onClose }) {
           </button>
           <button
             onClick={() => setPoop(poop === 'accident' ? null : 'accident')}
-            className={`px-4 py-2.5 rounded-lg text-sm font-medium border transition-all flex-1 ${
+            className={`px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all flex-1 ${
               poop === 'accident'
                 ? 'bg-rose-50 text-rose-500 border-rose-300'
                 : 'bg-white border-sand-200 text-sand-400 hover:border-sand-300'
@@ -106,24 +106,24 @@ export default function PottyForm({ onClose }) {
               </svg>
             )}
           </div>
-          <span className="text-sm font-medium text-sand-600">Rang the bell</span>
+          <span className="text-sm font-medium text-sand-700">Rang the bell</span>
         </label>
       </div>
 
       <div>
-        <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">Notes (optional)</label>
+        <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Notes (optional)</label>
         <input
           type="text"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Any details..."
-          className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+          className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
         />
       </div>
 
       <button
         onClick={handleSave}
-        className="w-full py-2.5 bg-steel-500 hover:bg-steel-600 text-white font-medium rounded-lg transition-colors active:scale-[0.98]"
+        className="w-full py-3 bg-steel-500 hover:bg-steel-600 text-white font-semibold rounded-xl transition-colors active:scale-[0.98] shadow-sm"
       >
         Save Potty Break
       </button>
