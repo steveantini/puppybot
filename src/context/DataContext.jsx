@@ -261,6 +261,16 @@ export function DataProvider({ children }) {
     [updateTodayLog]
   );
 
+  const deleteWakeUpTime = useCallback(
+    (id) => {
+      updateTodayLog((prev) => ({
+        ...prev,
+        wakeUpTimes: prev.wakeUpTimes.filter((w) => w.id !== id),
+      }));
+    },
+    [updateTodayLog]
+  );
+
   const getDayLogByDate = useCallback(
     (date) => {
       return allLogs[date] || createEmptyDayLog(date);
@@ -288,6 +298,7 @@ export function DataProvider({ children }) {
     deletePottyBreak,
     deleteMeal,
     deleteNap,
+    deleteWakeUpTime,
     allLogs,
     getDayLogByDate,
     healthRecords,

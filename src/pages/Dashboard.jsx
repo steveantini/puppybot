@@ -26,7 +26,7 @@ const quickAddButtons = [
 ];
 
 export default function Dashboard() {
-  const { todayLog, puppy, deletePottyBreak, deleteMeal, deleteNap } = useData();
+  const { todayLog, puppy, deletePottyBreak, deleteMeal, deleteNap, deleteWakeUpTime } = useData();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeModal, setActiveModal] = useState(null);
 
@@ -41,14 +41,17 @@ export default function Dashboard() {
   const timelineEntries = [];
 
   todayLog.wakeUpTimes?.forEach((w) => {
+    const isNight = w.label === 'Night Wake';
     timelineEntries.push({
       type: 'wake',
       time: w.time,
       data: w,
-      icon: Sun,
-      color: 'text-warm-500',
-      bgColor: 'bg-warm-50',
-      label: 'Wake Up',
+      icon: isNight ? Moon : Sun,
+      color: isNight ? 'text-steel-500' : 'text-warm-500',
+      bgColor: isNight ? 'bg-steel-50' : 'bg-warm-50',
+      label: w.label || 'Wake Up',
+      detail: w.notes || undefined,
+      id: w.id,
     });
   });
 
@@ -124,6 +127,7 @@ export default function Dashboard() {
     if (type === 'potty') deletePottyBreak(id);
     if (type === 'meal') deleteMeal(id);
     if (type === 'nap') deleteNap(id);
+    if (type === 'wake') deleteWakeUpTime(id);
   };
 
   return (

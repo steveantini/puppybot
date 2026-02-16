@@ -208,8 +208,15 @@ export default function History() {
                         key={i}
                         className="flex items-center gap-2 text-sm text-sand-800 mb-1"
                       >
-                        <Sun size={13} className="text-warm-500" />
-                        Wake Up: {formatTime(w.time)}
+                        {w.label === 'Night Wake' ? (
+                          <Moon size={13} className="text-steel-500" />
+                        ) : (
+                          <Sun size={13} className="text-warm-500" />
+                        )}
+                        {w.label || 'Wake Up'}: {formatTime(w.time)}
+                        {w.notes && (
+                          <span className="text-xs text-sand-400 italic">— {w.notes}</span>
+                        )}
                       </div>
                     ))}
                     {log.bedTime && (
