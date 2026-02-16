@@ -76,6 +76,13 @@ function minutesToTimeLabel(minutes) {
   return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
 }
 
+function minutesToShortLabel(minutes) {
+  const h = Math.floor(minutes / 60);
+  const ampm = h >= 12 ? 'p' : 'a';
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${h12}${ampm}`;
+}
+
 function parseCups(foodGiven) {
   if (!foodGiven) return 0;
   const s = foodGiven.toLowerCase().replace('cup', '').trim();
@@ -167,6 +174,194 @@ function PottyTooltip({ active, payload, label }) {
   );
 }
 
+const NAP_START = 360; // 6 AM
+const NAP_END = 1260;  // 9 PM
+const NAP_SPAN = NAP_END - NAP_START; // 900 minutes
+
+const HOUR_TICKS = [];
+for (let m = NAP_START; m <= NAP_END; m += 60) {
+  HOUR_TICKS.push(m);
+}
+
+function NapHeatmap({ dateRange, allLogs }) {
+  const [hoveredNap, setHoveredNap] = useState(null);
+
+  const napRows = useMemo(() => {
+    const dates = [...dateRange].sort((a, b) => b.localeCompare(a));
+    return dates.map((date) => {
+      const log = allLogs[date];
+      const naps = (log?.naps || []).map((n) => {
+        const start = timeToMinutes(n.startTime);
+        const end = timeToMinutes(n.endTime);
+        if (start == null || end == null || end <= start) return null;
+        const clippedStart = Math.max(start, NAP_START);
+        const clippedEnd = Math.min(end, NAP_END);
+        if (clippedStart >= clippedEnd) return null;
+        const durationMin = end - start;
+        return {
+          startMin: start,
+          endMin: end,
+          clippedStart,
+          clippedEnd,
+          durationMin,
+          leftPct: ((clippedStart - NAP_START) / NAP_SPAN) * 100,
+          widthPct: ((clippedEnd - clippedStart) / NAP_SPAN) * 100,
+        };
+      }).filter(Boolean);
+
+      const totalMin = naps.reduce((sum, n) => sum + n.durationMin, 0);
+      const totalHrs = Math.round((totalMin / 60) * 10) / 10;
+
+      const dateLabel = new Date(date + 'T12:00:00').toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      });
+
+      return { date, dateLabel, naps, totalMin, totalHrs };
+    });
+  }, [dateRange, allLogs]);
+
+  if (napRows.length === 0) {
+    return (
+      <p className="text-sm text-sand-400 italic text-center py-6">No data in range.</p>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <div style={{ minWidth: 600 }}>
+        {/* Header row with hour labels */}
+        <div className="flex items-end mb-1">
+          <div className="shrink-0" style={{ width: 70 }} />
+          <div className="flex-1 relative" style={{ height: 20 }}>
+            {HOUR_TICKS.map((m) => {
+              const pct = ((m - NAP_START) / NAP_SPAN) * 100;
+              return (
+                <span
+                  key={m}
+                  className="absolute text-[10px] text-sand-400 font-medium"
+                  style={{
+                    left: `${pct}%`,
+                    transform: 'translateX(-50%)',
+                  }}
+                >
+                  {minutesToShortLabel(m)}
+                </span>
+              );
+            })}
+          </div>
+          <div
+            className="shrink-0 text-[10px] text-sand-400 font-semibold text-right uppercase tracking-wider"
+            style={{ width: 56 }}
+          >
+            Total
+          </div>
+        </div>
+
+        {/* Data rows */}
+        {napRows.map((row) => (
+          <div key={row.date} className="flex items-center group" style={{ height: 28 }}>
+            {/* Date label */}
+            <div
+              className="shrink-0 text-[11px] text-sand-600 font-medium truncate pr-2"
+              style={{ width: 70 }}
+            >
+              {row.dateLabel}
+            </div>
+
+            {/* Timeline bar */}
+            <div className="flex-1 relative bg-sand-100/60 rounded-sm" style={{ height: 18 }}>
+              {/* Hourly grid lines */}
+              {HOUR_TICKS.map((m) => {
+                const pct = ((m - NAP_START) / NAP_SPAN) * 100;
+                return (
+                  <div
+                    key={m}
+                    className="absolute top-0 bottom-0"
+                    style={{
+                      left: `${pct}%`,
+                      width: 1,
+                      background: 'rgba(209, 199, 186, 0.4)',
+                    }}
+                  />
+                );
+              })}
+
+              {/* Nap blocks */}
+              {row.naps.map((nap, i) => (
+                <div
+                  key={i}
+                  className="absolute top-0 bottom-0 rounded-sm cursor-default transition-opacity"
+                  style={{
+                    left: `${nap.leftPct}%`,
+                    width: `${nap.widthPct}%`,
+                    background: '#5BA87A',
+                    opacity: 0.85,
+                    minWidth: 2,
+                  }}
+                  onMouseEnter={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setHoveredNap({
+                      startLabel: minutesToTimeLabel(nap.startMin),
+                      endLabel: minutesToTimeLabel(nap.endMin),
+                      duration: nap.durationMin,
+                      x: rect.left + rect.width / 2,
+                      y: rect.top,
+                    });
+                  }}
+                  onMouseLeave={() => setHoveredNap(null)}
+                />
+              ))}
+            </div>
+
+            {/* Total hours */}
+            <div
+              className="shrink-0 text-[11px] font-semibold text-sand-700 text-right pl-2"
+              style={{ width: 56 }}
+            >
+              {row.totalHrs > 0 ? `${row.totalHrs} hr${row.totalHrs !== 1 ? 's' : ''}` : '—'}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Floating tooltip */}
+      {hoveredNap && (
+        <div
+          className="fixed z-50 pointer-events-none"
+          style={{
+            left: hoveredNap.x,
+            top: hoveredNap.y - 8,
+            transform: 'translate(-50%, -100%)',
+          }}
+        >
+          <div
+            style={{
+              borderRadius: '10px',
+              border: '1px solid #EBE6DE',
+              fontSize: '11px',
+              fontFamily: 'DM Sans, system-ui, sans-serif',
+              boxShadow: '0 4px 16px rgba(42, 35, 29, 0.12)',
+              background: '#fff',
+              padding: '8px 12px',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <div style={{ fontWeight: 600, color: '#4A3F35' }}>
+              {hoveredNap.startLabel} – {hoveredNap.endLabel}
+            </div>
+            <div style={{ color: '#918272', marginTop: 2 }}>
+              {hoveredNap.duration >= 60
+                ? `${Math.floor(hoveredNap.duration / 60)}h ${hoveredNap.duration % 60}m`
+                : `${hoveredNap.duration}m`}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Stats() {
   const { allLogs } = useData();
   const [range, setRange] = useState('all');
@@ -206,17 +401,6 @@ export default function Stats() {
       return {
         date: formatShortDate(date),
         cups: Math.round(totalCups * 100) / 100,
-      };
-    });
-  }, [allLogs, dateRange]);
-
-  const napData = useMemo(() => {
-    return dateRange.map((date) => {
-      const log = allLogs[date];
-      const naps = log?.naps || [];
-      return {
-        date: formatShortDate(date),
-        naps: naps.length,
       };
     });
   }, [allLogs, dateRange]);
@@ -278,7 +462,7 @@ export default function Stats() {
   const dayCount = dateRange.length;
 
   const handleExportPdf = () => {
-    exportStatsPdf(pottyData, mealData, napData, {
+    exportStatsPdf(pottyData, mealData, [], {
       successRate,
       totalPotty,
       totalAccidents,
@@ -495,28 +679,13 @@ export default function Stats() {
             </ResponsiveContainer>
           </div>
 
-          {/* Naps Chart */}
+          {/* Nap Heatmap */}
           <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
             <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
               <TrendingUp size={14} className="text-sand-400" />
-              Naps ({dayCount}d)
+              Nap Schedule ({dayCount}d)
             </h3>
-            <ResponsiveContainer width="100%" height={240}>
-              <LineChart data={napData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
-                <XAxis {...xAxisProps} />
-                <YAxis {...yAxisProps} />
-                <Tooltip contentStyle={tooltipStyle} />
-                <Line
-                  type="monotone"
-                  dataKey="naps"
-                  stroke="#48778F"
-                  strokeWidth={2.5}
-                  dot={dayCount <= 31 ? { fill: '#48778F', r: 3.5, strokeWidth: 0 } : false}
-                  name="Naps"
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            <NapHeatmap dateRange={dateRange} allLogs={allLogs} />
           </div>
 
           {/* Sleep Schedule Chart */}
