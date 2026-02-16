@@ -76,6 +76,27 @@ function minutesToTimeLabel(minutes) {
   return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
 }
 
+function parseCups(foodGiven) {
+  if (!foodGiven) return 0;
+  const s = foodGiven.toLowerCase().replace('cup', '').trim();
+  if (s.includes('/')) {
+    const [num, den] = s.split('/').map(Number);
+    if (num && den) return num / den;
+  }
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+function parseEatenFraction(foodEaten) {
+  if (!foodEaten) return 0;
+  const lower = foodEaten.toLowerCase();
+  if (lower.includes('all')) return 1;
+  if (lower.includes('none')) return 0;
+  const match = lower.match(/(\d+)\s*\/\s*(\d+)/);
+  if (match) return parseInt(match[1], 10) / parseInt(match[2], 10);
+  return 0;
+}
+
 function ScheduleTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   const items = payload.filter((p) => p.value != null);
@@ -113,6 +134,39 @@ function ScheduleTooltip({ active, payload, label }) {
   );
 }
 
+function PottyTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  const peeGood = payload.find((p) => p.dataKey === 'peeGood')?.value || 0;
+  const peeAccident = payload.find((p) => p.dataKey === 'peeAccident')?.value || 0;
+  const poopGood = payload.find((p) => p.dataKey === 'poopGood')?.value || 0;
+  const poopAccident = payload.find((p) => p.dataKey === 'poopAccident')?.value || 0;
+  const totalPee = peeGood + peeAccident;
+  const totalPoop = poopGood + poopAccident;
+  return (
+    <div
+      style={{
+        borderRadius: '12px',
+        border: '1px solid #EBE6DE',
+        fontSize: '12px',
+        fontFamily: 'DM Sans, system-ui, sans-serif',
+        boxShadow: '0 4px 16px rgba(42, 35, 29, 0.08)',
+        background: '#fff',
+        padding: '10px 14px',
+      }}
+    >
+      <div style={{ fontWeight: 600, marginBottom: 6, color: '#4A3F35' }}>{label}</div>
+      <div style={{ color: '#6B5D4F' }}>
+        Pee: <strong>{totalPee}</strong>
+        {peeAccident > 0 && <span style={{ color: '#D4726A' }}> ({peeAccident} accident{peeAccident > 1 ? 's' : ''})</span>}
+      </div>
+      <div style={{ color: '#6B5D4F', marginTop: 2 }}>
+        Poop: <strong>{totalPoop}</strong>
+        {poopAccident > 0 && <span style={{ color: '#D4726A' }}> ({poopAccident} accident{poopAccident > 1 ? 's' : ''})</span>}
+      </div>
+    </div>
+  );
+}
+
 export default function Stats() {
   const { allLogs } = useData();
   const [range, setRange] = useState('all');
@@ -131,9 +185,10 @@ export default function Stats() {
       const breaks = log?.pottyBreaks || [];
       return {
         date: formatShortDate(date),
-        good: breaks.filter((p) => p.pee === 'good' || p.poop === 'good').length,
-        accidents: breaks.filter((p) => p.pee === 'accident' || p.poop === 'accident').length,
-        total: breaks.length,
+        peeGood: breaks.filter((p) => p.pee === 'good').length,
+        peeAccident: breaks.filter((p) => p.pee === 'accident').length,
+        poopGood: breaks.filter((p) => p.poop === 'good').length,
+        poopAccident: breaks.filter((p) => p.poop === 'accident').length,
       };
     });
   }, [allLogs, dateRange]);
@@ -142,12 +197,15 @@ export default function Stats() {
     return dateRange.map((date) => {
       const log = allLogs[date];
       const meals = log?.meals || [];
+      let totalCups = 0;
+      meals.forEach((m) => {
+        const given = parseCups(m.foodGiven);
+        const eaten = parseEatenFraction(m.foodEaten);
+        totalCups += given * eaten;
+      });
       return {
         date: formatShortDate(date),
-        meals: meals.length,
-        fullyEaten: meals.filter((m) =>
-          m.foodEaten?.toLowerCase()?.includes('all')
-        ).length,
+        cups: Math.round(totalCups * 100) / 100,
       };
     });
   }, [allLogs, dateRange]);
@@ -192,8 +250,7 @@ export default function Stats() {
     if (allMinutes.length === 0) return [0, 1440];
     const min = Math.min(...allMinutes);
     const max = Math.max(...allMinutes);
-    const padded = [Math.max(0, Math.floor(min / 60) * 60 - 60), Math.min(1440, Math.ceil(max / 60) * 60 + 60)];
-    return padded;
+    return [Math.max(0, Math.floor(min / 60) * 60 - 60), Math.min(1440, Math.ceil(max / 60) * 60 + 60)];
   }, [scheduleData]);
 
   const scheduleTicks = useMemo(() => {
@@ -205,8 +262,12 @@ export default function Stats() {
     return ticks;
   }, [scheduleDomain]);
 
-  const totalPotty = pottyData.reduce((sum, d) => sum + d.total, 0);
-  const totalAccidents = pottyData.reduce((sum, d) => sum + d.accidents, 0);
+  const totalPee = pottyData.reduce((sum, d) => sum + d.peeGood + d.peeAccident, 0);
+  const totalPoop = pottyData.reduce((sum, d) => sum + d.poopGood + d.poopAccident, 0);
+  const totalPeeAccidents = pottyData.reduce((sum, d) => sum + d.peeAccident, 0);
+  const totalPoopAccidents = pottyData.reduce((sum, d) => sum + d.poopAccident, 0);
+  const totalPotty = totalPee + totalPoop;
+  const totalAccidents = totalPeeAccidents + totalPoopAccidents;
   const successRate =
     totalPotty > 0
       ? Math.round(((totalPotty - totalAccidents) / totalPotty) * 100)
@@ -251,7 +312,7 @@ export default function Stats() {
   };
 
   return (
-    <div className="space-y-4 pb-4">
+    <div className="space-y-5 pb-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="text-xl font-bold text-sand-900">Stats & Trends</h2>
         {hasData && (
@@ -335,143 +396,182 @@ export default function Stats() {
             </div>
           </div>
 
-          {/* Charts grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
-              <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
-                <TrendingUp size={14} className="text-sand-400" />
-                Potty Breaks ({dayCount}d)
-              </h3>
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={pottyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
-                  <XAxis {...xAxisProps} />
-                  <YAxis {...yAxisProps} />
-                  <Tooltip contentStyle={tooltipStyle} />
-                  <Bar
-                    dataKey="good"
-                    fill="#5BA87A"
-                    name="Good"
-                    radius={[4, 4, 0, 0]}
-                  />
-                  <Bar
-                    dataKey="accidents"
-                    fill="#D4726A"
-                    name="Accidents"
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
-              <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
-                <TrendingUp size={14} className="text-sand-400" />
-                Meals ({dayCount}d)
-              </h3>
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={mealData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
-                  <XAxis {...xAxisProps} />
-                  <YAxis {...yAxisProps} />
-                  <Tooltip contentStyle={tooltipStyle} />
-                  <Bar
-                    dataKey="meals"
-                    fill="#9F8362"
-                    name="Meals"
-                    radius={[4, 4, 0, 0]}
-                  />
-                  <Bar
-                    dataKey="fullyEaten"
-                    fill="#5BA87A"
-                    name="Fully Eaten"
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+          {/* Potty Chart — Pee */}
+          <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+            <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
+              <TrendingUp size={14} className="text-sand-400" />
+              Pee ({dayCount}d)
+            </h3>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={pottyData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
+                <XAxis {...xAxisProps} />
+                <YAxis {...yAxisProps} />
+                <Tooltip content={<PottyTooltip />} />
+                <Legend
+                  iconType="circle"
+                  iconSize={8}
+                  wrapperStyle={{ fontSize: '11px', color: '#918272' }}
+                />
+                <Bar
+                  dataKey="peeGood"
+                  stackId="pee"
+                  fill="#5BA87A"
+                  name="Pee (Good)"
+                  radius={[0, 0, 0, 0]}
+                />
+                <Bar
+                  dataKey="peeAccident"
+                  stackId="pee"
+                  fill="#D4726A"
+                  name="Pee (Accident)"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
 
-          {/* Second row of charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Naps Chart */}
-            <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
-              <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
-                <TrendingUp size={14} className="text-sand-400" />
-                Naps ({dayCount}d)
-              </h3>
-              <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={napData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
-                  <XAxis {...xAxisProps} tick={{ fontSize: 11, fill: '#918272' }} />
-                  <YAxis {...yAxisProps} tick={{ fontSize: 11, fill: '#918272' }} />
-                  <Tooltip contentStyle={tooltipStyle} />
-                  <Line
-                    type="monotone"
-                    dataKey="naps"
-                    stroke="#48778F"
-                    strokeWidth={2.5}
-                    dot={dayCount <= 31 ? { fill: '#48778F', r: 3.5, strokeWidth: 0 } : false}
-                    name="Naps"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+          {/* Potty Chart — Poop */}
+          <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+            <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
+              <TrendingUp size={14} className="text-sand-400" />
+              Poop ({dayCount}d)
+            </h3>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={pottyData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
+                <XAxis {...xAxisProps} />
+                <YAxis {...yAxisProps} />
+                <Tooltip content={<PottyTooltip />} />
+                <Legend
+                  iconType="circle"
+                  iconSize={8}
+                  wrapperStyle={{ fontSize: '11px', color: '#918272' }}
+                />
+                <Bar
+                  dataKey="poopGood"
+                  stackId="poop"
+                  fill="#9F8362"
+                  name="Poop (Good)"
+                  radius={[0, 0, 0, 0]}
+                />
+                <Bar
+                  dataKey="poopAccident"
+                  stackId="poop"
+                  fill="#D4726A"
+                  name="Poop (Accident)"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
 
-            {/* Sleep Schedule Chart */}
-            <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
-              <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
-                <TrendingUp size={14} className="text-sand-400" />
-                Sleep Schedule ({dayCount}d)
-              </h3>
-              <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={scheduleData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
-                  <XAxis {...xAxisProps} />
-                  <YAxis
-                    {...yAxisProps}
-                    domain={scheduleDomain}
-                    ticks={scheduleTicks}
-                    tickFormatter={minutesToTimeLabel}
-                    width={62}
-                  />
-                  <Tooltip content={<ScheduleTooltip />} />
-                  <Legend
-                    iconType="circle"
-                    iconSize={8}
-                    wrapperStyle={{ fontSize: '11px', color: '#918272' }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="morning"
-                    stroke="#9F8362"
-                    strokeWidth={2.5}
-                    dot={dayCount <= 31 ? { fill: '#9F8362', r: 3.5, strokeWidth: 0 } : false}
-                    name="Morning Wake"
-                    connectNulls
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="nightWake"
-                    stroke="#3B6179"
-                    strokeWidth={2.5}
-                    strokeDasharray="6 3"
-                    dot={dayCount <= 31 ? { fill: '#3B6179', r: 3.5, strokeWidth: 0 } : false}
-                    name="Night Wake"
-                    connectNulls
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="bed"
-                    stroke="#48778F"
-                    strokeWidth={2.5}
-                    dot={dayCount <= 31 ? { fill: '#48778F', r: 3.5, strokeWidth: 0 } : false}
-                    name="Bed Time"
-                    connectNulls
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+          {/* Meals Chart — Total Cups Eaten */}
+          <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+            <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
+              <TrendingUp size={14} className="text-sand-400" />
+              Cups Eaten ({dayCount}d)
+            </h3>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={mealData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
+                <XAxis {...xAxisProps} />
+                <YAxis
+                  {...yAxisProps}
+                  allowDecimals
+                  tickFormatter={(v) => v % 1 === 0 ? v : v.toFixed(1)}
+                />
+                <Tooltip
+                  contentStyle={tooltipStyle}
+                  formatter={(value) => [`${value} cups`, 'Eaten']}
+                />
+                <Bar
+                  dataKey="cups"
+                  fill="#9F8362"
+                  name="Cups"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Naps Chart */}
+          <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+            <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
+              <TrendingUp size={14} className="text-sand-400" />
+              Naps ({dayCount}d)
+            </h3>
+            <ResponsiveContainer width="100%" height={240}>
+              <LineChart data={napData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
+                <XAxis {...xAxisProps} />
+                <YAxis {...yAxisProps} />
+                <Tooltip contentStyle={tooltipStyle} />
+                <Line
+                  type="monotone"
+                  dataKey="naps"
+                  stroke="#48778F"
+                  strokeWidth={2.5}
+                  dot={dayCount <= 31 ? { fill: '#48778F', r: 3.5, strokeWidth: 0 } : false}
+                  name="Naps"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Sleep Schedule Chart */}
+          <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+            <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
+              <TrendingUp size={14} className="text-sand-400" />
+              Sleep Schedule ({dayCount}d)
+            </h3>
+            <ResponsiveContainer width="100%" height={260}>
+              <LineChart data={scheduleData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
+                <XAxis {...xAxisProps} />
+                <YAxis
+                  {...yAxisProps}
+                  domain={scheduleDomain}
+                  ticks={scheduleTicks}
+                  tickFormatter={minutesToTimeLabel}
+                  width={62}
+                />
+                <Tooltip content={<ScheduleTooltip />} />
+                <Legend
+                  iconType="circle"
+                  iconSize={8}
+                  wrapperStyle={{ fontSize: '11px', color: '#918272' }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="morning"
+                  stroke="#9F8362"
+                  strokeWidth={2.5}
+                  dot={dayCount <= 31 ? { fill: '#9F8362', r: 3.5, strokeWidth: 0 } : false}
+                  name="Morning Wake"
+                  connectNulls
+                />
+                <Line
+                  type="monotone"
+                  dataKey="nightWake"
+                  stroke="#3B6179"
+                  strokeWidth={2.5}
+                  strokeDasharray="6 3"
+                  dot={dayCount <= 31 ? { fill: '#3B6179', r: 3.5, strokeWidth: 0 } : false}
+                  name="Night Wake"
+                  connectNulls
+                />
+                <Line
+                  type="monotone"
+                  dataKey="bed"
+                  stroke="#48778F"
+                  strokeWidth={2.5}
+                  dot={dayCount <= 31 ? { fill: '#48778F', r: 3.5, strokeWidth: 0 } : false}
+                  name="Bed Time"
+                  connectNulls
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </>
       )}
