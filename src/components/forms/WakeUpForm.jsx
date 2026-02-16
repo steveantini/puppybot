@@ -22,32 +22,32 @@ export default function WakeUpForm({ onClose }) {
   return (
     <div className="space-y-5">
       <div>
-        <label className="block text-sm font-medium text-stone-600 mb-1.5">Date</label>
+        <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">Date</label>
         <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-stone-800 focus:outline-none focus:ring-2 focus:ring-sky-300"
+          className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
         />
       </div>
 
       <div className="flex gap-2">
         <button
           onClick={() => setMode('wake')}
-          className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-all ${
+          className={`flex-1 py-2.5 rounded-lg text-sm font-medium border transition-all ${
             mode === 'wake'
               ? 'bg-orange-50 text-orange-600 border-orange-300'
-              : 'bg-white border-stone-200 text-stone-400'
+              : 'bg-white border-sand-200 text-sand-400 hover:border-sand-300'
           }`}
         >
           Wake Up
         </button>
         <button
           onClick={() => setMode('bed')}
-          className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-all ${
+          className={`flex-1 py-2.5 rounded-lg text-sm font-medium border transition-all ${
             mode === 'bed'
               ? 'bg-indigo-50 text-indigo-600 border-indigo-300'
-              : 'bg-white border-stone-200 text-stone-400'
+              : 'bg-white border-sand-200 text-sand-400 hover:border-sand-300'
           }`}
         >
           Bed Time
@@ -55,30 +55,30 @@ export default function WakeUpForm({ onClose }) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-600 mb-1.5">Time</label>
+        <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">Time</label>
         <input
           type="time"
           value={time}
           onChange={(e) => setTime(e.target.value)}
-          className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-stone-800 focus:outline-none focus:ring-2 focus:ring-sky-300"
+          className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
         />
       </div>
 
       {dayLog.wakeUpTimes?.length > 0 && mode === 'wake' && (
-        <div className="text-xs text-stone-400">
+        <div className="text-xs text-sand-400">
           Already logged: {dayLog.wakeUpTimes.map((w) => formatTime(w.time)).join(', ')}
         </div>
       )}
 
       {dayLog.bedTime && mode === 'bed' && (
-        <div className="text-xs text-stone-400">
+        <div className="text-xs text-sand-400">
           Current bed time: {formatTime(dayLog.bedTime)} (will be replaced)
         </div>
       )}
 
       <button
         onClick={handleSave}
-        className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl transition-colors active:scale-[0.98] shadow-sm"
+        className="w-full py-2.5 bg-steel-500 hover:bg-steel-600 text-white font-medium rounded-lg transition-colors active:scale-[0.98]"
       >
         Save {mode === 'wake' ? 'Wake Up' : 'Bed'} Time
       </button>

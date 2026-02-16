@@ -21,27 +21,27 @@ export default function MealForm({ onClose }) {
   return (
     <div className="space-y-5">
       <div>
-        <label className="block text-sm font-medium text-stone-600 mb-1.5">Date</label>
+        <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">Date</label>
         <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-stone-800 focus:outline-none focus:ring-2 focus:ring-sky-300"
+          className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-600 mb-1.5">Time</label>
+        <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">Time</label>
         <input
           type="time"
           value={time}
           onChange={(e) => setTime(e.target.value)}
-          className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-stone-800 focus:outline-none focus:ring-2 focus:ring-sky-300"
+          className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-600 mb-1.5">Food Given</label>
+        <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">Food Given</label>
         <div className="flex flex-wrap gap-2">
           {foodAmounts.map((amt) => (
             <button
@@ -49,8 +49,8 @@ export default function MealForm({ onClose }) {
               onClick={() => setFoodGiven(amt)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
                 foodGiven === amt
-                  ? 'bg-amber-50 text-amber-600 border-amber-300'
-                  : 'bg-white border-stone-200 text-stone-500 hover:border-stone-300'
+                  ? 'bg-amber-50 text-amber-700 border-amber-300'
+                  : 'bg-white border-sand-200 text-sand-500 hover:border-sand-300'
               }`}
             >
               {amt}
@@ -62,12 +62,12 @@ export default function MealForm({ onClose }) {
           value={foodGiven}
           onChange={(e) => setFoodGiven(e.target.value)}
           placeholder="Or type custom amount..."
-          className="w-full mt-2 px-3 py-2 border border-stone-200 rounded-xl text-sm text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-sky-300"
+          className="w-full mt-2 px-3 py-2 border border-sand-200 rounded-lg text-sm text-sand-800 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-600 mb-1.5">Food Eaten</label>
+        <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">Food Eaten</label>
         <div className="flex flex-wrap gap-2">
           {eatenAmounts.map((amt) => (
             <button
@@ -76,7 +76,7 @@ export default function MealForm({ onClose }) {
               className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-all ${
                 foodEaten === amt
                   ? 'bg-emerald-50 text-emerald-600 border-emerald-300'
-                  : 'bg-white border-stone-200 text-stone-500 hover:border-stone-300'
+                  : 'bg-white border-sand-200 text-sand-500 hover:border-sand-300'
               }`}
             >
               {amt}
@@ -86,19 +86,19 @@ export default function MealForm({ onClose }) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-600 mb-1.5">Notes (optional)</label>
+        <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">Notes (optional)</label>
         <input
           type="text"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="e.g., Hand fed, added topper..."
-          className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-sky-300"
+          className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
         />
       </div>
 
       <button
         onClick={handleSave}
-        className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl transition-colors active:scale-[0.98] shadow-sm"
+        className="w-full py-2.5 bg-steel-500 hover:bg-steel-600 text-white font-medium rounded-lg transition-colors active:scale-[0.98]"
       >
         Save Meal
       </button>

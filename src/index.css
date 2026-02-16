@@ -1,40 +1,58 @@
 @import "tailwindcss";
 
-/* Slide-up animation for modals */
-@keyframes slide-up {
-  from {
-    transform: translateY(100%);
-    opacity: 0.5;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+/* ── Design Tokens ── */
+@theme {
+  --color-sand-50: #FAFAF8;
+  --color-sand-100: #F4F1EC;
+  --color-sand-200: #EBE6DE;
+  --color-sand-300: #D9D1C5;
+  --color-sand-400: #B8AC9C;
+  --color-sand-500: #918272;
+  --color-sand-600: #6E6052;
+  --color-sand-700: #4D4237;
+  --color-sand-800: #37302A;
+  --color-sand-900: #2A231D;
+
+  --color-steel-50: #F0F4F7;
+  --color-steel-100: #DCE5EC;
+  --color-steel-200: #B9CCD9;
+  --color-steel-300: #8EAFC2;
+  --color-steel-400: #6B96AD;
+  --color-steel-500: #527E96;
+  --color-steel-600: #42677B;
+  --color-steel-700: #345163;
+
+  --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
 }
 
-.animate-slide-up {
-  animation: slide-up 0.3s ease-out;
+/* ── Base ── */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
-/* Fade-in animation for desktop centered modals */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -48%);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%);
-  }
+body {
+  overscroll-behavior-y: contain;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@media (min-width: 768px) {
-  .md\:animate-fade-in {
-    animation: fade-in 0.2s ease-out;
-  }
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Hide scrollbar for quick-add horizontal scroll */
+/* ── Inputs ── */
+input[type="time"],
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* ── Utilities ── */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
@@ -44,29 +62,59 @@
   scrollbar-width: none;
 }
 
-/* Improve time/date input styling on mobile */
-input[type="time"],
-input[type="date"] {
-  -webkit-appearance: none;
-  appearance: none;
+/* ── Animations ── */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
-/* Disable tap highlight on mobile */
-* {
-  -webkit-tap-highlight-color: transparent;
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
-/* Tabular numbers for clock display */
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Smooth body transitions */
-html {
-  scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
+@keyframes backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-body {
-  overscroll-behavior-y: contain;
+.animate-slide-up {
+  animation: slide-up 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease-out both;
+}
+
+.animate-backdrop {
+  animation: backdrop-in 0.2s ease-out;
+}
+
+@media (min-width: 768px) {
+  .md\:animate-fade-in {
+    animation: fade-in 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+  }
 }

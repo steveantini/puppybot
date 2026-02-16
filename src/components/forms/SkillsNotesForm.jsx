@@ -10,7 +10,6 @@ export default function SkillsNotesForm({ onClose }) {
   const [skills, setSkills] = useState(dayLog.skills || '');
   const [notes, setNotes] = useState(dayLog.notes || '');
 
-  // Update fields when date changes
   useEffect(() => {
     const log = getDayLogByDate(date);
     setSkills(log.skills || '');
@@ -26,40 +25,40 @@ export default function SkillsNotesForm({ onClose }) {
   return (
     <div className="space-y-5">
       <div>
-        <label className="block text-sm font-medium text-stone-600 mb-1.5">Date</label>
+        <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">Date</label>
         <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-stone-800 focus:outline-none focus:ring-2 focus:ring-sky-300"
+          className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-600 mb-1.5">Skills Practiced</label>
+        <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">Skills Practiced</label>
         <textarea
           value={skills}
           onChange={(e) => setSkills(e.target.value)}
           placeholder="e.g., Sit, Stay, Come, Leash walking..."
           rows={3}
-          className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-sky-300 resize-none"
+          className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors resize-none"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-600 mb-1.5">General Notes</label>
+        <label className="block text-[11px] font-semibold text-sand-400 uppercase tracking-wide mb-1.5">General Notes</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Anything noteworthy about this day..."
           rows={3}
-          className="w-full px-3 py-2.5 border border-stone-200 rounded-xl text-stone-800 placeholder:text-stone-300 focus:outline-none focus:ring-2 focus:ring-sky-300 resize-none"
+          className="w-full px-3 py-2.5 border border-sand-200 rounded-lg text-sand-800 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors resize-none"
         />
       </div>
 
       <button
         onClick={handleSave}
-        className="w-full py-3 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl transition-colors active:scale-[0.98] shadow-sm"
+        className="w-full py-2.5 bg-steel-500 hover:bg-steel-600 text-white font-medium rounded-lg transition-colors active:scale-[0.98]"
       >
         Save
       </button>

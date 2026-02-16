@@ -16,15 +16,22 @@ function NavItem({ to, icon: Icon, label }) {
       end={to === '/'}
     >
       {({ isActive }) => (
-        <div
-          className={`flex flex-col items-center py-2 px-3 rounded-xl transition-colors min-w-[48px] ${
-            isActive ? 'text-sky-600' : 'text-stone-400 hover:text-stone-600'
-          }`}
-        >
-          <Icon size={22} strokeWidth={isActive ? 2.5 : 1.5} />
-          <span className={`text-[10px] mt-0.5 ${isActive ? 'font-semibold' : 'font-medium'}`}>
+        <div className="flex flex-col items-center py-2 px-3 min-w-[48px] relative">
+          <Icon
+            size={21}
+            strokeWidth={isActive ? 2.2 : 1.5}
+            className={`transition-colors ${
+              isActive ? 'text-steel-600' : 'text-sand-400 hover:text-sand-600'
+            }`}
+          />
+          <span className={`text-[10px] mt-1 transition-colors ${
+            isActive ? 'font-semibold text-steel-600' : 'font-medium text-sand-400'
+          }`}>
             {label}
           </span>
+          {isActive && (
+            <span className="absolute top-0.5 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-steel-500" />
+          )}
         </div>
       )}
     </NavLink>
@@ -33,7 +40,7 @@ function NavItem({ to, icon: Icon, label }) {
 
 export default function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-stone-200 z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-sand-200/60 z-50">
       <div className="max-w-5xl mx-auto flex items-center justify-around py-1 px-2 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
         {navItems.map((item) => (
           <NavItem key={item.to} {...item} />

@@ -75,25 +75,33 @@ export default function Stats() {
     });
   };
 
+  const tooltipStyle = {
+    borderRadius: '10px',
+    border: '1px solid #EBE6DE',
+    fontSize: '12px',
+    fontFamily: 'DM Sans, system-ui, sans-serif',
+    boxShadow: '0 4px 12px rgba(42, 35, 29, 0.06)',
+  };
+
   return (
     <div className="space-y-4 pb-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-stone-800">Stats & Trends</h2>
+        <h2 className="text-lg font-semibold text-sand-800 tracking-tight">Stats & Trends</h2>
         {hasData && (
           <button
             onClick={handleExportPdf}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-sky-500 rounded-xl hover:bg-sky-600 transition-colors shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium text-white bg-steel-500 rounded-lg hover:bg-steel-600 transition-colors"
           >
-            <FileDown size={16} /> Export PDF
+            <FileDown size={15} /> Export PDF
           </button>
         )}
       </div>
 
       {!hasData ? (
-        <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-8 text-center">
-          <BarChart3 className="mx-auto text-stone-300" size={40} />
-          <p className="text-stone-400 mt-3">No data yet.</p>
-          <p className="text-stone-400 text-sm mt-1">
+        <div className="bg-white rounded-xl border border-sand-200/70 p-10 text-center">
+          <BarChart3 className="mx-auto text-sand-300" size={36} />
+          <p className="text-sand-400 mt-3 text-sm">No data yet.</p>
+          <p className="text-sand-300 text-xs mt-1">
             Start logging to see trends!
           </p>
         </div>
@@ -101,151 +109,129 @@ export default function Stats() {
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="bg-white rounded-2xl p-4 text-center border border-stone-100 shadow-sm">
-              <div className="text-3xl font-bold text-emerald-600">
+            <div className="bg-white rounded-xl p-4 text-center border border-sand-200/70">
+              <div className="text-3xl font-semibold text-emerald-600">
                 {successRate}%
               </div>
-              <div className="text-xs text-stone-500 mt-1">
+              <div className="text-[11px] text-sand-400 font-medium mt-1">
                 Potty Success (7d)
               </div>
             </div>
-            <div className="bg-white rounded-2xl p-4 text-center border border-stone-100 shadow-sm">
-              <div className="text-3xl font-bold text-sky-600">
+            <div className="bg-white rounded-xl p-4 text-center border border-sand-200/70">
+              <div className="text-3xl font-semibold text-steel-600">
                 {totalPotty7d}
               </div>
-              <div className="text-xs text-stone-500 mt-1">
+              <div className="text-[11px] text-sand-400 font-medium mt-1">
                 Total Potty (7d)
               </div>
             </div>
-            <div className="bg-white rounded-2xl p-4 text-center border border-stone-100 shadow-sm">
-              <div className="text-3xl font-bold text-rose-500">
+            <div className="bg-white rounded-xl p-4 text-center border border-sand-200/70">
+              <div className="text-3xl font-semibold text-rose-500">
                 {totalAccidents7d}
               </div>
-              <div className="text-xs text-stone-500 mt-1">Accidents (7d)</div>
+              <div className="text-[11px] text-sand-400 font-medium mt-1">Accidents (7d)</div>
             </div>
           </div>
 
-          {/* Charts grid - side by side on desktop */}
+          {/* Charts grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="bg-white rounded-xl border border-sand-200/70 p-4 sm:p-5">
+              <h3 className="text-[13px] font-semibold text-sand-700 mb-4 flex items-center gap-2 uppercase tracking-wide">
+                <TrendingUp size={14} className="text-sand-400" />
+                Potty Breaks (7 Days)
+              </h3>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={pottyData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 10, fill: '#918272' }}
+                    stroke="#D9D1C5"
+                  />
+                  <YAxis
+                    tick={{ fontSize: 10, fill: '#918272' }}
+                    stroke="#D9D1C5"
+                    allowDecimals={false}
+                  />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Bar
+                    dataKey="good"
+                    fill="#5BA87A"
+                    name="Good"
+                    radius={[3, 3, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="accidents"
+                    fill="#D4726A"
+                    name="Accidents"
+                    radius={[3, 3, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
 
-          {/* Potty Chart */}
-          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 sm:p-6">
-            <h3 className="font-semibold text-stone-800 mb-3 flex items-center gap-2">
-              <TrendingUp size={16} className="text-stone-400" />
-              Potty Breaks (7 Days)
-            </h3>
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={pottyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
-                <XAxis
-                  dataKey="date"
-                  tick={{ fontSize: 10 }}
-                  stroke="#a8a29e"
-                />
-                <YAxis
-                  tick={{ fontSize: 10 }}
-                  stroke="#a8a29e"
-                  allowDecimals={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: '12px',
-                    border: '1px solid #e7e5e4',
-                    fontSize: '12px',
-                  }}
-                />
-                <Bar
-                  dataKey="good"
-                  fill="#34d399"
-                  name="Good"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="accidents"
-                  fill="#fb7185"
-                  name="Accidents"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="bg-white rounded-xl border border-sand-200/70 p-4 sm:p-5">
+              <h3 className="text-[13px] font-semibold text-sand-700 mb-4 flex items-center gap-2 uppercase tracking-wide">
+                <TrendingUp size={14} className="text-sand-400" />
+                Meals (7 Days)
+              </h3>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={mealData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 10, fill: '#918272' }}
+                    stroke="#D9D1C5"
+                  />
+                  <YAxis
+                    tick={{ fontSize: 10, fill: '#918272' }}
+                    stroke="#D9D1C5"
+                    allowDecimals={false}
+                  />
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Bar
+                    dataKey="meals"
+                    fill="#C4956A"
+                    name="Meals"
+                    radius={[3, 3, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="fullyEaten"
+                    fill="#5BA87A"
+                    name="Fully Eaten"
+                    radius={[3, 3, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
-          {/* Meals Chart */}
-          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 sm:p-6">
-            <h3 className="font-semibold text-stone-800 mb-3 flex items-center gap-2">
-              <TrendingUp size={16} className="text-stone-400" />
-              Meals (7 Days)
-            </h3>
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={mealData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
-                <XAxis
-                  dataKey="date"
-                  tick={{ fontSize: 10 }}
-                  stroke="#a8a29e"
-                />
-                <YAxis
-                  tick={{ fontSize: 10 }}
-                  stroke="#a8a29e"
-                  allowDecimals={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: '12px',
-                    border: '1px solid #e7e5e4',
-                    fontSize: '12px',
-                  }}
-                />
-                <Bar
-                  dataKey="meals"
-                  fill="#fbbf24"
-                  name="Meals"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar
-                  dataKey="fullyEaten"
-                  fill="#34d399"
-                  name="Fully Eaten"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          </div>{/* end charts grid */}
-
-          {/* Naps Chart - full width */}
-          <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-4 sm:p-6">
-            <h3 className="font-semibold text-stone-800 mb-3 flex items-center gap-2">
-              <TrendingUp size={16} className="text-stone-400" />
+          {/* Naps Chart */}
+          <div className="bg-white rounded-xl border border-sand-200/70 p-4 sm:p-5">
+            <h3 className="text-[13px] font-semibold text-sand-700 mb-4 flex items-center gap-2 uppercase tracking-wide">
+              <TrendingUp size={14} className="text-sand-400" />
               Naps (7 Days)
             </h3>
-            <ResponsiveContainer width="100%" height={240}>
+            <ResponsiveContainer width="100%" height={220}>
               <LineChart data={napData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e4" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
                 <XAxis
                   dataKey="date"
-                  tick={{ fontSize: 11 }}
-                  stroke="#a8a29e"
+                  tick={{ fontSize: 11, fill: '#918272' }}
+                  stroke="#D9D1C5"
                 />
                 <YAxis
-                  tick={{ fontSize: 11 }}
-                  stroke="#a8a29e"
+                  tick={{ fontSize: 11, fill: '#918272' }}
+                  stroke="#D9D1C5"
                   allowDecimals={false}
                 />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: '12px',
-                    border: '1px solid #e7e5e4',
-                    fontSize: '12px',
-                  }}
-                />
+                <Tooltip contentStyle={tooltipStyle} />
                 <Line
                   type="monotone"
                   dataKey="naps"
-                  stroke="#818cf8"
+                  stroke="#7B82A8"
                   strokeWidth={2}
-                  dot={{ fill: '#818cf8', r: 4 }}
+                  dot={{ fill: '#7B82A8', r: 3.5, strokeWidth: 0 }}
                   name="Naps"
                 />
               </LineChart>
