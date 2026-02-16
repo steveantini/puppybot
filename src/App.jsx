@@ -25,8 +25,9 @@ function AppShell() {
         {/* Header */}
         <header className="bg-white border-b border-sand-200/80 sticky top-0 z-50 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-center">
-            <h1 className="text-3xl font-bold text-sand-900 tracking-tight flex items-center gap-2">
-              <span>🐾</span> PuppyBot
+            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+              <span className="text-warm-600">🐾</span>
+              <span className="text-steel-700">PuppyBot</span>
             </h1>
           </div>
         </header>
