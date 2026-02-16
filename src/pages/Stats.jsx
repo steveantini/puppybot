@@ -12,6 +12,7 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
+  Legend,
 } from 'recharts';
 import { TrendingUp, BarChart3, FileDown, ChevronDown } from 'lucide-react';
 
@@ -54,6 +55,62 @@ function getDateRange(range, allLogDates) {
 function getRangeLabel(range) {
   const opt = RANGE_OPTIONS.find((o) => o.value === range);
   return opt ? opt.label : 'All Time';
+}
+
+function timeToMinutes(timeStr) {
+  if (!timeStr) return null;
+  const parts = timeStr.split(':');
+  if (parts.length < 2) return null;
+  const h = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  if (isNaN(h) || isNaN(m)) return null;
+  return h * 60 + m;
+}
+
+function minutesToTimeLabel(minutes) {
+  if (minutes == null) return '';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+}
+
+function ScheduleTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  const items = payload.filter((p) => p.value != null);
+  if (items.length === 0) return null;
+  return (
+    <div
+      style={{
+        borderRadius: '12px',
+        border: '1px solid #EBE6DE',
+        fontSize: '12px',
+        fontFamily: 'DM Sans, system-ui, sans-serif',
+        boxShadow: '0 4px 16px rgba(42, 35, 29, 0.08)',
+        background: '#fff',
+        padding: '10px 14px',
+      }}
+    >
+      <div style={{ fontWeight: 600, marginBottom: 4, color: '#4A3F35' }}>{label}</div>
+      {items.map((item, i) => (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              background: item.stroke || item.color,
+              display: 'inline-block',
+            }}
+          />
+          <span style={{ color: '#6B5D4F' }}>
+            {item.name}: <strong>{minutesToTimeLabel(item.value)}</strong>
+          </span>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function Stats() {
@@ -106,18 +163,47 @@ export default function Stats() {
     });
   }, [allLogs, dateRange]);
 
-  const wakeData = useMemo(() => {
+  const scheduleData = useMemo(() => {
     return dateRange.map((date) => {
       const log = allLogs[date];
       const wakes = log?.wakeUpTimes || [];
+      const morningWakes = wakes.filter((w) => w.label !== 'Night Wake');
+      const nightWakes = wakes.filter((w) => w.label === 'Night Wake');
+
+      const morningTime =
+        morningWakes.length > 0 ? timeToMinutes(morningWakes[0].time) : null;
+      const nightTime =
+        nightWakes.length > 0 ? timeToMinutes(nightWakes[0].time) : null;
+      const bedTime = log?.bedTime ? timeToMinutes(log.bedTime) : null;
+
       return {
         date: formatShortDate(date),
-        morning: wakes.filter((w) => w.label !== 'Night Wake').length,
-        night: wakes.filter((w) => w.label === 'Night Wake').length,
-        total: wakes.length,
+        morning: morningTime,
+        nightWake: nightTime,
+        bed: bedTime,
       };
     });
   }, [allLogs, dateRange]);
+
+  const scheduleDomain = useMemo(() => {
+    const allMinutes = scheduleData.flatMap((d) =>
+      [d.morning, d.nightWake, d.bed].filter((v) => v != null)
+    );
+    if (allMinutes.length === 0) return [0, 1440];
+    const min = Math.min(...allMinutes);
+    const max = Math.max(...allMinutes);
+    const padded = [Math.max(0, Math.floor(min / 60) * 60 - 60), Math.min(1440, Math.ceil(max / 60) * 60 + 60)];
+    return padded;
+  }, [scheduleData]);
+
+  const scheduleTicks = useMemo(() => {
+    const ticks = [];
+    const step = 120;
+    for (let m = scheduleDomain[0]; m <= scheduleDomain[1]; m += step) {
+      ticks.push(m);
+    }
+    return ticks;
+  }, [scheduleDomain]);
 
   const totalPotty = pottyData.reduce((sum, d) => sum + d.total, 0);
   const totalAccidents = pottyData.reduce((sum, d) => sum + d.accidents, 0);
@@ -125,10 +211,6 @@ export default function Stats() {
     totalPotty > 0
       ? Math.round(((totalPotty - totalAccidents) / totalPotty) * 100)
       : 0;
-
-  const totalNightWakes = wakeData.reduce((sum, d) => sum + d.night, 0);
-  const totalMorningWakes = wakeData.reduce((sum, d) => sum + d.morning, 0);
-  const daysWithNightWakes = wakeData.filter((d) => d.night > 0).length;
 
   const hasData = Object.keys(allLogs).length > 0;
   const rangeLabel = getRangeLabel(range);
@@ -174,7 +256,6 @@ export default function Stats() {
         <h2 className="text-xl font-bold text-sand-900">Stats & Trends</h2>
         {hasData && (
           <div className="flex items-center gap-2">
-            {/* Range dropdown */}
             <div className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -229,7 +310,7 @@ export default function Stats() {
       ) : (
         <>
           {/* Summary Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div className="bg-white rounded-2xl p-4 text-center border border-sand-200/80 shadow-sm">
               <div className="text-3xl font-bold text-emerald-600">
                 {successRate}%
@@ -251,12 +332,6 @@ export default function Stats() {
                 {totalAccidents}
               </div>
               <div className="text-[11px] text-sand-500 font-medium mt-1">Accidents</div>
-            </div>
-            <div className="bg-white rounded-2xl p-4 text-center border border-sand-200/80 shadow-sm">
-              <div className="text-3xl font-bold text-warm-600">
-                {totalNightWakes}
-              </div>
-              <div className="text-[11px] text-sand-500 font-medium mt-1">Night Wakes</div>
             </div>
           </div>
 
@@ -343,50 +418,59 @@ export default function Stats() {
               </ResponsiveContainer>
             </div>
 
-            {/* Wake Schedule Chart */}
+            {/* Sleep Schedule Chart */}
             <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
               <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
                 <TrendingUp size={14} className="text-sand-400" />
-                Wake-Ups ({dayCount}d)
+                Sleep Schedule ({dayCount}d)
               </h3>
               <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={wakeData}>
+                <LineChart data={scheduleData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
                   <XAxis {...xAxisProps} />
-                  <YAxis {...yAxisProps} />
-                  <Tooltip contentStyle={tooltipStyle} />
-                  <Bar
+                  <YAxis
+                    {...yAxisProps}
+                    domain={scheduleDomain}
+                    ticks={scheduleTicks}
+                    tickFormatter={minutesToTimeLabel}
+                    width={62}
+                  />
+                  <Tooltip content={<ScheduleTooltip />} />
+                  <Legend
+                    iconType="circle"
+                    iconSize={8}
+                    wrapperStyle={{ fontSize: '11px', color: '#918272' }}
+                  />
+                  <Line
+                    type="monotone"
                     dataKey="morning"
-                    stackId="wakes"
-                    fill="#9F8362"
+                    stroke="#9F8362"
+                    strokeWidth={2.5}
+                    dot={dayCount <= 31 ? { fill: '#9F8362', r: 3.5, strokeWidth: 0 } : false}
                     name="Morning Wake"
-                    radius={[0, 0, 0, 0]}
+                    connectNulls
                   />
-                  <Bar
-                    dataKey="night"
-                    stackId="wakes"
-                    fill="#3B6179"
+                  <Line
+                    type="monotone"
+                    dataKey="nightWake"
+                    stroke="#3B6179"
+                    strokeWidth={2.5}
+                    strokeDasharray="6 3"
+                    dot={dayCount <= 31 ? { fill: '#3B6179', r: 3.5, strokeWidth: 0 } : false}
                     name="Night Wake"
-                    radius={[4, 4, 0, 0]}
+                    connectNulls
                   />
-                </BarChart>
+                  <Line
+                    type="monotone"
+                    dataKey="bed"
+                    stroke="#48778F"
+                    strokeWidth={2.5}
+                    dot={dayCount <= 31 ? { fill: '#48778F', r: 3.5, strokeWidth: 0 } : false}
+                    name="Bed Time"
+                    connectNulls
+                  />
+                </LineChart>
               </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Wake summary row */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-white rounded-2xl p-4 text-center border border-sand-200/80 shadow-sm">
-              <div className="text-2xl font-bold text-warm-600">{totalMorningWakes}</div>
-              <div className="text-[11px] text-sand-500 font-medium mt-1">Morning Wakes</div>
-            </div>
-            <div className="bg-white rounded-2xl p-4 text-center border border-sand-200/80 shadow-sm">
-              <div className="text-2xl font-bold text-steel-700">{totalNightWakes}</div>
-              <div className="text-[11px] text-sand-500 font-medium mt-1">Night Wakes</div>
-            </div>
-            <div className="bg-white rounded-2xl p-4 text-center border border-sand-200/80 shadow-sm">
-              <div className="text-2xl font-bold text-sand-700">{daysWithNightWakes}</div>
-              <div className="text-[11px] text-sand-500 font-medium mt-1">Days w/ Night Wakes</div>
             </div>
           </div>
         </>
