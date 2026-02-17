@@ -2,34 +2,34 @@
 
 /* ── Design Tokens ── */
 @theme {
-  --color-sand-50: #F8F6F0;
-  --color-sand-100: #EDE6DA;
-  --color-sand-200: #DDD2C2;
-  --color-sand-300: #C5B59F;
-  --color-sand-400: #9A8568;
-  --color-sand-500: #6F5C48;
-  --color-sand-600: #564434;
-  --color-sand-700: #3E2F1E;
-  --color-sand-800: #2E2216;
-  --color-sand-900: #211A0E;
+  --color-sand-50: #F7F4EC;
+  --color-sand-100: #EBE0D0;
+  --color-sand-200: #D6C8B2;
+  --color-sand-300: #BBA68A;
+  --color-sand-400: #8E7555;
+  --color-sand-500: #654D36;
+  --color-sand-600: #4D3928;
+  --color-sand-700: #37281A;
+  --color-sand-800: #281C10;
+  --color-sand-900: #1C130A;
 
-  --color-steel-50: #E6F0FC;
-  --color-steel-100: #C2D9F0;
-  --color-steel-200: #96BDE0;
-  --color-steel-300: #5F9ACB;
-  --color-steel-400: #3A7EB8;
-  --color-steel-500: #2B6AAF;
-  --color-steel-600: #215694;
-  --color-steel-700: #174176;
+  --color-steel-50: #E1EDFC;
+  --color-steel-100: #B8D4F2;
+  --color-steel-200: #85B5E5;
+  --color-steel-300: #4D90D0;
+  --color-steel-400: #2E74BF;
+  --color-steel-500: #1F5FAD;
+  --color-steel-600: #164B92;
+  --color-steel-700: #0E3870;
 
-  --color-warm-50: #FAF2E6;
-  --color-warm-100: #EDDCC6;
-  --color-warm-200: #DBC3A3;
-  --color-warm-300: #C2A176;
-  --color-warm-400: #A98054;
-  --color-warm-500: #926940;
-  --color-warm-600: #73522C;
-  --color-warm-700: #543A1E;
+  --color-warm-50: #F9EFE0;
+  --color-warm-100: #EBD5B8;
+  --color-warm-200: #D6B68C;
+  --color-warm-300: #BA9160;
+  --color-warm-400: #A07342;
+  --color-warm-500: #865C30;
+  --color-warm-600: #694722;
+  --color-warm-700: #4C3316;
 
   --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
 }

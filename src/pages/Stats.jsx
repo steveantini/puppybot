@@ -158,9 +158,10 @@ function PoopTooltip({ active, payload, label }) {
 
 function SuccessComboTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
-  const good = payload.find((p) => p.dataKey === 'good')?.value || 0;
-  const accidents = payload.find((p) => p.dataKey === 'accidents')?.value || 0;
-  const pct = payload.find((p) => p.dataKey === 'successPct')?.value;
+  const row = payload[0]?.payload || {};
+  const good = row.good || 0;
+  const accidents = row.accidents || 0;
+  const pct = row.successPct;
   const total = good + accidents;
   return (
     <div style={{ borderRadius: '12px', border: '1px solid #DDD2C2', fontSize: '12px', fontFamily: 'DM Sans, system-ui, sans-serif', boxShadow: '0 4px 16px rgba(33, 26, 14, 0.10)', background: '#fff', padding: '10px 14px' }}>
@@ -469,7 +470,7 @@ export default function Stats() {
                 <YAxis {...yAxisProps} />
                 <Tooltip content={<PeeTooltip />} />
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#9A8568' }} />
-                <Bar dataKey="peeGood" stackId="pee" fill="#C2A176" name="Pee (Good)" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="peeGood" stackId="pee" fill="#E2B735" name="Pee (Good)" radius={[0, 0, 0, 0]} />
                 <Bar dataKey="peeAccident" stackId="pee" fill="#D4726A" name="Pee (Accident)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
