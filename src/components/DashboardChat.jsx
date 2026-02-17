@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Send, Sparkles, Loader2, Mic, MicOff, Save, Download, Trash2 } from 'lucide-react'
+import { Send, Loader2, Mic, MicOff, Save, Download, Trash2, PawPrint } from 'lucide-react'
 import { useData } from '../context/DataContext'
 import { getTodayKey } from '../utils/helpers'
 
@@ -29,7 +29,6 @@ export default function DashboardChat() {
     scrollToBottom()
   }, [messages])
 
-  // Initialize speech recognition
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition
@@ -166,170 +165,170 @@ export default function DashboardChat() {
   const puppyName = puppy?.name || 'Puppy'
 
   return (
-    <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm overflow-hidden max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-steel-500 to-steel-600 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="text-white" size={20} />
-            <div>
-              <h3 className="text-white font-bold text-sm">
-                {puppyName}Bot Assistant
-              </h3>
-              <p className="text-steel-100 text-xs">Ask me anything about {puppyName}</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            {/* Date range selector - right aligned */}
-            <div className="flex gap-2 text-xs">
-              {['week', 'month', 'ytd', 'all'].map((range) => (
-                <button
-                  key={range}
-                  onClick={() => setDateRange(range)}
-                  className={`px-3 py-1 rounded-lg font-medium transition-colors ${
-                    dateRange === range
-                      ? 'bg-white text-steel-600'
-                      : 'bg-steel-400 text-white hover:bg-steel-300 border border-steel-300'
-                  }`}
-                >
-                  {range === 'ytd' ? 'YTD' : range.charAt(0).toUpperCase() + range.slice(1)}
-                </button>
-              ))}
-            </div>
-
-            {/* Action buttons */}
-            {messages.length > 0 && (
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={exportConversation}
-                  className="text-white hover:bg-steel-400 p-1.5 rounded-lg transition-colors"
-                  title="Export conversation"
-                >
-                  <Download size={14} />
-                </button>
-                <button
-                  onClick={clearChat}
-                  className="text-white hover:bg-steel-400 p-1.5 rounded-lg transition-colors"
-                  title="Clear chat"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
+    <div className="max-w-4xl mx-auto">
+      {/* Title — on page background, not in a card */}
+      <div className="flex items-center gap-3 mb-4">
+        <PawPrint size={28} className="text-warm-300" />
+        <h2 className="text-2xl font-bold text-sand-900">
+          Welcome to <span className="text-steel-400">{puppyName}</span><span className="text-steel-500">Bot</span>!
+        </h2>
       </div>
 
-      {/* Messages */}
-      <div className="h-[400px] overflow-y-auto p-4 space-y-4 bg-sand-50/30">
-        {messages.length === 0 && (
-          <div className="text-center py-4">
-            <Sparkles className="mx-auto text-steel-300 mb-3" size={28} />
-            <p className="text-sand-600 text-sm font-medium mb-2">
-              I can help you understand {puppyName}&apos;s patterns and get training insights!
-            </p>
-            
-            {/* Suggested questions */}
-            <div className="space-y-2 mt-4">
-              <p className="text-xs text-sand-500 font-semibold uppercase tracking-wide mb-2">
-                Try asking:
-              </p>
-              {SUGGESTED_QUESTIONS.map((q, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleSuggestedQuestion(q)}
-                  className="w-full text-left px-3 py-2 bg-white border border-sand-200 rounded-lg text-xs text-sand-700 hover:border-steel-300 hover:bg-sand-50 transition-colors flex items-center gap-2"
-                >
-                  <span>{q.emoji}</span>
-                  <span>{q.text}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {messages.map((msg, i) => (
-          <div
-            key={i}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div className="flex flex-col gap-1 max-w-[85%]">
-              <div
-                className={`px-4 py-2 rounded-2xl text-sm ${
-                  msg.role === 'user'
-                    ? 'bg-steel-500 text-white'
-                    : 'bg-white text-sand-900 border border-sand-200 shadow-sm'
-                }`}
-                style={{ whiteSpace: 'pre-wrap' }}
-              >
-                {msg.content}
-              </div>
-              {msg.role === 'assistant' && (
-                <div className="flex items-center gap-1 ml-2">
-                  {msg.saved ? (
-                    <span className="text-[10px] text-emerald-600 font-medium">✓ Saved to notes</span>
-                  ) : (
-                    <button
-                      onClick={() => saveToNotes(msg.content, i)}
-                      className="text-[10px] text-sand-400 hover:text-steel-500 transition-colors flex items-center gap-1"
-                      title="Save to today's notes"
-                    >
-                      <Save size={10} />
-                      Save to notes
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-
-        {loading && (
-          <div className="flex justify-start">
-            <div className="bg-white px-4 py-3 rounded-2xl flex items-center gap-2 border border-sand-200 shadow-sm">
-              <Loader2 className="animate-spin text-steel-500" size={16} />
-              <span className="text-xs text-sand-600">Thinking...</span>
-            </div>
-          </div>
-        )}
-
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Input */}
-      <div className="p-4 border-t border-sand-200 bg-white">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-            placeholder="Ask about training, patterns, or advice..."
-            className="flex-1 px-4 py-2 border border-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300"
-            disabled={loading}
-          />
-          {recognitionRef.current && (
+      {/* Date range selector — subtle, on background */}
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-xs text-sand-400 font-medium">Data range:</span>
+        <div className="flex gap-1.5">
+          {['week', 'month', 'ytd', 'all'].map((range) => (
             <button
-              onClick={toggleVoiceInput}
-              disabled={loading}
-              className={`px-3 py-2 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                isListening
-                  ? 'bg-warm-400 text-white'
-                  : 'bg-sand-100 text-sand-600 hover:bg-sand-200'
+              key={range}
+              onClick={() => setDateRange(range)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                dateRange === range
+                  ? 'bg-steel-500 text-white'
+                  : 'bg-sand-100 text-sand-500 hover:bg-sand-200'
               }`}
-              title="Voice input"
             >
-              {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+              {range === 'ytd' ? 'YTD' : range.charAt(0).toUpperCase() + range.slice(1)}
             </button>
+          ))}
+        </div>
+
+        {/* Action buttons when messages exist */}
+        {messages.length > 0 && (
+          <div className="flex items-center gap-1 ml-auto">
+            <button
+              onClick={exportConversation}
+              className="text-sand-400 hover:text-steel-500 p-1.5 rounded-lg transition-colors"
+              title="Export conversation"
+            >
+              <Download size={14} />
+            </button>
+            <button
+              onClick={clearChat}
+              className="text-sand-400 hover:text-red-500 p-1.5 rounded-lg transition-colors"
+              title="Clear chat"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Chat window — clean white rectangle */}
+      <div className="bg-white rounded-2xl border border-sand-200/60 shadow-sm overflow-hidden">
+        {/* Messages area */}
+        <div className="h-[420px] overflow-y-auto p-5 relative">
+          {messages.length === 0 && (
+            <div className="flex flex-col items-center justify-center h-full">
+              <p className="text-sand-400 text-sm mb-6">
+                Ask about training, patterns, or advice
+              </p>
+              
+              {/* Suggested questions */}
+              <div className="w-full max-w-md space-y-2">
+                {SUGGESTED_QUESTIONS.map((q, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSuggestedQuestion(q)}
+                    className="w-full text-left px-4 py-2.5 border border-sand-200/80 rounded-xl text-xs text-sand-600 hover:border-steel-300 hover:bg-sand-50 transition-colors flex items-center gap-2.5"
+                  >
+                    <span className="text-sm">{q.emoji}</span>
+                    <span>{q.text}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
-          <button
-            onClick={() => handleSend()}
-            disabled={loading || !input.trim()}
-            className="px-4 py-2 bg-steel-500 text-white rounded-xl hover:bg-steel-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Send size={18} />
-          </button>
+
+          {messages.map((msg, i) => (
+            <div
+              key={i}
+              className={`flex mb-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div className="flex flex-col gap-1 max-w-[85%]">
+                <div
+                  className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                    msg.role === 'user'
+                      ? 'bg-steel-500 text-white'
+                      : 'bg-sand-50 text-sand-900 border border-sand-200/60'
+                  }`}
+                  style={{ whiteSpace: 'pre-wrap' }}
+                >
+                  {msg.content}
+                </div>
+                {msg.role === 'assistant' && (
+                  <div className="flex items-center gap-1 ml-2">
+                    {msg.saved ? (
+                      <span className="text-[10px] text-emerald-600 font-medium">✓ Saved to notes</span>
+                    ) : (
+                      <button
+                        onClick={() => saveToNotes(msg.content, i)}
+                        className="text-[10px] text-sand-400 hover:text-steel-500 transition-colors flex items-center gap-1"
+                        title="Save to today's notes"
+                      >
+                        <Save size={10} />
+                        Save to notes
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {loading && (
+            <div className="flex justify-start mb-4">
+              <div className="bg-sand-50 px-4 py-3 rounded-2xl flex items-center gap-2 border border-sand-200/60">
+                <Loader2 className="animate-spin text-steel-500" size={16} />
+                <span className="text-xs text-sand-500">Thinking...</span>
+              </div>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input area */}
+        <div className="px-5 pb-4 pt-2 border-t border-sand-100">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
+              placeholder={`Ask about ${puppyName}'s training, patterns, or advice...`}
+              className="flex-1 px-4 py-2.5 border border-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 placeholder:text-sand-300"
+              disabled={loading}
+            />
+            {recognitionRef.current && (
+              <button
+                onClick={toggleVoiceInput}
+                disabled={loading}
+                className={`px-3 py-2.5 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                  isListening
+                    ? 'bg-warm-400 text-white'
+                    : 'bg-sand-100 text-sand-500 hover:bg-sand-200'
+                }`}
+                title="Voice input"
+              >
+                {isListening ? <MicOff size={18} /> : <Mic size={18} />}
+              </button>
+            )}
+            <button
+              onClick={() => handleSend()}
+              disabled={loading || !input.trim()}
+              className="px-4 py-2.5 bg-steel-500 text-white rounded-xl hover:bg-steel-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Send size={18} />
+            </button>
+          </div>
+
+          {/* Powered by Claude — bottom right */}
+          <div className="flex justify-end mt-2">
+            <p className="text-[10px] text-sand-300">
+              powered by Claude 3.5 Sonnet
+            </p>
+          </div>
         </div>
       </div>
     </div>
