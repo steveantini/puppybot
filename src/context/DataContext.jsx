@@ -11,21 +11,38 @@ import {
   createEmptyDayLog,
 } from '../utils/storage';
 import { getTodayKey, generateId } from '../utils/helpers';
+import { useAuth } from './AuthContext';
 
 const DataContext = createContext(null);
 
 export function DataProvider({ children }) {
+  const { user, loading: authLoading } = useAuth();
+
   const [puppy, setPuppy] = useState(null);
   const [todayLog, setTodayLog] = useState(createEmptyDayLog(getTodayKey()));
   const [allLogs, setAllLogs] = useState({});
   const [healthRecords, setHealthRecords] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ─── Initial data load from Supabase ─────────────────────
+  // ─── Load data when user changes (login/logout) ───────────
   useEffect(() => {
     let cancelled = false;
 
+    // Wait for auth to finish loading
+    if (authLoading) return;
+
+    // If no user, clear data and stop loading
+    if (!user) {
+      setPuppy(null);
+      setAllLogs({});
+      setTodayLog(createEmptyDayLog(getTodayKey()));
+      setHealthRecords([]);
+      setIsLoading(false);
+      return;
+    }
+
     async function load() {
+      setIsLoading(true);
       try {
         const [puppyData, logsData, healthData] = await Promise.all([
           fetchPuppy(),
@@ -36,6 +53,8 @@ export function DataProvider({ children }) {
         if (cancelled) return;
 
         if (puppyData) setPuppy(puppyData);
+        else setPuppy(null);
+
         setAllLogs(logsData);
         setHealthRecords(healthData);
 
@@ -50,7 +69,7 @@ export function DataProvider({ children }) {
 
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [user?.id, authLoading]);
 
   // Refresh today's log when date changes (midnight rollover)
   useEffect(() => {

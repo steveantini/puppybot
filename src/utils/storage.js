@@ -1,5 +1,11 @@
 import { supabase } from './supabase';
 
+// ─── Get current user ID ──────────────────────────────────────
+async function getCurrentUserId() {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.user?.id || null;
+}
+
 // ─── Pure helpers (no DB) ────────────────────────────────────
 
 export function createEmptyDayLog(date) {
@@ -14,17 +20,18 @@ export function createEmptyDayLog(date) {
     skills: '',
     notes: '',
   };
-
 }
 
 // ─── PUPPY ───────────────────────────────────────────────────
 
 export async function fetchPuppy() {
-  const { data: puppy, error } = await supabase
-    .from('puppies')
-    .select('*')
-    .limit(1)
-    .maybeSingle();
+  const userId = await getCurrentUserId();
+
+  let query = supabase.from('puppies').select('*').limit(1);
+  if (userId) {
+    query = query.eq('user_id', userId);
+  }
+  const { data: puppy, error } = await query.maybeSingle();
 
   if (error) throw error;
   if (!puppy) return null;
@@ -58,6 +65,8 @@ export async function fetchPuppy() {
 }
 
 export async function savePuppy(puppyData) {
+  const userId = await getCurrentUserId();
+
   const row = {
     name: puppyData.name || null,
     breed: puppyData.breed || null,
@@ -78,6 +87,7 @@ export async function savePuppy(puppyData) {
     if (error) throw error;
     return puppyData.id;
   } else {
+    if (userId) row.user_id = userId;
     const { data, error } = await supabase
       .from('puppies')
       .insert(row)
@@ -89,13 +99,18 @@ export async function savePuppy(puppyData) {
 }
 
 export async function addWeightLog(puppyId, entry) {
+  const userId = await getCurrentUserId();
+
+  const row = {
+    puppy_id: puppyId,
+    date: entry.date,
+    weight: entry.weight,
+  };
+  if (userId) row.user_id = userId;
+
   const { data, error } = await supabase
     .from('weight_logs')
-    .insert({
-      puppy_id: puppyId,
-      date: entry.date,
-      weight: entry.weight,
-    })
+    .insert(row)
     .select()
     .single();
   if (error) throw error;
@@ -130,21 +145,25 @@ export async function fetchAllLogs() {
 }
 
 export async function upsertDayLog(date, dayLog) {
-  const { error } = await supabase.from('daily_logs').upsert(
-    {
-      date,
-      wake_up_times: dayLog.wakeUpTimes || [],
-      bed_time: dayLog.bedTime || null,
-      potty_breaks: dayLog.pottyBreaks || [],
-      naps: dayLog.naps || [],
-      meals: dayLog.meals || [],
-      snacks: dayLog.snacks || 0,
-      skills: dayLog.skills || '',
-      notes: dayLog.notes || '',
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: 'date' }
-  );
+  const userId = await getCurrentUserId();
+
+  const row = {
+    date,
+    wake_up_times: dayLog.wakeUpTimes || [],
+    bed_time: dayLog.bedTime || null,
+    potty_breaks: dayLog.pottyBreaks || [],
+    naps: dayLog.naps || [],
+    meals: dayLog.meals || [],
+    snacks: dayLog.snacks || 0,
+    skills: dayLog.skills || '',
+    notes: dayLog.notes || '',
+    updated_at: new Date().toISOString(),
+  };
+  if (userId) row.user_id = userId;
+
+  const { error } = await supabase.from('daily_logs').upsert(row, {
+    onConflict: 'date',
+  });
   if (error) throw error;
 }
 
@@ -169,15 +188,20 @@ export async function fetchHealthRecords() {
 }
 
 export async function insertHealthRecord(record) {
+  const userId = await getCurrentUserId();
+
+  const row = {
+    type: record.type,
+    date: record.date,
+    title: record.title,
+    description: record.description || '',
+    notes: record.notes || '',
+  };
+  if (userId) row.user_id = userId;
+
   const { data, error } = await supabase
     .from('health_records')
-    .insert({
-      type: record.type,
-      date: record.date,
-      title: record.title,
-      description: record.description || '',
-      notes: record.notes || '',
-    })
+    .insert(row)
     .select()
     .single();
 
