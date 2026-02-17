@@ -29,9 +29,10 @@ export default function AdminPanel({ isOpen, onClose }) {
       />
 
       {/* Panel */}
-      <div className="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-50 transform transition-transform relative">
+      <div className="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-50 transform transition-transform">
+        <div className="relative h-full flex flex-col">
         {/* Header */}
-        <div className="bg-gradient-to-r from-steel-500 to-steel-600 p-6">
+        <div className="bg-gradient-to-r from-steel-500 to-steel-600 p-6 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-white">Settings</h2>
             <button
@@ -53,8 +54,8 @@ export default function AdminPanel({ isOpen, onClose }) {
         </div>
 
         {/* Menu Items */}
-        <div className="overflow-y-auto h-[calc(100vh-240px)]">
-          <div className="p-4 pb-6 space-y-1">
+        <div className="overflow-y-auto flex-1">
+          <div className="p-4 pb-20 space-y-1">
             {/* Account Settings */}
             <button
               onClick={() => handleNavigation('/settings/account')}
@@ -169,7 +170,7 @@ export default function AdminPanel({ isOpen, onClose }) {
         </div>
 
         {/* Footer - Sign Out */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-sand-200 bg-white">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-sand-200 bg-white flex-shrink-0">
           <button
             onClick={handleSignOut}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors font-semibold"
@@ -177,6 +178,7 @@ export default function AdminPanel({ isOpen, onClose }) {
             <LogOut size={20} />
             Sign Out
           </button>
+        </div>
         </div>
       </div>
     </>
