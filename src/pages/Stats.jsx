@@ -23,7 +23,7 @@ const RANGE_OPTIONS = [
   { value: 'ytd', label: 'Year to Date' },
 ];
 
-const CAL_PER_CUP = 367;
+const CAL_PER_CUP = 381;
 const CAL_PER_SNACK = 4;
 
 function getDateRange(range, allLogDates) {
