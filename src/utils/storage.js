@@ -44,6 +44,7 @@ export async function fetchPuppy() {
     breed: puppy.breed,
     birthday: puppy.birthday,
     breederName: puppy.breeder_name,
+    breederWebsite: puppy.breeder_website,
     gotchaDay: puppy.gotcha_day,
     photoUrl: puppy.photo_url,
     weightLog: (weightLogs || []).map((w) => ({
@@ -60,6 +61,7 @@ export async function savePuppy(puppyData) {
     breed: puppyData.breed || null,
     birthday: puppyData.birthday || null,
     breeder_name: puppyData.breederName || null,
+    breeder_website: puppyData.breederWebsite || null,
     gotcha_day: puppyData.gotchaDay || null,
     photo_url: puppyData.photoUrl || null,
   };

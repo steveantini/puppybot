@@ -12,6 +12,7 @@ export default function PuppyProfile() {
   const [breed, setBreed] = useState(puppy?.breed || '');
   const [birthday, setBirthday] = useState(puppy?.birthday || '');
   const [breederName, setBreederName] = useState(puppy?.breederName || '');
+  const [breederWebsite, setBreederWebsite] = useState(puppy?.breederWebsite || '');
   const [gotchaDay, setGotchaDay] = useState(puppy?.gotchaDay || '');
   const [photoUrl, setPhotoUrl] = useState(puppy?.photoUrl || '');
 
@@ -21,7 +22,7 @@ export default function PuppyProfile() {
   const [weightValue, setWeightValue] = useState('');
 
   const handleSaveProfile = () => {
-    updatePuppy({ name, breed, birthday, breederName, gotchaDay, photoUrl });
+    updatePuppy({ name, breed, birthday, breederName, breederWebsite, gotchaDay, photoUrl });
     setIsEditing(false);
   };
 
@@ -50,18 +51,27 @@ export default function PuppyProfile() {
     if (!bday) return '';
     const birth = new Date(bday + 'T12:00:00');
     const now = new Date();
-    const months =
-      (now.getFullYear() - birth.getFullYear()) * 12 +
-      (now.getMonth() - birth.getMonth());
-    if (months < 1) {
-      const days = Math.floor((now - birth) / (1000 * 60 * 60 * 24));
-      return `${days} day${days !== 1 ? 's' : ''} old`;
+    const ageInDays = Math.floor((now - birth) / (1000 * 60 * 60 * 24));
+    
+    if (ageInDays < 30) {
+      return `${ageInDays} day${ageInDays !== 1 ? 's' : ''} old`;
     }
-    if (months < 12)
-      return `${months} month${months !== 1 ? 's' : ''} old`;
-    const years = Math.floor(months / 12);
-    const rem = months % 12;
-    return `${years} yr${years !== 1 ? 's' : ''}${rem > 0 ? ` ${rem} mo` : ''} old`;
+    
+    // Calculate precise months as decimal
+    const ageInMonths = ageInDays / 30.44; // Average days per month
+    
+    if (ageInMonths < 12) {
+      return `${ageInMonths.toFixed(1)} months old`;
+    }
+    
+    const years = Math.floor(ageInMonths / 12);
+    const remainingMonths = ageInMonths % 12;
+    
+    if (remainingMonths < 0.5) {
+      return `${years} yr${years !== 1 ? 's' : ''} old`;
+    }
+    
+    return `${years} yr${years !== 1 ? 's' : ''} ${remainingMonths.toFixed(1)} mo old`;
   };
 
   const calculateDogYears = (bday) => {
@@ -72,13 +82,16 @@ export default function PuppyProfile() {
     const ageInYears = ageInDays / 365.25;
     
     // Standard calculation: first year = 15, second year = 9, each year after = 4
+    let dogYears;
     if (ageInYears < 1) {
-      return Math.round(ageInYears * 15);
+      dogYears = ageInYears * 15;
     } else if (ageInYears < 2) {
-      return Math.round(15 + (ageInYears - 1) * 9);
+      dogYears = 15 + (ageInYears - 1) * 9;
     } else {
-      return Math.round(15 + 9 + (ageInYears - 2) * 4);
+      dogYears = 15 + 9 + (ageInYears - 2) * 4;
     }
+    
+    return dogYears.toFixed(1);
   };
 
   const sortedWeights = [...(puppy?.weightLog || [])].sort((a, b) =>
@@ -183,6 +196,18 @@ export default function PuppyProfile() {
                   value={breederName}
                   onChange={(e) => setBreederName(e.target.value)}
                   placeholder="Breeder's name (optional)"
+                  className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">
+                  Breeder Website
+                </label>
+                <input
+                  type="url"
+                  value={breederWebsite}
+                  onChange={(e) => setBreederWebsite(e.target.value)}
+                  placeholder="https://breederwebsite.com (optional)"
                   className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
                 />
               </div>
