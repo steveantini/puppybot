@@ -163,8 +163,10 @@ export default function DashboardChat() {
     }
   }
 
+  const puppyName = puppy?.name || 'Puppy'
+
   return (
-    <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm overflow-hidden max-w-4xl mx-auto">
       {/* Header */}
       <div className="bg-gradient-to-r from-steel-500 to-steel-600 p-4">
         <div className="flex items-center justify-between">
@@ -172,14 +174,33 @@ export default function DashboardChat() {
             <Sparkles className="text-white" size={20} />
             <div>
               <h3 className="text-white font-bold text-sm">
-                AI Assistant
+                {puppyName}Bot Assistant
               </h3>
-              <p className="text-steel-100 text-xs">Ask me anything about {puppy?.name || 'your puppy'}</p>
+              <p className="text-steel-100 text-xs">Ask me anything about {puppyName}</p>
             </div>
           </div>
-          <div className="flex items-center gap-1">
+          
+          <div className="flex items-center gap-3">
+            {/* Date range selector - right aligned */}
+            <div className="flex gap-2 text-xs">
+              {['week', 'month', 'ytd', 'all'].map((range) => (
+                <button
+                  key={range}
+                  onClick={() => setDateRange(range)}
+                  className={`px-3 py-1 rounded-lg font-medium transition-colors ${
+                    dateRange === range
+                      ? 'bg-white text-steel-600'
+                      : 'bg-steel-400 text-white hover:bg-steel-300 border border-steel-300'
+                  }`}
+                >
+                  {range === 'ytd' ? 'YTD' : range.charAt(0).toUpperCase() + range.slice(1)}
+                </button>
+              ))}
+            </div>
+
+            {/* Action buttons */}
             {messages.length > 0 && (
-              <>
+              <div className="flex items-center gap-1">
                 <button
                   onClick={exportConversation}
                   className="text-white hover:bg-steel-400 p-1.5 rounded-lg transition-colors"
@@ -194,26 +215,9 @@ export default function DashboardChat() {
                 >
                   <Trash2 size={14} />
                 </button>
-              </>
+              </div>
             )}
           </div>
-        </div>
-
-        {/* Date range selector */}
-        <div className="flex gap-2 text-xs mt-3">
-          {['week', 'month', 'ytd', 'all'].map((range) => (
-            <button
-              key={range}
-              onClick={() => setDateRange(range)}
-              className={`px-3 py-1 rounded-lg font-medium transition-colors ${
-                dateRange === range
-                  ? 'bg-white text-steel-600'
-                  : 'bg-steel-400 text-white hover:bg-steel-300 border border-steel-300'
-              }`}
-            >
-              {range === 'ytd' ? 'YTD' : range.charAt(0).toUpperCase() + range.slice(1)}
-            </button>
-          ))}
         </div>
       </div>
 
@@ -223,7 +227,7 @@ export default function DashboardChat() {
           <div className="text-center py-4">
             <Sparkles className="mx-auto text-steel-300 mb-3" size={28} />
             <p className="text-sand-600 text-sm font-medium mb-2">
-              I can help you understand patterns and get training insights!
+              I can help you understand {puppyName}&apos;s patterns and get training insights!
             </p>
             
             {/* Suggested questions */}

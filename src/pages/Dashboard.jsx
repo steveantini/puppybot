@@ -57,7 +57,7 @@ export default function Dashboard() {
       </div>
 
       {/* Welcome intro */}
-      <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm px-6 py-5 text-center max-w-2xl mx-auto">
+      <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm px-6 py-5 text-center max-w-4xl mx-auto">
         <p className="text-sand-700 text-sm leading-relaxed">
           Welcome to <strong className="text-steel-500">PuppyBot</strong> — your intelligent companion for tracking {puppyName}&apos;s daily routine.
           Use the buttons below to log potty breaks, meals, naps, sleep schedules, and notes.
