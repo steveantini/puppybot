@@ -21,16 +21,16 @@ export default function AdminPanel({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   const menuItems = [
-    { icon: User, label: 'Account Settings', desc: 'Profile, email, password', path: '/settings/account' },
-    { icon: Dog, label: 'My Puppies', desc: 'Add, edit, manage puppies', path: '/settings/puppies' },
-    { icon: Users, label: 'Family & Sharing', desc: 'Invite family, manage access', path: '/settings/sharing' },
+    { icon: User, label: 'Account Settings', desc: 'Profile, email, password', path: '/settings/account', active: true },
+    { icon: Dog, label: 'My Puppies', desc: 'Add, edit, manage puppies', path: '/settings/puppies', active: true },
+    { icon: Users, label: 'Family & Sharing', desc: 'Invite family, manage access', path: '/settings/sharing', active: true },
     { divider: true },
-    { icon: CreditCard, label: 'Subscription & Billing', desc: profile?.subscription_tier === 'premium' ? 'Premium Plan' : 'Free Plan', path: '/settings/billing' },
-    { icon: Lock, label: 'Security', desc: '2FA, sessions', path: '/settings/security' },
-    { icon: Bell, label: 'Notifications', desc: 'Email, reminders', path: '/settings/notifications' },
-    { icon: SettingsIcon, label: 'Preferences', desc: 'Timezone, units', path: '/settings/preferences' },
+    { icon: CreditCard, label: 'Subscription & Billing', desc: 'Coming soon', path: null, active: false },
+    { icon: Lock, label: 'Security', desc: 'Coming soon', path: null, active: false },
+    { icon: Bell, label: 'Notifications', desc: 'Coming soon', path: null, active: false },
+    { icon: SettingsIcon, label: 'Preferences', desc: 'Coming soon', path: null, active: false },
     { divider: true },
-    { icon: HelpCircle, label: 'Help & Support', desc: 'Docs, contact', path: '/settings/help' },
+    { icon: HelpCircle, label: 'Help & Support', desc: 'Coming soon', path: null, active: false },
   ];
 
   return (
@@ -72,6 +72,23 @@ export default function AdminPanel({ isOpen, onClose }) {
               return <div key={`d-${i}`} className="h-px bg-sand-200 my-1.5"></div>;
             }
             const Icon = item.icon;
+
+            if (!item.active) {
+              return (
+                <div
+                  key={item.label}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left opacity-40 cursor-not-allowed"
+                  title="Coming soon"
+                >
+                  <Icon size={17} className="text-sand-400 flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-semibold text-xs text-sand-400">{item.label}</p>
+                    <p className="text-[10px] text-sand-300 leading-tight">{item.desc}</p>
+                  </div>
+                </div>
+              );
+            }
+
             return (
               <button
                 key={item.path}

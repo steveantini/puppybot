@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../utils/supabase';
-import { ArrowLeft, Plus, Mail, Users, Crown, Edit, Trash2, Eye, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { ArrowLeft, Plus, Mail, Users, Crown, Edit, Trash2, Eye, Dog, Clock, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function SharingManagement() {
@@ -21,7 +21,7 @@ export default function SharingManagement() {
   const [inviteLoading, setInviteLoading] = useState(false);
 
   useEffect(() => {
-    fetchOwnedPuppies();
+    if (user) fetchOwnedPuppies();
   }, [user]);
 
   useEffect(() => {
@@ -32,16 +32,32 @@ export default function SharingManagement() {
 
   const fetchOwnedPuppies = async () => {
     try {
-      const { data, error } = await supabase
-        .from('puppies')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('name');
+      // Try with user_id, fallback to all
+      let data = [];
 
-      if (error) throw error;
+      if (user?.id) {
+        const { data: userPuppies, error } = await supabase
+          .from('puppies')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('name');
 
-      setPuppies(data || []);
-      if (data && data.length > 0) {
+        if (!error && userPuppies && userPuppies.length > 0) {
+          data = userPuppies;
+        }
+      }
+
+      if (data.length === 0) {
+        const { data: allPuppies, error } = await supabase
+          .from('puppies')
+          .select('*')
+          .order('name');
+
+        if (!error) data = allPuppies || [];
+      }
+
+      setPuppies(data);
+      if (data.length > 0) {
         setSelectedPuppy(data[0]);
       }
     } catch (error) {
@@ -55,42 +71,55 @@ export default function SharingManagement() {
     if (!selectedPuppy) return;
 
     try {
-      // Fetch members
+      // Fetch members for this puppy
       const { data: membersData, error: membersError } = await supabase
         .from('puppy_members')
-        .select('*, invited_by_user:invited_by(email)')
+        .select('*')
         .eq('puppy_id', selectedPuppy.id);
 
-      if (membersError) throw membersError;
+      if (membersError) {
+        console.warn('Members fetch warning:', membersError);
+        setMembers([]);
+      } else {
+        // Get user details for each member
+        const membersWithDetails = await Promise.all(
+          (membersData || []).map(async (member) => {
+            try {
+              const { data: userData } = await supabase
+                .from('user_profiles')
+                .select('full_name, email')
+                .eq('id', member.user_id)
+                .maybeSingle();
 
-      // Fetch user details for each member
-      const membersWithDetails = await Promise.all(
-        (membersData || []).map(async (member) => {
-          const { data: userData } = await supabase
-            .from('user_profiles')
-            .select('full_name, email')
-            .eq('id', member.user_id)
-            .single();
-
-          return {
-            ...member,
-            user_details: userData || { email: 'Unknown', full_name: 'Unknown User' },
-          };
-        })
-      );
-
-      setMembers(membersWithDetails);
+              return {
+                ...member,
+                user_details: userData || { email: 'Unknown', full_name: 'Unknown User' },
+              };
+            } catch {
+              return {
+                ...member,
+                user_details: { email: 'Unknown', full_name: 'Unknown User' },
+              };
+            }
+          })
+        );
+        setMembers(membersWithDetails);
+      }
 
       // Fetch pending invites
-      const { data: invitesData, error: invitesError } = await supabase
-        .from('puppy_invites')
-        .select('*')
-        .eq('puppy_id', selectedPuppy.id)
-        .eq('status', 'pending');
+      try {
+        const { data: invitesData, error: invitesError } = await supabase
+          .from('puppy_invites')
+          .select('*')
+          .eq('puppy_id', selectedPuppy.id)
+          .eq('status', 'pending');
 
-      if (invitesError) throw invitesError;
-
-      setInvites(invitesData || []);
+        if (!invitesError) {
+          setInvites(invitesData || []);
+        }
+      } catch {
+        setInvites([]);
+      }
     } catch (error) {
       console.error('Error fetching members:', error);
     }
@@ -101,10 +130,9 @@ export default function SharingManagement() {
     setInviteLoading(true);
 
     try {
-      // Generate invite token
       const token = crypto.randomUUID();
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
+      expiresAt.setDate(expiresAt.getDate() + 7);
 
       const { error } = await supabase
         .from('puppy_invites')
@@ -119,7 +147,7 @@ export default function SharingManagement() {
 
       if (error) throw error;
 
-      alert(`Invitation sent to ${inviteEmail}! They'll receive an email with a link to accept.`);
+      alert(`Invitation sent to ${inviteEmail}!`);
       setInviteEmail('');
       setInviteRole('viewer');
       setShowInviteForm(false);
@@ -142,7 +170,6 @@ export default function SharingManagement() {
         .eq('id', memberId);
 
       if (error) throw error;
-
       fetchMembersAndInvites();
     } catch (error) {
       console.error('Remove error:', error);
@@ -158,7 +185,6 @@ export default function SharingManagement() {
         .eq('id', inviteId);
 
       if (error) throw error;
-
       fetchMembersAndInvites();
     } catch (error) {
       console.error('Cancel error:', error);
@@ -168,29 +194,32 @@ export default function SharingManagement() {
 
   const getRoleIcon = (role) => {
     switch (role) {
-      case 'owner':
-        return <Crown size={14} className="text-warm-500" />;
-      case 'editor':
-        return <Edit size={14} className="text-steel-500" />;
-      case 'viewer':
-        return <Eye size={14} className="text-sand-500" />;
-      default:
-        return null;
+      case 'owner': return <Crown size={14} className="text-warm-500" />;
+      case 'editor': return <Edit size={14} className="text-steel-500" />;
+      case 'viewer': return <Eye size={14} className="text-sand-500" />;
+      default: return null;
     }
   };
 
   const getRoleLabel = (role) => {
     switch (role) {
-      case 'owner':
-        return 'Owner';
-      case 'editor':
-        return 'Editor';
-      case 'viewer':
-        return 'Viewer';
-      default:
-        return role;
+      case 'owner': return 'Owner';
+      case 'editor': return 'Editor';
+      case 'viewer': return 'Viewer';
+      default: return role;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <Dog className="animate-pulse text-sand-300 mx-auto mb-3" size={32} />
+          <p className="text-sand-500 text-sm">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (puppies.length === 0) {
     return (
@@ -211,13 +240,6 @@ export default function SharingManagement() {
           <p className="text-sand-400 text-sm mb-6">
             Add a puppy first before inviting family members
           </p>
-          <button
-            onClick={() => navigate('/settings/puppies/new')}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-steel-500 text-white rounded-xl hover:bg-steel-600 transition-colors shadow-sm font-semibold"
-          >
-            <Plus size={18} />
-            Add Puppy
-          </button>
         </div>
       </div>
     );
@@ -237,34 +259,38 @@ export default function SharingManagement() {
       </div>
 
       {/* Puppy Selector */}
-      <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-4">
-        <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-2">
-          Select Puppy
-        </label>
-        <select
-          value={selectedPuppy?.id || ''}
-          onChange={(e) => {
-            const puppy = puppies.find(p => p.id === e.target.value);
-            setSelectedPuppy(puppy);
-          }}
-          className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
-        >
-          {puppies.map((puppy) => (
-            <option key={puppy.id} value={puppy.id}>
-              {puppy.name} {puppy.breed ? `(${puppy.breed})` : ''}
-            </option>
-          ))}
-        </select>
-      </div>
+      {puppies.length > 1 && (
+        <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-4">
+          <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-2">
+            Select Puppy
+          </label>
+          <select
+            value={selectedPuppy?.id || ''}
+            onChange={(e) => {
+              const p = puppies.find(pp => pp.id === e.target.value);
+              setSelectedPuppy(p);
+            }}
+            className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+          >
+            {puppies.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name} {p.breed ? `(${p.breed})` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {selectedPuppy && (
         <>
-          {/* Current Members */}
+          {/* Sharing for this puppy */}
           <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <Users className="text-steel-500" size={20} />
-                <h3 className="text-lg font-bold text-sand-900">Current Members</h3>
+                <h3 className="text-lg font-bold text-sand-900">
+                  {selectedPuppy.name} — Members
+                </h3>
               </div>
               <button
                 onClick={() => setShowInviteForm(!showInviteForm)}
@@ -303,19 +329,11 @@ export default function SharingManagement() {
                     <option value="viewer">Viewer (Read-only)</option>
                     <option value="editor">Editor (Can log data)</option>
                   </select>
-                  <p className="text-xs text-sand-400 mt-1">
-                    {inviteRole === 'viewer' 
-                      ? 'Can view all data but cannot make changes'
-                      : 'Can view and log new data'}
-                  </p>
                 </div>
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowInviteForm(false);
-                      setInviteEmail('');
-                    }}
+                    onClick={() => { setShowInviteForm(false); setInviteEmail(''); }}
                     className="flex-1 py-2 border border-sand-200 text-sand-700 rounded-lg hover:bg-sand-50 transition-colors font-semibold text-sm"
                   >
                     Cancel
@@ -323,7 +341,7 @@ export default function SharingManagement() {
                   <button
                     type="submit"
                     disabled={inviteLoading || !inviteEmail}
-                    className="flex-1 py-2 bg-steel-500 text-white rounded-lg hover:bg-steel-600 transition-colors font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 py-2 bg-steel-500 text-white rounded-lg hover:bg-steel-600 transition-colors font-semibold text-sm disabled:opacity-50"
                   >
                     {inviteLoading ? 'Sending...' : 'Send Invite'}
                   </button>
@@ -398,23 +416,17 @@ export default function SharingManagement() {
                       <div>
                         <p className="font-semibold text-sm text-sand-900">{invite.invitee_email}</p>
                         <p className="text-xs text-sand-500">
-                          Invited {new Date(invite.created_at).toLocaleDateString()} · Expires {new Date(invite.expires_at).toLocaleDateString()}
+                          Invited {new Date(invite.created_at).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1 px-2 py-1 bg-sand-100 rounded-lg text-xs font-medium text-sand-700">
-                        {getRoleIcon(invite.role)}
-                        {getRoleLabel(invite.role)}
-                      </div>
-                      <button
-                        onClick={() => handleCancelInvite(invite.id)}
-                        className="p-1.5 text-sand-600 hover:bg-sand-100 rounded-lg transition-colors"
-                        title="Cancel invitation"
-                      >
-                        <XCircle size={14} />
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => handleCancelInvite(invite.id)}
+                      className="p-1.5 text-sand-600 hover:bg-sand-100 rounded-lg transition-colors"
+                      title="Cancel invitation"
+                    >
+                      <XCircle size={14} />
+                    </button>
                   </div>
                 ))}
               </div>
