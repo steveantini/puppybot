@@ -17,6 +17,10 @@ export default function PuppyProfile() {
   const [gotchaDay, setGotchaDay] = useState(puppy?.gotchaDay || '');
   const [vetName, setVetName] = useState(puppy?.vetName || '');
   const [vetWebsite, setVetWebsite] = useState(puppy?.vetWebsite || '');
+  const [microchipNumber, setMicrochipNumber] = useState(puppy?.microchipNumber || '');
+  const [microchipCompany, setMicrochipCompany] = useState(puppy?.microchipCompany || '');
+  const [insuranceCarrier, setInsuranceCarrier] = useState(puppy?.insuranceCarrier || '');
+  const [insurancePolicyNumber, setInsurancePolicyNumber] = useState(puppy?.insurancePolicyNumber || '');
   const [photoUrl, setPhotoUrl] = useState(puppy?.photoUrl || '');
 
   const [weightDate, setWeightDate] = useState(
@@ -25,7 +29,7 @@ export default function PuppyProfile() {
   const [weightValue, setWeightValue] = useState('');
 
   const handleSaveProfile = () => {
-    updatePuppy({ name, breed, birthday, breederName, breederWebsite, gotchaDay, vetName, vetWebsite, photoUrl });
+    updatePuppy({ name, breed, birthday, breederName, breederWebsite, gotchaDay, vetName, vetWebsite, microchipNumber, microchipCompany, insuranceCarrier, insurancePolicyNumber, photoUrl });
     setIsEditing(false);
   };
 
@@ -229,6 +233,22 @@ export default function PuppyProfile() {
                           )}
                         </p>
                       )}
+                      {(puppy.microchipNumber || puppy.microchipCompany) && (
+                        <p className="text-sand-500">
+                          <span className="text-sand-400">Microchip:</span>{' '}
+                          <span className="font-medium">
+                            {puppy.microchipNumber}{puppy.microchipCompany ? ` (${puppy.microchipCompany})` : ''}
+                          </span>
+                        </p>
+                      )}
+                      {(puppy.insuranceCarrier || puppy.insurancePolicyNumber) && (
+                        <p className="text-sand-500">
+                          <span className="text-sand-400">Insurance:</span>{' '}
+                          <span className="font-medium">
+                            {puppy.insuranceCarrier}{puppy.insurancePolicyNumber ? ` — #${puppy.insurancePolicyNumber}` : ''}
+                          </span>
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -329,6 +349,54 @@ export default function PuppyProfile() {
                   value={vetWebsite}
                   onChange={(e) => setVetWebsite(e.target.value)}
                   placeholder="https://vetwebsite.com (optional)"
+                  className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">
+                  Microchip Number
+                </label>
+                <input
+                  type="text"
+                  value={microchipNumber}
+                  onChange={(e) => setMicrochipNumber(e.target.value)}
+                  placeholder="e.g., 985112345678901 (optional)"
+                  className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">
+                  Microchip Company
+                </label>
+                <input
+                  type="text"
+                  value={microchipCompany}
+                  onChange={(e) => setMicrochipCompany(e.target.value)}
+                  placeholder="e.g., HomeAgain, AKC Reunite (optional)"
+                  className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">
+                  Insurance Carrier
+                </label>
+                <input
+                  type="text"
+                  value={insuranceCarrier}
+                  onChange={(e) => setInsuranceCarrier(e.target.value)}
+                  placeholder="e.g., Trupanion, Nationwide (optional)"
+                  className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">
+                  Insurance Policy Number
+                </label>
+                <input
+                  type="text"
+                  value={insurancePolicyNumber}
+                  onChange={(e) => setInsurancePolicyNumber(e.target.value)}
+                  placeholder="Policy number (optional)"
                   className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
                 />
               </div>

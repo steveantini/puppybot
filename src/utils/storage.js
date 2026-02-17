@@ -68,6 +68,10 @@ async function enrichPuppy(puppy) {
     gotchaDay: puppy.gotcha_day,
     vetName: puppy.vet_name,
     vetWebsite: puppy.vet_website,
+    microchipNumber: puppy.microchip_number,
+    microchipCompany: puppy.microchip_company,
+    insuranceCarrier: puppy.insurance_carrier,
+    insurancePolicyNumber: puppy.insurance_policy_number,
     photoUrl: puppy.photo_url,
     weightLog: (weightLogs || []).map((w) => ({
       id: w.id,
@@ -87,6 +91,10 @@ export async function savePuppy(puppyData, userId) {
     gotcha_day: puppyData.gotchaDay || null,
     vet_name: puppyData.vetName || null,
     vet_website: puppyData.vetWebsite || null,
+    microchip_number: puppyData.microchipNumber || null,
+    microchip_company: puppyData.microchipCompany || null,
+    insurance_carrier: puppyData.insuranceCarrier || null,
+    insurance_policy_number: puppyData.insurancePolicyNumber || null,
     photo_url: puppyData.photoUrl || null,
   };
 

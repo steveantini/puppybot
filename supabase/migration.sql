@@ -14,6 +14,10 @@ CREATE TABLE puppies (
   gotcha_day date,
   vet_name text,
   vet_website text,
+  microchip_number text,
+  microchip_company text,
+  insurance_carrier text,
+  insurance_policy_number text,
   photo_url text,
   created_at timestamptz DEFAULT now()
 );
