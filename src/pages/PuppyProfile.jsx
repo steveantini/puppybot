@@ -146,6 +146,31 @@ export default function PuppyProfile() {
                     </p>
                   </>
                 )}
+                {puppy.breederName && (
+                  <p className="text-xs text-sand-500 mt-2">
+                    Breeder: {puppy.breederWebsite ? (
+                      <a 
+                        href={puppy.breederWebsite} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-steel-500 hover:text-steel-600 underline font-medium"
+                      >
+                        {puppy.breederName}
+                      </a>
+                    ) : (
+                      <span className="font-medium">{puppy.breederName}</span>
+                    )}
+                  </p>
+                )}
+                {puppy.gotchaDay && (
+                  <p className="text-xs text-sand-400 mt-0.5">
+                    Gotcha Day: {new Date(puppy.gotchaDay + 'T12:00:00').toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </p>
+                )}
               </div>
             )}
           </div>
