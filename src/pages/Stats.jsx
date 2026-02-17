@@ -13,6 +13,7 @@ import {
   LineChart,
   Line,
   Legend,
+  ComposedChart,
 } from 'recharts';
 import { TrendingUp, BarChart3, FileDown, ChevronDown } from 'lucide-react';
 
@@ -141,6 +142,21 @@ function PottyTooltip({ active, payload, label }) {
   );
 }
 
+function SuccessComboTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  const good = payload.find((p) => p.dataKey === 'good')?.value || 0;
+  const accidents = payload.find((p) => p.dataKey === 'accidents')?.value || 0;
+  const pct = payload.find((p) => p.dataKey === 'successPct')?.value;
+  const total = good + accidents;
+  return (
+    <div style={{ borderRadius: '12px', border: '1px solid #DDD2C2', fontSize: '12px', fontFamily: 'DM Sans, system-ui, sans-serif', boxShadow: '0 4px 16px rgba(33, 26, 14, 0.10)', background: '#fff', padding: '10px 14px' }}>
+      <div style={{ fontWeight: 600, marginBottom: 6, color: '#3E2F1E' }}>{label}</div>
+      <div style={{ color: '#6F5C48' }}>Total: <strong>{total}</strong> ({good} good, {accidents} accident{accidents !== 1 ? 's' : ''})</div>
+      {pct != null && <div style={{ color: '#2B6AAF', marginTop: 3, fontWeight: 600 }}>Success rate: {pct}%</div>}
+    </div>
+  );
+}
+
 function CaloriesTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   const food = payload.find((p) => p.dataKey === 'foodCal')?.value || 0;
@@ -256,7 +272,7 @@ export default function Stats() {
     });
   }, [allLogs, dateRange]);
 
-  const successRateData = useMemo(() => {
+  const pottyComboData = useMemo(() => {
     return dateRange.map((date) => {
       const log = allLogs[date];
       const breaks = log?.pottyBreaks || [];
@@ -268,12 +284,13 @@ export default function Stats() {
         if (p.poop === 'good') totalOutcomes++;
         if (p.poop === 'accident') { totalOutcomes++; accidentOutcomes++; }
       });
-      const successCount = totalOutcomes - accidentOutcomes;
-      const pct = totalOutcomes > 0 ? Math.round((successCount / totalOutcomes) * 100) : 0;
+      const goodCount = totalOutcomes - accidentOutcomes;
+      const pct = totalOutcomes > 0 ? Math.round((goodCount / totalOutcomes) * 100) : null;
       return {
         date: formatShortDate(date),
-        successPct: totalOutcomes > 0 ? pct : null,
-        accidentPct: totalOutcomes > 0 ? 100 - pct : null,
+        good: goodCount,
+        accidents: accidentOutcomes,
+        successPct: pct,
       };
     });
   }, [allLogs, dateRange]);
@@ -400,38 +417,32 @@ export default function Stats() {
         </div>
       ) : (
         <>
-          {/* Summary Cards — compact */}
-          <div className="flex items-center justify-center gap-4 flex-wrap">
-            <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-2 border border-sand-200/80 shadow-sm">
-              <span className="text-lg font-bold text-emerald-600">{successRate}%</span>
-              <span className="text-[10px] text-sand-500 font-medium">Success</span>
-            </div>
-            <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-2 border border-sand-200/80 shadow-sm">
-              <span className="text-lg font-bold text-steel-600">{totalPotty}</span>
-              <span className="text-[10px] text-sand-500 font-medium">Total Potty</span>
-            </div>
-            <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-2 border border-sand-200/80 shadow-sm">
-              <span className="text-lg font-bold text-rose-500">{totalAccidents}</span>
-              <span className="text-[10px] text-sand-500 font-medium">Accidents</span>
+          {/* Summary Card — Success Rate only */}
+          <div className="flex items-center justify-center">
+            <div className="flex items-center gap-2 bg-white rounded-xl px-5 py-2.5 border border-sand-200/80 shadow-sm">
+              <span className="text-xl font-bold text-emerald-600">{successRate}%</span>
+              <span className="text-[10px] text-sand-500 font-medium">Potty Success Rate</span>
             </div>
           </div>
 
-          {/* Potty Success Rate Chart */}
+          {/* Potty Success Rate — Combo Chart */}
           <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
             <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
               <TrendingUp size={14} className="text-sand-400" />
-              Potty Success Rate ({dayCount}d)
+              Potty Outcomes & Success Rate ({dayCount}d)
             </h3>
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={successRateData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
+            <ResponsiveContainer width="100%" height={260}>
+              <ComposedChart data={pottyComboData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#DDD2C2" />
                 <XAxis {...xAxisProps} />
-                <YAxis {...yAxisProps} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
-                <Tooltip contentStyle={tooltipStyle} formatter={(value, name) => [`${value}%`, name]} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#918272' }} />
-                <Bar dataKey="successPct" stackId="rate" fill="#5BA87A" name="Success %" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="accidentPct" stackId="rate" fill="#D4726A" name="Accident %" radius={[4, 4, 0, 0]} />
-              </BarChart>
+                <YAxis yAxisId="left" {...yAxisProps} label={{ value: 'Count', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#9A8568' } }} />
+                <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 10, fill: '#2B6AAF' }} stroke="#96BDE0" />
+                <Tooltip content={<SuccessComboTooltip />} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#9A8568' }} />
+                <Bar yAxisId="left" dataKey="good" stackId="potty" fill="#4DAF68" name="Good" radius={[0, 0, 0, 0]} />
+                <Bar yAxisId="left" dataKey="accidents" stackId="potty" fill="#D4726A" name="Accidents" radius={[4, 4, 0, 0]} />
+                <Line yAxisId="right" type="monotone" dataKey="successPct" stroke="#2B6AAF" strokeWidth={2.5} dot={{ fill: '#2B6AAF', r: 3.5, strokeWidth: 0 }} name="Success %" connectNulls />
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
 
