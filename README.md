@@ -9,10 +9,10 @@ A clean, modern puppy behavior tracker built with React. Log potty breaks, meals
 - **Dashboard** — Personalized greeting, live clock, a welcoming intro, and large quick-add buttons for fast entry (3 taps or fewer)
 - **History** — Browse past days in a scrollable list; tap any day to expand full details. Expand All / Collapse All toggle to view everything at once. Filter by category (Potty, Meals, Naps, Schedule, Skills, Notes) to see all matching entries across all dates. Select individual dates or all dates and export to PDF.
 - **Stats & Trends** — Comprehensive charts powered by Recharts with a date range selector (All Time, Last 7 Days, Last 30 Days, Year to Date):
-  - Potty success rate line chart tracking daily % trend over time
-  - Separate Pee and Poop count charts with good vs. accident breakdowns; tooltips show category-specific totals, accidents, and success rate
+  - Potty success rate line chart tracking daily % trend; hover shows total, good, accidents, and %
+  - Separate Pee (yellow/red) and Poop (brown/red) bar charts; tooltips show category-specific totals, accidents, and success rate
   - Calories eaten chart in shades of blue (dark blue for food, light blue for snacks)
-  - Nap schedule heatmap in blue (Gantt-style, 6 AM–9 PM timeline with total hours per day)
+  - Nap schedule heatmap in light blue (Gantt-style, 6 AM–9 PM timeline with total hours per day)
   - Sleep schedule line chart (morning wake, night wake, and bed time)
   - Export stats to PDF
 - **Snack Tracking** — Log number of snacks per day (4 calories each); snack calories are shown separately in the Calories chart
@@ -165,7 +165,7 @@ weight_logs: [{ date, weight }]
 
 ## Design
 
-- Vibrant blues, rich browns, and warm beiges — friendly but not childish
+- Bold, vibrant blues, rich browns, and warm beiges — iteratively refined for a modern feel
 - Rounded corners and subtle shadows throughout
 - Responsive: wide `max-w-7xl` layout with mobile-first breakpoints
 - Bottom sheet modals on mobile, centered dialogs on desktop
