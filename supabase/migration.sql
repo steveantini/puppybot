@@ -31,6 +31,7 @@ CREATE TABLE daily_logs (
   potty_breaks jsonb DEFAULT '[]'::jsonb,
   naps jsonb DEFAULT '[]'::jsonb,
   meals jsonb DEFAULT '[]'::jsonb,
+  snacks integer DEFAULT 0,
   skills text DEFAULT '',
   notes text DEFAULT '',
   created_at timestamptz DEFAULT now(),
@@ -70,3 +71,9 @@ CREATE POLICY "Allow all on health_records" ON health_records
 CREATE INDEX idx_daily_logs_date ON daily_logs(date);
 CREATE INDEX idx_health_records_date ON health_records(date);
 CREATE INDEX idx_weight_logs_puppy_date ON weight_logs(puppy_id, date);
+
+-- ============================================================
+-- Migration: Add snacks column to daily_logs
+-- Run this if the table already exists:
+--   ALTER TABLE daily_logs ADD COLUMN IF NOT EXISTS snacks integer DEFAULT 0;
+-- ============================================================

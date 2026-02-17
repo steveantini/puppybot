@@ -10,9 +10,11 @@ export function createEmptyDayLog(date) {
     pottyBreaks: [],
     naps: [],
     meals: [],
+    snacks: 0,
     skills: '',
     notes: '',
   };
+
 }
 
 // ─── PUPPY ───────────────────────────────────────────────────
@@ -109,6 +111,7 @@ export async function fetchAllLogs() {
       pottyBreaks: row.potty_breaks || [],
       naps: row.naps || [],
       meals: row.meals || [],
+      snacks: row.snacks || 0,
       skills: row.skills || '',
       notes: row.notes || '',
     };
@@ -125,6 +128,7 @@ export async function upsertDayLog(date, dayLog) {
       potty_breaks: dayLog.pottyBreaks || [],
       naps: dayLog.naps || [],
       meals: dayLog.meals || [],
+      snacks: dayLog.snacks || 0,
       skills: dayLog.skills || '',
       notes: dayLog.notes || '',
       updated_at: new Date().toISOString(),

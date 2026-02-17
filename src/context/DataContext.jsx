@@ -204,6 +204,14 @@ export function DataProvider({ children }) {
     [updateDayLog]
   );
 
+  const updateSnacks = useCallback(
+    (snacks, date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({ ...prev, snacks }));
+    },
+    [updateDayLog]
+  );
+
   // ─── Health records ──────────────────────────────────────
 
   const addHealthRecord = useCallback(async (record) => {
@@ -295,6 +303,7 @@ export function DataProvider({ children }) {
     setBedTime,
     updateSkills,
     updateNotes,
+    updateSnacks,
     deletePottyBreak,
     deleteMeal,
     deleteNap,

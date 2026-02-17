@@ -132,8 +132,25 @@ export default function Dashboard() {
 
   return (
     <div className="pb-4 space-y-5">
+      {/* Quick Add Buttons — top, large */}
+      <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide justify-start sm:justify-center pt-1">
+        {quickAddButtons.map((btn) => {
+          const Icon = btn.icon;
+          return (
+            <button
+              key={btn.id}
+              onClick={() => setActiveModal(btn.id)}
+              className={`flex items-center gap-2.5 px-6 py-4 rounded-2xl border text-base font-bold whitespace-nowrap transition-all active:scale-[0.97] shadow-sm ${btn.color}`}
+            >
+              <Icon size={22} />
+              {btn.label}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Greeting & Clock */}
-      <div className="text-center pt-2">
+      <div className="text-center">
         <p className="text-sand-500 text-sm">
           {getGreeting()}
           {puppy?.name ? `, ${puppy.name}'s family` : ''} &middot;{' '}
@@ -251,25 +268,6 @@ export default function Dashboard() {
               <p className="text-xs mt-1 text-sand-300">Tap &quot;Notes&quot; below to add.</p>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Quick Add Buttons */}
-      <div className="sticky bottom-[68px] z-40 bg-gradient-to-t from-sand-50 via-sand-50/95 to-sand-50/0 pt-6 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-        <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-2 scrollbar-hide justify-start sm:justify-center">
-          {quickAddButtons.map((btn) => {
-            const Icon = btn.icon;
-            return (
-              <button
-                key={btn.id}
-                onClick={() => setActiveModal(btn.id)}
-                className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl border text-sm font-semibold whitespace-nowrap transition-all active:scale-[0.97] shadow-sm ${btn.color}`}
-              >
-                <Icon size={15} />
-                {btn.label}
-              </button>
-            );
-          })}
         </div>
       </div>
 
