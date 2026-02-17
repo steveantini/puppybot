@@ -12,6 +12,8 @@ CREATE TABLE puppies (
   breeder_name text,
   breeder_website text,
   gotcha_day date,
+  vet_name text,
+  vet_website text,
   photo_url text,
   created_at timestamptz DEFAULT now()
 );
@@ -115,9 +117,11 @@ CREATE INDEX idx_weekly_insights_week ON weekly_insights(week_start);
 -- Run these if upgrading an existing database:
 --   (Copy the chat_history and weekly_insights table creation statements above)
 --
--- Migration: Add breeder_name, breeder_website, and gotcha_day to puppies table
+-- Migration: Add breeder_name, breeder_website, gotcha_day, vet_name, vet_website to puppies table
 -- Run these if the puppies table already exists:
 --   ALTER TABLE puppies ADD COLUMN IF NOT EXISTS breeder_name text;
 --   ALTER TABLE puppies ADD COLUMN IF NOT EXISTS breeder_website text;
 --   ALTER TABLE puppies ADD COLUMN IF NOT EXISTS gotcha_day date;
+--   ALTER TABLE puppies ADD COLUMN IF NOT EXISTS vet_name text;
+--   ALTER TABLE puppies ADD COLUMN IF NOT EXISTS vet_website text;
 -- ============================================================

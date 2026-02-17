@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { Camera, Plus, Scale, Dog } from 'lucide-react';
+import { Camera, Plus, Scale, Dog, ChevronDown, ChevronUp } from 'lucide-react';
 import Modal from '../components/Modal';
 
 export default function PuppyProfile() {
   const { puppy, updatePuppy, addWeightEntry } = useData();
   const [isEditing, setIsEditing] = useState(!puppy?.name);
   const [showWeightModal, setShowWeightModal] = useState(false);
+  const [showMoreInfo, setShowMoreInfo] = useState(false);
 
   const [name, setName] = useState(puppy?.name || '');
   const [breed, setBreed] = useState(puppy?.breed || '');
@@ -14,6 +15,8 @@ export default function PuppyProfile() {
   const [breederName, setBreederName] = useState(puppy?.breederName || '');
   const [breederWebsite, setBreederWebsite] = useState(puppy?.breederWebsite || '');
   const [gotchaDay, setGotchaDay] = useState(puppy?.gotchaDay || '');
+  const [vetName, setVetName] = useState(puppy?.vetName || '');
+  const [vetWebsite, setVetWebsite] = useState(puppy?.vetWebsite || '');
   const [photoUrl, setPhotoUrl] = useState(puppy?.photoUrl || '');
 
   const [weightDate, setWeightDate] = useState(
@@ -22,7 +25,7 @@ export default function PuppyProfile() {
   const [weightValue, setWeightValue] = useState('');
 
   const handleSaveProfile = () => {
-    updatePuppy({ name, breed, birthday, breederName, breederWebsite, gotchaDay, photoUrl });
+    updatePuppy({ name, breed, birthday, breederName, breederWebsite, gotchaDay, vetName, vetWebsite, photoUrl });
     setIsEditing(false);
   };
 
@@ -146,31 +149,89 @@ export default function PuppyProfile() {
                     </p>
                   </>
                 )}
-                {puppy.breederName && (
-                  <p className="text-xs text-sand-500 mt-2">
-                    Breeder: {puppy.breederWebsite ? (
-                      <a 
-                        href={puppy.breederWebsite} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-steel-500 hover:text-steel-600 underline font-medium"
-                      >
-                        {puppy.breederName}
-                      </a>
+                
+                {/* More Info Collapsible Section */}
+                <div className="mt-3 w-full max-w-xs mx-auto">
+                  <button
+                    onClick={() => setShowMoreInfo(!showMoreInfo)}
+                    className="flex items-center justify-center gap-1 text-xs text-steel-500 hover:text-steel-600 font-medium transition-colors"
+                  >
+                    {showMoreInfo ? (
+                      <>
+                        <ChevronUp size={14} />
+                        Less Info
+                      </>
                     ) : (
-                      <span className="font-medium">{puppy.breederName}</span>
+                      <>
+                        <ChevronDown size={14} />
+                        More Info
+                      </>
                     )}
-                  </p>
-                )}
-                {puppy.gotchaDay && (
-                  <p className="text-xs text-sand-400 mt-0.5">
-                    Gotcha Day: {new Date(puppy.gotchaDay + 'T12:00:00').toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </p>
-                )}
+                  </button>
+                  
+                  {showMoreInfo && (
+                    <div className="mt-2 space-y-1.5 text-xs">
+                      {puppy.birthday && (
+                        <p className="text-sand-500">
+                          <span className="text-sand-400">Birthday:</span>{' '}
+                          <span className="font-medium">
+                            {new Date(puppy.birthday + 'T12:00:00').toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })}
+                          </span>
+                        </p>
+                      )}
+                      {puppy.breederName && (
+                        <p className="text-sand-500">
+                          <span className="text-sand-400">Breeder:</span>{' '}
+                          {puppy.breederWebsite ? (
+                            <a 
+                              href={puppy.breederWebsite} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-steel-500 hover:text-steel-600 underline font-medium"
+                            >
+                              {puppy.breederName}
+                            </a>
+                          ) : (
+                            <span className="font-medium">{puppy.breederName}</span>
+                          )}
+                        </p>
+                      )}
+                      {puppy.gotchaDay && (
+                        <p className="text-sand-500">
+                          <span className="text-sand-400">Gotcha Day:</span>{' '}
+                          <span className="font-medium">
+                            {new Date(puppy.gotchaDay + 'T12:00:00').toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })}
+                          </span>
+                        </p>
+                      )}
+                      {puppy.vetName && (
+                        <p className="text-sand-500">
+                          <span className="text-sand-400">Veterinarian:</span>{' '}
+                          {puppy.vetWebsite ? (
+                            <a 
+                              href={puppy.vetWebsite} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-steel-500 hover:text-steel-600 underline font-medium"
+                            >
+                              {puppy.vetName}
+                            </a>
+                          ) : (
+                            <span className="font-medium">{puppy.vetName}</span>
+                          )}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -245,6 +306,30 @@ export default function PuppyProfile() {
                   value={gotchaDay}
                   onChange={(e) => setGotchaDay(e.target.value)}
                   className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">
+                  Veterinarian Name
+                </label>
+                <input
+                  type="text"
+                  value={vetName}
+                  onChange={(e) => setVetName(e.target.value)}
+                  placeholder="Vet's name (optional)"
+                  className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">
+                  Veterinarian Website
+                </label>
+                <input
+                  type="url"
+                  value={vetWebsite}
+                  onChange={(e) => setVetWebsite(e.target.value)}
+                  placeholder="https://vetwebsite.com (optional)"
+                  className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
                 />
               </div>
               <button
