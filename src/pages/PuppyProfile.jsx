@@ -11,6 +11,8 @@ export default function PuppyProfile() {
   const [name, setName] = useState(puppy?.name || '');
   const [breed, setBreed] = useState(puppy?.breed || '');
   const [birthday, setBirthday] = useState(puppy?.birthday || '');
+  const [breederName, setBreederName] = useState(puppy?.breederName || '');
+  const [gotchaDay, setGotchaDay] = useState(puppy?.gotchaDay || '');
   const [photoUrl, setPhotoUrl] = useState(puppy?.photoUrl || '');
 
   const [weightDate, setWeightDate] = useState(
@@ -19,7 +21,7 @@ export default function PuppyProfile() {
   const [weightValue, setWeightValue] = useState('');
 
   const handleSaveProfile = () => {
-    updatePuppy({ name, breed, birthday, photoUrl });
+    updatePuppy({ name, breed, birthday, breederName, gotchaDay, photoUrl });
     setIsEditing(false);
   };
 
@@ -60,6 +62,23 @@ export default function PuppyProfile() {
     const years = Math.floor(months / 12);
     const rem = months % 12;
     return `${years} yr${years !== 1 ? 's' : ''}${rem > 0 ? ` ${rem} mo` : ''} old`;
+  };
+
+  const calculateDogYears = (bday) => {
+    if (!bday) return '';
+    const birth = new Date(bday + 'T12:00:00');
+    const now = new Date();
+    const ageInDays = Math.floor((now - birth) / (1000 * 60 * 60 * 24));
+    const ageInYears = ageInDays / 365.25;
+    
+    // Standard calculation: first year = 15, second year = 9, each year after = 4
+    if (ageInYears < 1) {
+      return Math.round(ageInYears * 15);
+    } else if (ageInYears < 2) {
+      return Math.round(15 + (ageInYears - 1) * 9);
+    } else {
+      return Math.round(15 + 9 + (ageInYears - 2) * 4);
+    }
   };
 
   const sortedWeights = [...(puppy?.weightLog || [])].sort((a, b) =>
@@ -105,9 +124,14 @@ export default function PuppyProfile() {
                   <p className="text-sm text-sand-600 mt-0.5">{puppy.breed}</p>
                 )}
                 {puppy.birthday && (
-                  <p className="text-xs text-sand-400 mt-1">
-                    {calculateAge(puppy.birthday)}
-                  </p>
+                  <>
+                    <p className="text-xs text-sand-400 mt-1">
+                      {calculateAge(puppy.birthday)}
+                    </p>
+                    <p className="text-xs text-sand-400 mt-0.5">
+                      {calculateDogYears(puppy.birthday)} (Dog Years)
+                    </p>
+                  </>
                 )}
               </div>
             )}
@@ -147,6 +171,29 @@ export default function PuppyProfile() {
                   type="date"
                   value={birthday}
                   onChange={(e) => setBirthday(e.target.value)}
+                  className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">
+                  Breeder Name
+                </label>
+                <input
+                  type="text"
+                  value={breederName}
+                  onChange={(e) => setBreederName(e.target.value)}
+                  placeholder="Breeder's name (optional)"
+                  className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">
+                  Gotcha Day
+                </label>
+                <input
+                  type="date"
+                  value={gotchaDay}
+                  onChange={(e) => setGotchaDay(e.target.value)}
                   className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
                 />
               </div>
