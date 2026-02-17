@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { PawPrint } from 'lucide-react';
 import { DataProvider, useData } from './context/DataContext';
 import BottomNav from './components/BottomNav';
 import Dashboard from './pages/Dashboard';
@@ -13,7 +14,7 @@ function AppShell() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-sand-50 flex flex-col items-center justify-center gap-4">
-        <span className="text-4xl animate-pulse-soft">🐾</span>
+        <PawPrint size={40} className="text-warm-200 animate-pulse-soft" />
         <p className="text-sand-500 text-sm font-medium tracking-wide">Loading PuppyBot…</p>
       </div>
     );
@@ -27,7 +28,7 @@ function AppShell() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
             <div className="w-[62px]" />
             <h1 className="text-5xl font-bold tracking-tight flex items-center gap-3">
-              <span className="text-warm-200">🐾</span>
+              <PawPrint size={36} className="text-warm-200" />
               <span><span className="text-steel-400">Puppy</span><span className="text-steel-500">Bot</span></span>
             </h1>
             <Link to="/profile" className="shrink-0">

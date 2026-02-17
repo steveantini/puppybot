@@ -171,7 +171,7 @@ weight_logs: [{ date, weight }]
 - Bottom sheet modals on mobile, centered dialogs on desktop
 - Touch-optimized with `active:scale` feedback and large tap targets
 - Puppy profile photo displayed as an avatar in the header
-- Header paw icon in light brown; "Puppy" in lighter steel blue, "Bot" in deeper steel blue
+- Header paw icon (Lucide SVG) in light brown; "Puppy" in lighter steel blue, "Bot" in deeper steel blue
 
 ## Calorie Tracking
 
