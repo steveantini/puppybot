@@ -5,8 +5,8 @@ const navItems = [
   { to: '/', icon: Home, label: 'Home' },
   { to: '/history', icon: CalendarDays, label: 'History' },
   { to: '/stats', icon: BarChart3, label: 'Stats' },
-  { to: '/profile', icon: Dog, label: 'Puppy' },
   { to: '/health', icon: Heart, label: 'Health' },
+  { to: '/profile', icon: Dog, label: 'Puppy' },
 ];
 
 function NavItem({ to, icon: Icon, label }) {

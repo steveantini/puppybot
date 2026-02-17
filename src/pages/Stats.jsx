@@ -432,14 +432,6 @@ export default function Stats() {
         </div>
       ) : (
         <>
-          {/* Summary Card — Success Rate only */}
-          <div className="flex items-center justify-center">
-            <div className="flex items-center gap-2 bg-white rounded-xl px-5 py-2.5 border border-sand-200/80 shadow-sm">
-              <span className="text-xl font-bold text-emerald-600">{successRate}%</span>
-              <span className="text-[10px] text-sand-500 font-medium">Potty Success Rate</span>
-            </div>
-          </div>
-
           {/* Potty Success Rate — Line Chart */}
           <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
             <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">

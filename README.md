@@ -105,7 +105,7 @@ npm run preview
 ```
 src/
 ├── components/
-│   ├── BottomNav.jsx          # 5-tab bottom navigation bar
+│   ├── BottomNav.jsx          # 5-tab bottom nav (Home, History, Stats, Health, Puppy)
 │   ├── Modal.jsx              # Slide-up (mobile) / centered (desktop) modal
 │   └── forms/
 │       ├── PottyForm.jsx      # Potty break logging (pee/poop/bell/accident)
@@ -165,7 +165,7 @@ weight_logs: [{ date, weight }]
 
 ## Design
 
-- Bold, vibrant blues, rich browns, and warm beiges — iteratively refined for a modern feel
+- Vibrant, saturated blues, rich browns, and warm golds — punchy modern tones that pop
 - Rounded corners and subtle shadows throughout
 - Responsive: wide `max-w-7xl` layout with mobile-first breakpoints
 - Bottom sheet modals on mobile, centered dialogs on desktop
