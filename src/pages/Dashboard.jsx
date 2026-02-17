@@ -7,7 +7,7 @@ import MealForm from '../components/forms/MealForm';
 import NapForm from '../components/forms/NapForm';
 import WakeUpForm from '../components/forms/WakeUpForm';
 import SkillsNotesForm from '../components/forms/SkillsNotesForm';
-import ChatAssistant from '../components/ChatAssistant';
+import DashboardChat from '../components/DashboardChat';
 import {
   Droplets,
   UtensilsCrossed,
@@ -59,9 +59,10 @@ export default function Dashboard() {
       {/* Welcome intro */}
       <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm px-6 py-5 text-center max-w-2xl mx-auto">
         <p className="text-sand-700 text-sm leading-relaxed">
-          Welcome to <strong className="text-steel-500">PuppyBot</strong> — your companion for tracking {puppyName}&apos;s daily routine.
+          Welcome to <strong className="text-steel-500">PuppyBot</strong> — your intelligent companion for tracking {puppyName}&apos;s daily routine.
           Use the buttons below to log potty breaks, meals, naps, sleep schedules, and notes.
-          Every little entry helps you spot patterns and celebrate progress!
+          Every little entry helps you spot patterns and celebrate progress! Plus, our <strong className="text-steel-500">AI-powered assistant</strong> below 
+          can analyze your data, answer questions, and provide personalized training insights.
         </p>
       </div>
 
@@ -120,7 +121,7 @@ export default function Dashboard() {
       </Modal>
 
       {/* AI Chat Assistant */}
-      <ChatAssistant />
+      <DashboardChat />
     </div>
   );
 }
