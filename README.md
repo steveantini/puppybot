@@ -6,7 +6,7 @@ A clean, modern puppy behavior tracker built with React. Log potty breaks, meals
 
 ## Features
 
-- **Dashboard** — Personalized greeting, live clock, a welcoming intro, and large quick-add buttons for fast entry (3 taps or fewer)
+- **Dashboard** — Clean welcome intro, large quick-add buttons for fast entry (3 taps or fewer), and a Claude-inspired AI chat input
 - **History** — Browse past days in a scrollable list; tap any day to expand full details. Expand All / Collapse All toggle to view everything at once. Filter by category (Potty, Meals, Naps, Schedule, Skills, Notes) to see all matching entries across all dates. Select individual dates or all dates and export to PDF.
 - **Stats & Trends** — Comprehensive charts powered by Recharts with a date range selector (All Time, Last 7 Days, Last 30 Days, Year to Date):
   - Potty success rate line chart tracking daily % trend; hover shows total, good, accidents, and %
@@ -17,10 +17,14 @@ A clean, modern puppy behavior tracker built with React. Log potty breaks, meals
   - Export stats to PDF
 - **Snack Tracking** — Log number of snacks per day (4 calories each); snack calories are shown separately in the Calories chart
 - **Wake/Bed Schedule** — Log morning wake, multiple night wakes, and bed time all at once in a single form
-- **Puppy Profile** — Store your puppy's name, breed, birthday (with auto-calculated age), photo (shown as avatar in the header), and a running weight log
+- **Puppy Profile** — Store your puppy's name, breed, birthday (with auto-calculated age and dog years), gotcha day, breeder info, vet info, microchip number/company, insurance carrier/policy number, photo (shown as avatar in the header), and a running weight log. Collapsible "+More Info" section for reference details
 - **Health Tracker** — Record immunizations, vet visits, and medications with date, description, and filterable categories
 - **Date Picker on All Forms** — Log entries for any date, not just today
 - **PDF Export** — Generate printable reports from both History and Stats pages
+- **Clickable Header** — Tap the PuppyBot logo/title from any page to return to the dashboard
+- **Multi-User Auth** — Email/password login and signup via Supabase Auth with protected routes
+- **Admin Panel** — Slide-out settings menu with account management, puppy management, and family sharing
+- **Family Sharing** — Invite family members by email with role-based access (Owner, Editor, Viewer); auto-accept invites on signup/login
 
 ## 🗺️ Product Roadmap
 
@@ -70,7 +74,7 @@ Enable them for Production, Preview, and Development environments.
 
 | Table | Purpose |
 |-------|---------|
-| `puppies` | Puppy profile (name, breed, birthday, photo) |
+| `puppies` | Puppy profile (name, breed, birthday, vet, microchip, insurance, photo) |
 | `weight_logs` | Weight entries linked to a puppy |
 | `daily_logs` | One row per day with JSONB columns for potty breaks, meals, naps, schedule, skills, notes, and snack count |
 | `health_records` | Immunizations, vet visits, and medications |
@@ -117,7 +121,9 @@ npm run preview
 ```
 src/
 ├── components/
+│   ├── AdminPanel.jsx         # Slide-out settings/admin panel
 │   ├── BottomNav.jsx          # 5-tab bottom nav (Home, History, Stats, Health, Puppy)
+│   ├── DashboardChat.jsx      # Claude-inspired AI chat interface
 │   ├── Modal.jsx              # Slide-up (mobile) / centered (desktop) modal
 │   └── forms/
 │       ├── PottyForm.jsx      # Potty break logging (pee/poop/bell/accident)
@@ -126,24 +132,34 @@ src/
 │       ├── WakeUpForm.jsx     # Wake up & bed time logging
 │       └── SkillsNotesForm.jsx # Snacks count, skills & notes
 ├── context/
-│   └── DataContext.jsx        # React Context provider — async Supabase state
+│   ├── AuthContext.jsx        # Authentication state, session, auto-accept invites
+│   └── DataContext.jsx        # Auth-aware data provider — async Supabase state
 ├── pages/
-│   ├── Dashboard.jsx          # Greeting, intro & quick-add buttons
+│   ├── Dashboard.jsx          # Welcome intro, quick-add buttons, AI chat
 │   ├── History.jsx            # Past days with expandable details + PDF export
 │   ├── Stats.jsx              # Trend charts + heatmap + PDF export
-│   ├── PuppyProfile.jsx      # Puppy info + weight log
-│   └── HealthTracker.jsx     # Immunizations, vet visits, medications
+│   ├── PuppyProfile.jsx      # Puppy info, vet, microchip, insurance + weight log
+│   ├── HealthTracker.jsx     # Immunizations, vet visits, medications
+│   ├── Login.jsx              # Email/password login
+│   ├── Signup.jsx             # User registration
+│   └── settings/
+│       ├── AccountSettings.jsx    # Profile, email, password management
+│       ├── PuppyManagement.jsx    # Add, edit, manage puppies
+│       └── SharingManagement.jsx  # Invite family, manage access
 ├── utils/
 │   ├── supabase.js            # Supabase client initialization
 │   ├── storage.js             # Async CRUD operations (Supabase)
 │   ├── helpers.js             # Date/time formatting, ID generation
 │   └── pdfExport.js           # PDF report generation
-├── App.jsx                    # Root layout + routing + loading screen
+├── App.jsx                    # Root layout, routing, header (clickable logo), admin panel
 ├── main.jsx                   # Entry point
 └── index.css                  # Tailwind imports + custom animations
 
 supabase/
-└── migration.sql              # Database table creation + RLS policies
+├── migration.sql              # Base database schema + RLS policies
+└── migrations/
+    ├── 001_auth_and_multi_user.sql  # Auth, profiles, sharing tables
+    └── 002_add_microchip_insurance.sql  # Microchip & insurance columns
 ```
 
 ## Data Model
@@ -152,7 +168,9 @@ All data is stored in Supabase PostgreSQL. Daily log sub-items (potty breaks, me
 
 **Puppy Profile** (`puppies` + `weight_logs`)
 ```
-{ name, breed, birthday, photo_url }
+{ name, breed, birthday, breeder_name, breeder_website, gotcha_day,
+  vet_name, vet_website, microchip_number, microchip_company,
+  insurance_carrier, insurance_policy_number, photo_url, user_id }
 weight_logs: [{ date, weight }]
 ```
 
@@ -208,7 +226,7 @@ PuppyBot includes an intelligent chat assistant powered by **Anthropic's Claude 
 - **🎤 Voice Input**: Speak your questions using browser speech recognition
 - **💾 Save Insights**: Save helpful responses directly to your daily notes
 - **📥 Export Conversations**: Download chat history as text files
-- **✨ Suggested Questions**: Quick-access buttons for common queries
+- **🎨 Claude-Inspired UI**: Clean standalone input bar with auto-resizing textarea, time-aware greeting, and "powered by Claude 3.5 Sonnet" branding
 
 ### Setup Instructions
 
@@ -284,9 +302,9 @@ CREATE INDEX idx_weekly_insights_week ON weekly_insights(week_start);
 
 ### Usage
 
-1. **Open Chat**: Click the sparkle ✨ button in the bottom-right corner
-2. **Select Time Range**: Choose Week, Month, YTD, or All Time for context
-3. **Ask Questions**: Type or speak your question
+1. **Scroll to Chat**: The AI assistant is on the dashboard below the quick-add buttons
+2. **Select Time Range**: Choose Week, Month, YTD, or All Time for data context
+3. **Ask Questions**: Type or speak your question in the Claude-style input bar
 4. **Get Insights**: Claude analyzes your data and responds with specific insights
 5. **Save Useful Tips**: Click "Save to notes" to preserve helpful advice
 
@@ -330,10 +348,16 @@ The `weekly-insights` Edge Function can generate automated weekly summaries. To 
 - [x] Potty success rate combo chart (bars + trend line)
 - [x] AI Chat Assistant (Claude-powered insights, voice input, save to notes)
 - [x] Weekly insights generation with AI summaries
+- [x] User authentication (Supabase Auth, email/password)
+- [x] Multi-puppy support
+- [x] Admin panel with account, puppy, and sharing management
+- [x] Family sharing with auto-accept invites
+- [x] Puppy profile: microchip, insurance, vet, breeder fields
+- [x] Claude-inspired chat UI with time-aware greeting
+- [x] Clickable header logo navigates to dashboard
 - [ ] Push notifications for feeding/potty reminders
-- [ ] Multi-puppy support
 - [ ] Photo gallery per day
-- [ ] User authentication
+- [ ] Two-factor authentication
 
 ## License
 

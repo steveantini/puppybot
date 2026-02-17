@@ -2,11 +2,16 @@
 
 This document outlines the development roadmap for transforming PuppyBot from a personal app into a multi-tenant SaaS application.
 
-## 🎯 Current Status: Single-User Personal App
+## 🎯 Current Status: Multi-User App with Auth & Sharing
 - ✅ Core puppy tracking features
-- ✅ AI assistant powered by Claude
+- ✅ AI assistant powered by Claude (Claude-inspired UI)
 - ✅ Stats and history visualization
 - ✅ PDF export functionality
+- ✅ Supabase Auth (email/password login/signup)
+- ✅ Admin panel with account, puppy, and sharing management
+- ✅ Family sharing with auto-accept invites
+- ✅ Puppy profile: microchip, insurance, vet, breeder fields
+- ✅ Clickable header logo navigates to dashboard
 
 ---
 
@@ -38,6 +43,23 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 - [ ] Profile photo upload
 - [ ] Password change
 - [ ] Account deletion
+
+#### 1.4 Puppy Profile Enhancements ✅ Complete
+- [x] Dog years calculation
+- [x] Breeder name with website link
+- [x] Gotcha day
+- [x] Veterinarian name with website link
+- [x] Microchip number and company
+- [x] Insurance carrier and policy number
+- [x] Collapsible "+More Info" section
+
+#### 1.5 Dashboard & UI Enhancements ✅ Complete
+- [x] Claude-inspired AI chat input (standalone input bar, auto-resizing textarea)
+- [x] Time-aware greeting ("Good morning/afternoon/evening!")
+- [x] "Powered by Claude 3.5 Sonnet" branding
+- [x] Clickable PuppyBot header logo navigates to dashboard
+- [x] Welcome text on page background (no card)
+- [x] Clean spacing between sections
 
 ---
 
@@ -234,7 +256,7 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 - Blockchain-based health records (secure, portable)
 - AI chatbot for training advice (beyond current assistant)
 - Gamification (achievements, badges, milestones)
-- Pet insurance integration
+- ~~Pet insurance integration~~ ✅ (insurance carrier & policy stored in puppy profile)
 - Veterinary telemedicine integration
 - DNA test result integration (Embark, Wisdom Panel)
 
@@ -266,7 +288,15 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 
 ## 🔄 Version History
 
-### v0.1.0 (Current) - Personal App
+### v0.2.0 (Current) - Multi-User with Auth & Sharing
+- Authentication (email/password login/signup)
+- Admin panel, account settings, puppy & sharing management
+- Family sharing with auto-accept invites
+- Puppy profile: microchip, insurance, vet, breeder fields
+- Claude-inspired chat UI with time-aware greeting
+- Clickable header logo
+
+### v0.1.0 - Personal App
 - Core tracking features
 - AI assistant
 - Single-user functionality
