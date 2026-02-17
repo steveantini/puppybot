@@ -41,21 +41,30 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 
 ---
 
-### **Phase 2: Collaboration Features** 🔄 Next
+### **Phase 2: Collaboration Features** 🔄 In Progress
 
-#### 2.1 Family Sharing
-- [ ] Puppy member management
-- [ ] Role-based access (Owner, Editor, Viewer)
+#### 2.1 Family Sharing ✅ Partially Complete
+- [x] Invite system (send invites by email from app)
+- [x] Role-based access (Owner, Editor, Viewer)
   - **Owner**: Full control, can delete puppy, manage members
   - **Editor**: Can log data, edit entries
   - **Viewer**: Read-only access to all data
-- [ ] Email invitation system
-- [ ] Share via email with magic link
-- [ ] Accept/decline invitations
-- [ ] Remove members
+- [x] Auto-accept invites on signup/login (Option B)
+  - When a user signs up or logs in, any pending invites matching their email are automatically accepted
+  - The shared puppy appears in their "My Puppies" list
+  - Expired invites are automatically cleaned up
+- [x] Family & Sharing management UI
+- [x] Remove members
 - [ ] Transfer ownership
 
-#### 2.2 Professional Sharing
+#### 2.2 Email Invite Notifications (Option A — Future Enhancement)
+- [ ] Transactional email service integration (Resend, SendGrid, or Supabase built-in)
+- [ ] Email templates for invite notifications
+- [ ] Magic link acceptance (click link in email to accept invite)
+- [ ] Custom branded email sender domain
+- [ ] Invite reminder emails for pending invites
+
+#### 2.3 Professional Sharing
 - [ ] Share with veterinarians (view-only)
 - [ ] Share with trainers (view + notes)
 - [ ] Time-limited access links
