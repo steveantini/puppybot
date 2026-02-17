@@ -1,11 +1,5 @@
 import { supabase } from './supabase';
 
-// ─── Get current user ID ──────────────────────────────────────
-async function getCurrentUserId() {
-  const { data: { session } } = await supabase.auth.getSession();
-  return session?.user?.id || null;
-}
-
 // ─── Pure helpers (no DB) ────────────────────────────────────
 
 export function createEmptyDayLog(date) {
@@ -24,16 +18,17 @@ export function createEmptyDayLog(date) {
 
 // ─── PUPPY ───────────────────────────────────────────────────
 
-export async function fetchPuppy() {
-  const userId = await getCurrentUserId();
-
+export async function fetchPuppy(userId) {
   let query = supabase.from('puppies').select('*').limit(1);
   if (userId) {
     query = query.eq('user_id', userId);
   }
   const { data: puppy, error } = await query.maybeSingle();
 
-  if (error) throw error;
+  if (error) {
+    console.error('fetchPuppy error:', error);
+    throw error;
+  }
   if (!puppy) return null;
 
   // Fetch weight logs for this puppy
@@ -64,9 +59,7 @@ export async function fetchPuppy() {
   };
 }
 
-export async function savePuppy(puppyData) {
-  const userId = await getCurrentUserId();
-
+export async function savePuppy(puppyData, userId) {
   const row = {
     name: puppyData.name || null,
     breed: puppyData.breed || null,
@@ -98,9 +91,7 @@ export async function savePuppy(puppyData) {
   }
 }
 
-export async function addWeightLog(puppyId, entry) {
-  const userId = await getCurrentUserId();
-
+export async function addWeightLog(puppyId, entry, userId) {
   const row = {
     puppy_id: puppyId,
     date: entry.date,
@@ -119,13 +110,22 @@ export async function addWeightLog(puppyId, entry) {
 
 // ─── DAILY LOGS ──────────────────────────────────────────────
 
-export async function fetchAllLogs() {
-  const { data, error } = await supabase
+export async function fetchAllLogs(userId) {
+  let query = supabase
     .from('daily_logs')
     .select('*')
     .order('date', { ascending: false });
 
-  if (error) throw error;
+  if (userId) {
+    query = query.eq('user_id', userId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('fetchAllLogs error:', error);
+    throw error;
+  }
 
   const logs = {};
   (data || []).forEach((row) => {
@@ -144,9 +144,7 @@ export async function fetchAllLogs() {
   return logs;
 }
 
-export async function upsertDayLog(date, dayLog) {
-  const userId = await getCurrentUserId();
-
+export async function upsertDayLog(date, dayLog, userId) {
   const row = {
     date,
     wake_up_times: dayLog.wakeUpTimes || [],
@@ -169,13 +167,22 @@ export async function upsertDayLog(date, dayLog) {
 
 // ─── HEALTH RECORDS ──────────────────────────────────────────
 
-export async function fetchHealthRecords() {
-  const { data, error } = await supabase
+export async function fetchHealthRecords(userId) {
+  let query = supabase
     .from('health_records')
     .select('*')
     .order('date', { ascending: false });
 
-  if (error) throw error;
+  if (userId) {
+    query = query.eq('user_id', userId);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('fetchHealthRecords error:', error);
+    throw error;
+  }
 
   return (data || []).map((r) => ({
     id: r.id,
@@ -187,9 +194,7 @@ export async function fetchHealthRecords() {
   }));
 }
 
-export async function insertHealthRecord(record) {
-  const userId = await getCurrentUserId();
-
+export async function insertHealthRecord(record, userId) {
   const row = {
     type: record.type,
     date: record.date,

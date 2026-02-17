@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import {
   fetchPuppy,
   savePuppy as storageSavePuppy,
@@ -17,12 +17,18 @@ const DataContext = createContext(null);
 
 export function DataProvider({ children }) {
   const { user, loading: authLoading } = useAuth();
+  const userIdRef = useRef(null);
 
   const [puppy, setPuppy] = useState(null);
   const [todayLog, setTodayLog] = useState(createEmptyDayLog(getTodayKey()));
   const [allLogs, setAllLogs] = useState({});
   const [healthRecords, setHealthRecords] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Keep userId ref updated for callbacks
+  useEffect(() => {
+    userIdRef.current = user?.id || null;
+  }, [user?.id]);
 
   // ─── Load data when user changes (login/logout) ───────────
   useEffect(() => {
@@ -41,16 +47,21 @@ export function DataProvider({ children }) {
       return;
     }
 
+    const userId = user.id;
+
     async function load() {
       setIsLoading(true);
       try {
+        console.log('[DataContext] Loading data for user:', userId);
         const [puppyData, logsData, healthData] = await Promise.all([
-          fetchPuppy(),
-          fetchAllLogs(),
-          fetchHealthRecords(),
+          fetchPuppy(userId),
+          fetchAllLogs(userId),
+          fetchHealthRecords(userId),
         ]);
 
         if (cancelled) return;
+
+        console.log('[DataContext] Puppy:', puppyData?.name, 'Logs:', Object.keys(logsData).length, 'Health:', healthData.length);
 
         if (puppyData) setPuppy(puppyData);
         else setPuppy(null);
@@ -61,7 +72,7 @@ export function DataProvider({ children }) {
         const todayKey = getTodayKey();
         setTodayLog(logsData[todayKey] || createEmptyDayLog(todayKey));
       } catch (err) {
-        console.error('Failed to load data from Supabase:', err);
+        console.error('[DataContext] Failed to load data:', err);
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -88,7 +99,7 @@ export function DataProvider({ children }) {
     const updated = { ...puppy, ...data };
     setPuppy(updated);
     try {
-      const id = await storageSavePuppy(updated);
+      const id = await storageSavePuppy(updated, userIdRef.current);
       if (!updated.id && id) {
         setPuppy((prev) => ({ ...prev, id }));
       }
@@ -106,7 +117,7 @@ export function DataProvider({ children }) {
     }));
     try {
       if (puppy?.id) {
-        const saved = await storageAddWeightLog(puppy.id, entry);
+        const saved = await storageAddWeightLog(puppy.id, entry, userIdRef.current);
         setPuppy((prev) => ({
           ...prev,
           weightLog: prev.weightLog.map((w) => (w.id === tempId ? saved : w)),
@@ -128,7 +139,7 @@ export function DataProvider({ children }) {
           : { ...currentLog, ...updater };
 
       // Persist to Supabase (fire-and-forget with error logging)
-      upsertDayLog(date, updated).catch((err) =>
+      upsertDayLog(date, updated, userIdRef.current).catch((err) =>
         console.error('Failed to save day log:', err)
       );
 
@@ -238,7 +249,7 @@ export function DataProvider({ children }) {
     const tempRecord = { ...record, id: tempId };
     setHealthRecords((prev) => [...prev, tempRecord]);
     try {
-      const saved = await insertHealthRecord(record);
+      const saved = await insertHealthRecord(record, userIdRef.current);
       setHealthRecords((prev) =>
         prev.map((r) => (r.id === tempId ? saved : r))
       );
