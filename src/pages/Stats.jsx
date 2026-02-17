@@ -13,7 +13,6 @@ import {
   LineChart,
   Line,
   Legend,
-  ComposedChart,
 } from 'recharts';
 import { TrendingUp, BarChart3, FileDown, ChevronDown } from 'lucide-react';
 
@@ -125,19 +124,34 @@ function ScheduleTooltip({ active, payload, label }) {
   );
 }
 
-function PottyTooltip({ active, payload, label }) {
+function PeeTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
-  const peeGood = payload.find((p) => p.dataKey === 'peeGood')?.value || 0;
-  const peeAccident = payload.find((p) => p.dataKey === 'peeAccident')?.value || 0;
-  const poopGood = payload.find((p) => p.dataKey === 'poopGood')?.value || 0;
-  const poopAccident = payload.find((p) => p.dataKey === 'poopAccident')?.value || 0;
-  const totalPee = peeGood + peeAccident;
-  const totalPoop = poopGood + poopAccident;
+  const good = payload.find((p) => p.dataKey === 'peeGood')?.value || 0;
+  const accident = payload.find((p) => p.dataKey === 'peeAccident')?.value || 0;
+  const total = good + accident;
+  const pct = total > 0 ? Math.round((good / total) * 100) : 0;
   return (
-    <div style={{ borderRadius: '12px', border: '1px solid #EBE6DE', fontSize: '12px', fontFamily: 'DM Sans, system-ui, sans-serif', boxShadow: '0 4px 16px rgba(42, 35, 29, 0.08)', background: '#fff', padding: '10px 14px' }}>
-      <div style={{ fontWeight: 600, marginBottom: 6, color: '#4A3F35' }}>{label}</div>
-      <div style={{ color: '#6B5D4F' }}>Pee: <strong>{totalPee}</strong>{peeAccident > 0 && <span style={{ color: '#D4726A' }}> ({peeAccident} accident{peeAccident > 1 ? 's' : ''})</span>}</div>
-      <div style={{ color: '#6B5D4F', marginTop: 2 }}>Poop: <strong>{totalPoop}</strong>{poopAccident > 0 && <span style={{ color: '#D4726A' }}> ({poopAccident} accident{poopAccident > 1 ? 's' : ''})</span>}</div>
+    <div style={{ borderRadius: '12px', border: '1px solid #DDD2C2', fontSize: '12px', fontFamily: 'DM Sans, system-ui, sans-serif', boxShadow: '0 4px 16px rgba(33, 26, 14, 0.10)', background: '#fff', padding: '10px 14px' }}>
+      <div style={{ fontWeight: 600, marginBottom: 6, color: '#3E2F1E' }}>{label}</div>
+      <div style={{ color: '#6F5C48' }}>Total Pee: <strong>{total}</strong></div>
+      <div style={{ color: '#D4726A', marginTop: 2 }}>Accidents: <strong>{accident}</strong></div>
+      <div style={{ color: '#2B6AAF', marginTop: 3, fontWeight: 600 }}>Success: {pct}%</div>
+    </div>
+  );
+}
+
+function PoopTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  const good = payload.find((p) => p.dataKey === 'poopGood')?.value || 0;
+  const accident = payload.find((p) => p.dataKey === 'poopAccident')?.value || 0;
+  const total = good + accident;
+  const pct = total > 0 ? Math.round((good / total) * 100) : 0;
+  return (
+    <div style={{ borderRadius: '12px', border: '1px solid #DDD2C2', fontSize: '12px', fontFamily: 'DM Sans, system-ui, sans-serif', boxShadow: '0 4px 16px rgba(33, 26, 14, 0.10)', background: '#fff', padding: '10px 14px' }}>
+      <div style={{ fontWeight: 600, marginBottom: 6, color: '#3E2F1E' }}>{label}</div>
+      <div style={{ color: '#6F5C48' }}>Total Poop: <strong>{total}</strong></div>
+      <div style={{ color: '#D4726A', marginTop: 2 }}>Accidents: <strong>{accident}</strong></div>
+      <div style={{ color: '#2B6AAF', marginTop: 3, fontWeight: 600 }}>Success: {pct}%</div>
     </div>
   );
 }
@@ -227,7 +241,7 @@ function NapHeatmap({ dateRange, allLogs }) {
             <div className="flex-1 relative bg-sand-100/60 rounded-sm" style={{ height: 18 }}>
               {HOUR_TICKS.map((m) => <div key={m} className="absolute top-0 bottom-0" style={{ left: `${((m - NAP_START) / NAP_SPAN) * 100}%`, width: 1, background: 'rgba(209, 199, 186, 0.4)' }} />)}
               {row.naps.map((nap, i) => (
-                <div key={i} className="absolute top-0 bottom-0 rounded-sm cursor-default" style={{ left: `${nap.leftPct}%`, width: `${nap.widthPct}%`, background: '#5BA87A', opacity: 0.85, minWidth: 2 }}
+                <div key={i} className="absolute top-0 bottom-0 rounded-sm cursor-default" style={{ left: `${nap.leftPct}%`, width: `${nap.widthPct}%`, background: '#5F9ACB', opacity: 0.85, minWidth: 2 }}
                   onMouseEnter={(e) => { const rect = e.currentTarget.getBoundingClientRect(); setHoveredNap({ startLabel: minutesToTimeLabel(nap.startMin), endLabel: minutesToTimeLabel(nap.endMin), duration: nap.durationMin, x: rect.left + rect.width / 2, y: rect.top }); }}
                   onMouseLeave={() => setHoveredNap(null)}
                 />
@@ -425,24 +439,20 @@ export default function Stats() {
             </div>
           </div>
 
-          {/* Potty Success Rate — Combo Chart */}
+          {/* Potty Success Rate — Line Chart */}
           <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
             <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
               <TrendingUp size={14} className="text-sand-400" />
-              Potty Outcomes & Success Rate ({dayCount}d)
+              Potty Success Rate ({dayCount}d)
             </h3>
-            <ResponsiveContainer width="100%" height={260}>
-              <ComposedChart data={pottyComboData}>
+            <ResponsiveContainer width="100%" height={240}>
+              <LineChart data={pottyComboData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#DDD2C2" />
                 <XAxis {...xAxisProps} />
-                <YAxis yAxisId="left" {...yAxisProps} label={{ value: 'Count', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: '#9A8568' } }} />
-                <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 10, fill: '#2B6AAF' }} stroke="#96BDE0" />
+                <YAxis {...yAxisProps} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                 <Tooltip content={<SuccessComboTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#9A8568' }} />
-                <Bar yAxisId="left" dataKey="good" stackId="potty" fill="#4DAF68" name="Good" radius={[0, 0, 0, 0]} />
-                <Bar yAxisId="left" dataKey="accidents" stackId="potty" fill="#D4726A" name="Accidents" radius={[4, 4, 0, 0]} />
-                <Line yAxisId="right" type="monotone" dataKey="successPct" stroke="#2B6AAF" strokeWidth={2.5} dot={{ fill: '#2B6AAF', r: 3.5, strokeWidth: 0 }} name="Success %" connectNulls />
-              </ComposedChart>
+                <Line type="monotone" dataKey="successPct" stroke="#2B6AAF" strokeWidth={2.5} dot={{ fill: '#2B6AAF', r: 4, strokeWidth: 0 }} name="Success %" connectNulls activeDot={{ r: 6, fill: '#2B6AAF', strokeWidth: 2, stroke: '#fff' }} />
+              </LineChart>
             </ResponsiveContainer>
           </div>
 
@@ -454,12 +464,12 @@ export default function Stats() {
             </h3>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={pottyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#DDD2C2" />
                 <XAxis {...xAxisProps} />
                 <YAxis {...yAxisProps} />
-                <Tooltip content={<PottyTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#918272' }} />
-                <Bar dataKey="peeGood" stackId="pee" fill="#5BA87A" name="Pee (Good)" radius={[0, 0, 0, 0]} />
+                <Tooltip content={<PeeTooltip />} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#9A8568' }} />
+                <Bar dataKey="peeGood" stackId="pee" fill="#C2A176" name="Pee (Good)" radius={[0, 0, 0, 0]} />
                 <Bar dataKey="peeAccident" stackId="pee" fill="#D4726A" name="Pee (Accident)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -473,12 +483,12 @@ export default function Stats() {
             </h3>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={pottyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#DDD2C2" />
                 <XAxis {...xAxisProps} />
                 <YAxis {...yAxisProps} />
-                <Tooltip content={<PottyTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#918272' }} />
-                <Bar dataKey="poopGood" stackId="poop" fill="#9F8362" name="Poop (Good)" radius={[0, 0, 0, 0]} />
+                <Tooltip content={<PoopTooltip />} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#9A8568' }} />
+                <Bar dataKey="poopGood" stackId="poop" fill="#926940" name="Poop (Good)" radius={[0, 0, 0, 0]} />
                 <Bar dataKey="poopAccident" stackId="poop" fill="#D4726A" name="Poop (Accident)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -497,8 +507,8 @@ export default function Stats() {
                 <YAxis {...yAxisProps} allowDecimals={false} />
                 <Tooltip content={<CaloriesTooltip />} />
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#918272' }} />
-                <Bar dataKey="foodCal" stackId="cal" fill="#9F8362" name="Food" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="snackCal" stackId="cal" fill="#5BA87A" name="Snacks" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="foodCal" stackId="cal" fill="#2B6AAF" name="Food" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="snackCal" stackId="cal" fill="#96BDE0" name="Snacks" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
