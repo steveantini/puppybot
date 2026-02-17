@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import { PawPrint } from 'lucide-react';
+import { PawPrint, Menu } from 'lucide-react';
 import { AuthProvider, ProtectedRoute } from './context/AuthContext';
 import { DataProvider, useData } from './context/DataContext';
 import BottomNav from './components/BottomNav';
+import AdminPanel from './components/AdminPanel';
 import Dashboard from './pages/Dashboard';
 import History from './pages/History';
 import Stats from './pages/Stats';
@@ -10,9 +12,13 @@ import PuppyProfile from './pages/PuppyProfile';
 import HealthTracker from './pages/HealthTracker';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import AccountSettings from './pages/settings/AccountSettings';
+import PuppyManagement from './pages/settings/PuppyManagement';
+import SharingManagement from './pages/settings/SharingManagement';
 
 function AppShell() {
   const { isLoading, puppy } = useData();
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
 
   if (isLoading) {
     return (
@@ -42,21 +48,33 @@ function AppShell() {
                     <PawPrint size={36} className="text-warm-200" />
                     <span><span className="text-steel-400">Puppy</span><span className="text-steel-500">Bot</span></span>
                   </h1>
-                  <Link to="/profile" className="shrink-0">
-                    {puppy?.photoUrl ? (
-                      <img
-                        src={puppy.photoUrl}
-                        alt={puppy.name || 'Puppy'}
-                        className="w-[62px] h-[62px] rounded-full object-cover border-2 border-sand-200 shadow-sm hover:border-steel-300 transition-colors"
-                      />
-                    ) : (
-                      <div className="w-[62px] h-[62px] rounded-full bg-sand-100 border-2 border-sand-200 flex items-center justify-center text-2xl hover:border-steel-300 transition-colors">
-                        🐶
-                      </div>
-                    )}
-                  </Link>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <Link to="/profile">
+                      {puppy?.photoUrl ? (
+                        <img
+                          src={puppy.photoUrl}
+                          alt={puppy.name || 'Puppy'}
+                          className="w-[62px] h-[62px] rounded-full object-cover border-2 border-sand-200 shadow-sm hover:border-steel-300 transition-colors"
+                        />
+                      ) : (
+                        <div className="w-[62px] h-[62px] rounded-full bg-sand-100 border-2 border-sand-200 flex items-center justify-center text-2xl hover:border-steel-300 transition-colors">
+                          🐶
+                        </div>
+                      )}
+                    </Link>
+                    <button
+                      onClick={() => setShowAdminPanel(true)}
+                      className="w-10 h-10 flex items-center justify-center text-sand-600 hover:bg-sand-100 rounded-lg transition-colors"
+                      aria-label="Open settings"
+                    >
+                      <Menu size={24} />
+                    </button>
+                  </div>
                 </div>
               </header>
+
+              {/* Admin Panel */}
+              <AdminPanel isOpen={showAdminPanel} onClose={() => setShowAdminPanel(false)} />
 
               {/* Page content */}
               <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
@@ -66,6 +84,11 @@ function AppShell() {
                   <Route path="/stats" element={<Stats />} />
                   <Route path="/profile" element={<PuppyProfile />} />
                   <Route path="/health" element={<HealthTracker />} />
+                  
+                  {/* Settings Pages */}
+                  <Route path="/settings/account" element={<AccountSettings />} />
+                  <Route path="/settings/puppies" element={<PuppyManagement />} />
+                  <Route path="/settings/sharing" element={<SharingManagement />} />
                 </Routes>
               </main>
 
