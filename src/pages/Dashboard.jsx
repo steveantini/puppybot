@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
-import { formatTime, getCurrentTime, getGreeting, getTodayKey, formatDate } from '../utils/helpers';
+import { formatTime, getCurrentTime, getGreeting, getTodayKey, formatDate, TZ } from '../utils/helpers';
 import Modal from '../components/Modal';
 import PottyForm from '../components/forms/PottyForm';
 import MealForm from '../components/forms/MealForm';
@@ -141,6 +141,7 @@ export default function Dashboard() {
         </p>
         <div className="text-lg font-medium text-sand-500 tabular-nums tracking-tight mt-1">
           {currentTime.toLocaleTimeString('en-US', {
+            timeZone: TZ,
             hour: 'numeric',
             minute: '2-digit',
           })}
