@@ -9,7 +9,7 @@ A clean, modern puppy behavior tracker built with React. Log potty breaks, meals
 - **Dashboard** — Personalized greeting, live clock, a welcoming intro, and large quick-add buttons for fast entry (3 taps or fewer)
 - **History** — Browse past days in a scrollable list; tap any day to expand full details. Expand All / Collapse All toggle to view everything at once. Filter by category (Potty, Meals, Naps, Schedule, Skills, Notes) to see all matching entries across all dates. Select individual dates or all dates and export to PDF.
 - **Stats & Trends** — Comprehensive charts powered by Recharts with a date range selector (All Time, Last 7 Days, Last 30 Days, Year to Date):
-  - Potty success rate % chart (stacked green/red bars)
+  - Potty combo chart: stacked bars for daily good/accident counts with a success rate % trend line overlay (dual Y-axes)
   - Separate Pee and Poop count charts with good vs. accident breakdowns
   - Calories eaten chart (food calories from meals + snack calories, stacked)
   - Nap schedule heatmap (Gantt-style, 6 AM–9 PM timeline with total hours per day)
@@ -194,7 +194,8 @@ The Calories chart shows food and snack calories as separate stacked bars with a
 - [x] Category filtering in History
 - [x] Date range selector for Stats (All Time, 7d, 30d, YTD)
 - [x] Expand All / Collapse All in History
-- [x] Vibrant, modern color palette
+- [x] Vibrant, modern color palette (iteratively refined)
+- [x] Potty success rate combo chart (bars + trend line)
 - [ ] Push notifications for feeding/potty reminders
 - [ ] Multi-puppy support
 - [ ] Photo gallery per day
