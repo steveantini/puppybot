@@ -41,7 +41,7 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Add Buttons — full width, closer to square */}
-      <div className="grid grid-cols-5 gap-2 sm:gap-3 mt-5">
+      <div className="grid grid-cols-5 gap-2 sm:gap-3 mt-16">
         {quickAddButtons.map((btn) => {
           const Icon = btn.icon;
           return (
