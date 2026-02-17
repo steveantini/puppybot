@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { getGreeting, getTodayKey, formatDate, TZ } from '../utils/helpers';
 import Modal from '../components/Modal';
 import PottyForm from '../components/forms/PottyForm';
 import MealForm from '../components/forms/MealForm';
@@ -26,38 +25,14 @@ const quickAddButtons = [
 
 export default function Dashboard() {
   const { puppy } = useData();
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [activeModal, setActiveModal] = useState(null);
 
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const today = getTodayKey();
   const puppyName = puppy?.name || 'your puppy';
 
   return (
-    <div className="pb-4 space-y-6">
-      {/* Greeting */}
-      <div className="text-center pt-2">
-        <p className="text-sand-800 text-lg font-semibold">
-          {getGreeting()}, {puppyName}&apos;s family!
-        </p>
-        <p className="text-sand-500 text-sm mt-1">
-          {formatDate(today)}
-        </p>
-        <div className="text-lg font-medium text-sand-400 tabular-nums tracking-tight mt-0.5">
-          {currentTime.toLocaleTimeString('en-US', {
-            timeZone: TZ,
-            hour: 'numeric',
-            minute: '2-digit',
-          })}
-        </div>
-      </div>
-
+    <div className="pb-4">
       {/* Welcome intro — no card, just text on background */}
-      <div className="px-2 text-center">
+      <div className="px-2 text-center pt-1">
         <p className="text-sand-600 text-sm leading-relaxed">
           Welcome to <strong className="text-steel-500">PuppyBot</strong> — your intelligent companion for tracking {puppyName}&apos;s daily routine.
           Use the buttons below to log potty breaks, meals, naps, sleep schedules, and notes.
@@ -66,7 +41,7 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Add Buttons — full width, closer to square */}
-      <div className="grid grid-cols-5 gap-2 sm:gap-3">
+      <div className="grid grid-cols-5 gap-2 sm:gap-3 mt-5">
         {quickAddButtons.map((btn) => {
           const Icon = btn.icon;
           return (
@@ -119,8 +94,10 @@ export default function Dashboard() {
         <SkillsNotesForm onClose={() => setActiveModal(null)} />
       </Modal>
 
-      {/* AI Chat Assistant */}
-      <DashboardChat />
+      {/* AI Chat Assistant — extra spacing from buttons */}
+      <div className="mt-16">
+        <DashboardChat />
+      </div>
     </div>
   );
 }
