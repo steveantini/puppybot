@@ -6,8 +6,8 @@ A clean, modern puppy behavior tracker built with React. Log potty breaks, meals
 
 ## Features
 
-- **Dashboard** — Live clock, today's quick stats, chronological timeline of all logged activities, and prominent quick-add buttons at the top for fast entry (3 taps or fewer)
-- **History** — Browse past days in a scrollable list; tap any day to expand full details. Filter by category (Potty, Meals, Naps, Schedule, Skills, Notes) to see all matching entries across all dates. Select individual dates or all dates and export to PDF.
+- **Dashboard** — Personalized greeting, live clock, a welcoming intro, and large quick-add buttons for fast entry (3 taps or fewer)
+- **History** — Browse past days in a scrollable list; tap any day to expand full details. Expand All / Collapse All toggle to view everything at once. Filter by category (Potty, Meals, Naps, Schedule, Skills, Notes) to see all matching entries across all dates. Select individual dates or all dates and export to PDF.
 - **Stats & Trends** — Comprehensive charts powered by Recharts with a date range selector (All Time, Last 7 Days, Last 30 Days, Year to Date):
   - Potty success rate % chart (stacked green/red bars)
   - Separate Pee and Poop count charts with good vs. accident breakdowns
@@ -116,7 +116,7 @@ src/
 ├── context/
 │   └── DataContext.jsx        # React Context provider — async Supabase state
 ├── pages/
-│   ├── Dashboard.jsx          # Today's timeline + quick stats + quick-add
+│   ├── Dashboard.jsx          # Greeting, intro & quick-add buttons
 │   ├── History.jsx            # Past days with expandable details + PDF export
 │   ├── Stats.jsx              # Trend charts + heatmap + PDF export
 │   ├── PuppyProfile.jsx      # Puppy info + weight log
@@ -165,11 +165,12 @@ weight_logs: [{ date, weight }]
 
 ## Design
 
-- Soft blues, warm browns, and whites — friendly but not childish
+- Vibrant blues, rich browns, and warm beiges — friendly but not childish
 - Rounded corners and subtle shadows throughout
-- Responsive: mobile-first with expanded layouts on tablet/desktop
+- Responsive: wide `max-w-7xl` layout with mobile-first breakpoints
 - Bottom sheet modals on mobile, centered dialogs on desktop
 - Touch-optimized with `active:scale` feedback and large tap targets
+- Puppy profile photo displayed as an avatar in the header
 
 ## Calorie Tracking
 
@@ -192,6 +193,8 @@ The Calories chart shows food and snack calories as separate stacked bars with a
 - [x] Sleep schedule chart (morning wake, night wake, bed time)
 - [x] Category filtering in History
 - [x] Date range selector for Stats (All Time, 7d, 30d, YTD)
+- [x] Expand All / Collapse All in History
+- [x] Vibrant, modern color palette
 - [ ] Push notifications for feeding/potty reminders
 - [ ] Multi-puppy support
 - [ ] Photo gallery per day
