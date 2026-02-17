@@ -53,8 +53,8 @@ export default function AdminPanel({ isOpen, onClose }) {
         </div>
 
         {/* Menu Items */}
-        <div className="overflow-y-auto h-[calc(100vh-180px)]">
-          <div className="p-4 space-y-1">
+        <div className="overflow-y-auto h-[calc(100vh-240px)]">
+          <div className="p-4 pb-6 space-y-1">
             {/* Account Settings */}
             <button
               onClick={() => handleNavigation('/settings/account')}
