@@ -180,7 +180,7 @@ function CaloriesTooltip({ active, payload, label }) {
     <div style={{ borderRadius: '12px', border: '1px solid #EBE6DE', fontSize: '12px', fontFamily: 'DM Sans, system-ui, sans-serif', boxShadow: '0 4px 16px rgba(42, 35, 29, 0.08)', background: '#fff', padding: '10px 14px' }}>
       <div style={{ fontWeight: 600, marginBottom: 6, color: '#4A3F35' }}>{label}</div>
       <div style={{ color: '#6B5D4F' }}>Food: <strong>{Math.round(food)} cal</strong></div>
-      <div style={{ color: '#6B5D4F', marginTop: 2 }}>Snacks: <strong>{Math.round(snack)} cal</strong></div>
+      <div style={{ color: '#6B5D4F', marginTop: 2 }}>Treats: <strong>{Math.round(snack)} cal</strong></div>
       <div style={{ color: '#4A3F35', marginTop: 4, fontWeight: 600, borderTop: '1px solid #EBE6DE', paddingTop: 4 }}>Total: {Math.round(food + snack)} cal</div>
     </div>
   );
@@ -501,7 +501,7 @@ export default function Stats() {
                 <Tooltip content={<CaloriesTooltip />} />
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#918272' }} />
                 <Bar dataKey="foodCal" stackId="cal" fill="#2B6AAF" name="Food" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="snackCal" stackId="cal" fill="#96BDE0" name="Snacks" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="snackCal" stackId="cal" fill="#96BDE0" name="Treats" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

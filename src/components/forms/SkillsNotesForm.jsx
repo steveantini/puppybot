@@ -38,7 +38,7 @@ export default function SkillsNotesForm({ onClose }) {
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Snacks</label>
+        <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Treats</label>
         <div className="flex items-center gap-3">
           <input
             type="number"
