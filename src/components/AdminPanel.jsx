@@ -29,7 +29,7 @@ export default function AdminPanel({ isOpen, onClose }) {
       />
 
       {/* Panel */}
-      <div className="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-50 transform transition-transform">
+      <div className="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-50 transform transition-transform relative">
         {/* Header */}
         <div className="bg-gradient-to-r from-steel-500 to-steel-600 p-6">
           <div className="flex items-center justify-between mb-4">
