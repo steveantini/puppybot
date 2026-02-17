@@ -3,14 +3,6 @@ import { Send, Loader2, Mic, MicOff, Save, Download, Trash2, PawPrint, ArrowUp }
 import { useData } from '../context/DataContext'
 import { getTodayKey } from '../utils/helpers'
 
-const SUGGESTED_QUESTIONS = [
-  { emoji: '🚽', text: 'How is potty training progress?' },
-  { emoji: '😴', text: 'Analyze sleep patterns' },
-  { emoji: '🍽️', text: 'Is eating schedule consistent?' },
-  { emoji: '📈', text: 'Show weekly trends' },
-  { emoji: '💡', text: 'Any training recommendations?' },
-]
-
 export default function DashboardChat() {
   const { puppy, updateNotes } = useData()
   const [messages, setMessages] = useState([])
@@ -130,10 +122,6 @@ export default function DashboardChat() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleSuggestedQuestion = (question) => {
-    handleSend(question.text)
   }
 
   const exportConversation = () => {
@@ -283,22 +271,6 @@ export default function DashboardChat() {
           )}
 
           <div ref={messagesEndRef} />
-        </div>
-      )}
-
-      {/* Suggested questions — shown only when no messages */}
-      {!hasMessages && (
-        <div className="flex flex-wrap justify-center gap-2 mb-5">
-          {SUGGESTED_QUESTIONS.map((q, i) => (
-            <button
-              key={i}
-              onClick={() => handleSuggestedQuestion(q)}
-              className="px-3.5 py-2 border border-sand-200/80 rounded-full text-xs text-sand-500 hover:border-steel-300 hover:text-steel-600 hover:bg-white transition-colors flex items-center gap-1.5"
-            >
-              <span>{q.emoji}</span>
-              <span>{q.text}</span>
-            </button>
-          ))}
         </div>
       )}
 
