@@ -7,6 +7,7 @@ import MealForm from '../components/forms/MealForm';
 import NapForm from '../components/forms/NapForm';
 import WakeUpForm from '../components/forms/WakeUpForm';
 import SkillsNotesForm from '../components/forms/SkillsNotesForm';
+import ChatAssistant from '../components/ChatAssistant';
 import {
   Droplets,
   UtensilsCrossed,
@@ -117,6 +118,9 @@ export default function Dashboard() {
       >
         <SkillsNotesForm onClose={() => setActiveModal(null)} />
       </Modal>
+
+      {/* AI Chat Assistant */}
+      <ChatAssistant />
     </div>
   );
 }

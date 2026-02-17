@@ -184,6 +184,125 @@ Meals and snacks are tracked in calories on the Stats page:
 
 The Calories chart shows food and snack calories as separate stacked bars with a combined total in the tooltip.
 
+## AI Chat Assistant
+
+PuppyBot includes an intelligent chat assistant powered by **Anthropic's Claude 3.5 Sonnet** that can analyze your puppy's data and provide insights, training advice, and answer questions.
+
+### Features
+
+- **🤖 Smart Analysis**: Ask questions about potty training progress, sleep patterns, eating habits, and trends
+- **📊 Context-Aware**: Analyzes your data across different time ranges (week, month, year-to-date, all time)
+- **💡 Training Tips**: Provides actionable recommendations based on behavioral patterns
+- **🎤 Voice Input**: Speak your questions using browser speech recognition
+- **💾 Save Insights**: Save helpful responses directly to your daily notes
+- **📥 Export Conversations**: Download chat history as text files
+- **✨ Suggested Questions**: Quick-access buttons for common queries
+
+### Setup Instructions
+
+#### 1. Get an Anthropic API Key
+
+1. Sign up at [console.anthropic.com](https://console.anthropic.com)
+2. Generate an API key from the dashboard
+3. Copy your key (starts with `sk-ant-...`)
+
+#### 2. Install Supabase CLI
+
+```bash
+npm install supabase --save-dev
+```
+
+#### 3. Deploy Edge Functions
+
+```bash
+# Deploy the chat assistant function
+npx supabase functions deploy chat-assistant
+
+# Deploy the weekly insights function (optional)
+npx supabase functions deploy weekly-insights
+```
+
+#### 4. Set Environment Secrets
+
+```bash
+# Set your Anthropic API key
+npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-your-key-here
+```
+
+The following environment variables are automatically available in Edge Functions:
+- `SUPABASE_URL` (auto-injected)
+- `SUPABASE_ANON_KEY` (auto-injected)
+
+#### 5. Run Database Migration
+
+Run the following SQL in your Supabase SQL Editor to create the chat tables:
+
+```sql
+-- Chat history (for AI assistant conversations)
+CREATE TABLE chat_history (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  message text NOT NULL,
+  role text NOT NULL CHECK (role IN ('user', 'assistant')),
+  date_range text,
+  created_at timestamptz DEFAULT now()
+);
+
+-- Weekly insights (AI-generated summaries)
+CREATE TABLE weekly_insights (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  week_start date NOT NULL,
+  insight text NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+
+-- Enable RLS
+ALTER TABLE chat_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE weekly_insights ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow all on chat_history" ON chat_history
+  FOR ALL USING (true) WITH CHECK (true);
+
+CREATE POLICY "Allow all on weekly_insights" ON weekly_insights
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- Indexes
+CREATE INDEX idx_chat_history_created ON chat_history(created_at);
+CREATE INDEX idx_weekly_insights_week ON weekly_insights(week_start);
+```
+
+### Usage
+
+1. **Open Chat**: Click the sparkle ✨ button in the bottom-right corner
+2. **Select Time Range**: Choose Week, Month, YTD, or All Time for context
+3. **Ask Questions**: Type or speak your question
+4. **Get Insights**: Claude analyzes your data and responds with specific insights
+5. **Save Useful Tips**: Click "Save to notes" to preserve helpful advice
+
+### Example Questions
+
+- "How is potty training progress?"
+- "Analyze sleep patterns over the last month"
+- "Is eating schedule consistent?"
+- "Show weekly trends"
+- "Any training recommendations?"
+- "Why are accidents increasing?"
+- "How many calories per day on average?"
+
+### Cost Optimization
+
+The assistant uses **prompt caching** to reduce costs by 90% for repeated queries. With typical usage:
+- Average query: $0.01 - $0.03
+- 100 queries/month: ~$1-3
+- Cached context reused within 5-minute windows
+
+### Weekly Insights (Optional)
+
+The `weekly-insights` Edge Function can generate automated weekly summaries. To schedule it:
+
+1. Set up a cron job in Supabase (Dashboard > Edge Functions > Cron)
+2. Schedule it to run weekly (e.g., Monday at 8 AM)
+3. Or call it manually: `curl -X POST https://your-project.supabase.co/functions/v1/weekly-insights`
+
 ## Roadmap
 
 - [x] Supabase backend for cloud sync and multi-device access
@@ -197,6 +316,8 @@ The Calories chart shows food and snack calories as separate stacked bars with a
 - [x] Expand All / Collapse All in History
 - [x] Vibrant, modern color palette (iteratively refined)
 - [x] Potty success rate combo chart (bars + trend line)
+- [x] AI Chat Assistant (Claude-powered insights, voice input, save to notes)
+- [x] Weekly insights generation with AI summaries
 - [ ] Push notifications for feeding/potty reminders
 - [ ] Multi-puppy support
 - [ ] Photo gallery per day

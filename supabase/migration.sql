@@ -72,8 +72,43 @@ CREATE INDEX idx_daily_logs_date ON daily_logs(date);
 CREATE INDEX idx_health_records_date ON health_records(date);
 CREATE INDEX idx_weight_logs_puppy_date ON weight_logs(puppy_id, date);
 
+-- Chat history (for AI assistant conversations)
+CREATE TABLE chat_history (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  message text NOT NULL,
+  role text NOT NULL CHECK (role IN ('user', 'assistant')),
+  date_range text,
+  created_at timestamptz DEFAULT now()
+);
+
+-- Weekly insights (AI-generated summaries)
+CREATE TABLE weekly_insights (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  week_start date NOT NULL,
+  insight text NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+
+-- Enable RLS for chat tables
+ALTER TABLE chat_history ENABLE ROW LEVEL SECURITY;
+ALTER TABLE weekly_insights ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow all on chat_history" ON chat_history
+  FOR ALL USING (true) WITH CHECK (true);
+
+CREATE POLICY "Allow all on weekly_insights" ON weekly_insights
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- Indexes for chat tables
+CREATE INDEX idx_chat_history_created ON chat_history(created_at);
+CREATE INDEX idx_weekly_insights_week ON weekly_insights(week_start);
+
 -- ============================================================
 -- Migration: Add snacks column to daily_logs
 -- Run this if the table already exists:
 --   ALTER TABLE daily_logs ADD COLUMN IF NOT EXISTS snacks integer DEFAULT 0;
+--
+-- Migration: Add chat tables
+-- Run these if upgrading an existing database:
+--   (Copy the chat_history and weekly_insights table creation statements above)
 -- ============================================================
