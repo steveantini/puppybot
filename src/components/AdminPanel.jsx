@@ -20,160 +20,82 @@ export default function AdminPanel({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
+  const menuItems = [
+    { icon: User, label: 'Account Settings', desc: 'Profile, email, password', path: '/settings/account' },
+    { icon: Dog, label: 'My Puppies', desc: 'Add, edit, manage puppies', path: '/settings/puppies' },
+    { icon: Users, label: 'Family & Sharing', desc: 'Invite family, manage access', path: '/settings/sharing' },
+    { divider: true },
+    { icon: CreditCard, label: 'Subscription & Billing', desc: profile?.subscription_tier === 'premium' ? 'Premium Plan' : 'Free Plan', path: '/settings/billing' },
+    { icon: Lock, label: 'Security', desc: '2FA, sessions', path: '/settings/security' },
+    { icon: Bell, label: 'Notifications', desc: 'Email, reminders', path: '/settings/notifications' },
+    { icon: SettingsIcon, label: 'Preferences', desc: 'Timezone, units', path: '/settings/preferences' },
+    { divider: true },
+    { icon: HelpCircle, label: 'Help & Support', desc: 'Docs, contact', path: '/settings/help' },
+  ];
+
   return (
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 z-50 transition-opacity"
+        className="fixed inset-0 bg-black/50 z-50"
         onClick={onClose}
       />
 
-      {/* Panel - single scrollable column */}
-      <div className="fixed top-0 right-0 bottom-0 w-full max-w-sm bg-white shadow-2xl z-50 overflow-y-auto">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-steel-500 to-steel-600 p-6 sticky top-0 z-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-white">Settings</h2>
+      {/* Panel */}
+      <div className="fixed top-0 right-0 bottom-0 w-full max-w-sm bg-white shadow-2xl z-50 overflow-hidden">
+        {/* Header - compact */}
+        <div className="bg-gradient-to-r from-steel-500 to-steel-600 px-5 py-4">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-bold text-white">Settings</h2>
             <button
               onClick={onClose}
-              className="text-white hover:bg-steel-400 p-2 rounded-lg transition-colors"
+              className="text-white hover:bg-steel-400 p-1.5 rounded-lg transition-colors"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-steel-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 bg-steel-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
               {profile?.full_name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'U'}
             </div>
             <div>
-              <p className="text-white font-semibold">{profile?.full_name || 'User'}</p>
-              <p className="text-steel-100 text-sm">{user?.email}</p>
+              <p className="text-white font-semibold text-sm">{profile?.full_name || 'User'}</p>
+              <p className="text-steel-100 text-xs">{user?.email}</p>
             </div>
           </div>
         </div>
 
-        {/* Menu Items */}
-        <div className="p-4 space-y-1">
-          {/* Account Settings */}
-          <button
-            onClick={() => handleNavigation('/settings/account')}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sand-700 hover:bg-sand-50 rounded-xl transition-colors text-left"
-          >
-            <User size={20} className="text-steel-500" />
-            <div>
-              <p className="font-semibold text-sm">Account Settings</p>
-              <p className="text-xs text-sand-500">Profile, email, password</p>
-            </div>
-          </button>
+        {/* Menu Items - compact */}
+        <div className="px-3 py-2">
+          {menuItems.map((item, i) => {
+            if (item.divider) {
+              return <div key={`d-${i}`} className="h-px bg-sand-200 my-1.5"></div>;
+            }
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.path}
+                onClick={() => handleNavigation(item.path)}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-sand-700 hover:bg-sand-50 rounded-lg transition-colors text-left"
+              >
+                <Icon size={17} className="text-steel-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <p className="font-semibold text-xs">{item.label}</p>
+                  <p className="text-[10px] text-sand-500 leading-tight">{item.desc}</p>
+                </div>
+              </button>
+            );
+          })}
 
-          {/* My Puppies */}
-          <button
-            onClick={() => handleNavigation('/settings/puppies')}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sand-700 hover:bg-sand-50 rounded-xl transition-colors text-left"
-          >
-            <Dog size={20} className="text-steel-500" />
-            <div>
-              <p className="font-semibold text-sm">My Puppies</p>
-              <p className="text-xs text-sand-500">Add, edit, manage puppies</p>
-            </div>
-          </button>
+          {/* Divider before sign out */}
+          <div className="h-px bg-sand-200 my-1.5"></div>
 
-          {/* Family & Sharing */}
-          <button
-            onClick={() => handleNavigation('/settings/sharing')}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sand-700 hover:bg-sand-50 rounded-xl transition-colors text-left"
-          >
-            <Users size={20} className="text-steel-500" />
-            <div>
-              <p className="font-semibold text-sm">Family & Sharing</p>
-              <p className="text-xs text-sand-500">Invite family, manage access</p>
-            </div>
-          </button>
-
-          {/* Divider */}
-          <div className="h-px bg-sand-200 my-2"></div>
-
-          {/* Subscription & Billing */}
-          <button
-            onClick={() => handleNavigation('/settings/billing')}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sand-700 hover:bg-sand-50 rounded-xl transition-colors text-left"
-          >
-            <CreditCard size={20} className="text-steel-500" />
-            <div className="flex items-center justify-between flex-1">
-              <div>
-                <p className="font-semibold text-sm">Subscription & Billing</p>
-                <p className="text-xs text-sand-500">
-                  {profile?.subscription_tier === 'premium' ? 'Premium Plan' : 'Free Plan'}
-                </p>
-              </div>
-              {profile?.subscription_tier === 'free' && (
-                <span className="text-xs bg-warm-100 text-warm-700 px-2 py-1 rounded-full font-medium">
-                  Upgrade
-                </span>
-              )}
-            </div>
-          </button>
-
-          {/* Security */}
-          <button
-            onClick={() => handleNavigation('/settings/security')}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sand-700 hover:bg-sand-50 rounded-xl transition-colors text-left"
-          >
-            <Lock size={20} className="text-steel-500" />
-            <div>
-              <p className="font-semibold text-sm">Security</p>
-              <p className="text-xs text-sand-500">2FA, sessions, login history</p>
-            </div>
-          </button>
-
-          {/* Notifications */}
-          <button
-            onClick={() => handleNavigation('/settings/notifications')}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sand-700 hover:bg-sand-50 rounded-xl transition-colors text-left"
-          >
-            <Bell size={20} className="text-steel-500" />
-            <div>
-              <p className="font-semibold text-sm">Notifications</p>
-              <p className="text-xs text-sand-500">Email preferences, reminders</p>
-            </div>
-          </button>
-
-          {/* Preferences */}
-          <button
-            onClick={() => handleNavigation('/settings/preferences')}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sand-700 hover:bg-sand-50 rounded-xl transition-colors text-left"
-          >
-            <SettingsIcon size={20} className="text-steel-500" />
-            <div>
-              <p className="font-semibold text-sm">Preferences</p>
-              <p className="text-xs text-sand-500">Timezone, units, display</p>
-            </div>
-          </button>
-
-          {/* Divider */}
-          <div className="h-px bg-sand-200 my-2"></div>
-
-          {/* Help & Support */}
-          <button
-            onClick={() => handleNavigation('/settings/help')}
-            className="w-full flex items-center gap-3 px-4 py-3 text-sand-700 hover:bg-sand-50 rounded-xl transition-colors text-left"
-          >
-            <HelpCircle size={20} className="text-steel-500" />
-            <div>
-              <p className="font-semibold text-sm">Help & Support</p>
-              <p className="text-xs text-sand-500">Docs, contact, feedback</p>
-            </div>
-          </button>
-
-          {/* Divider */}
-          <div className="h-px bg-sand-200 my-2"></div>
-
-          {/* Sign Out - inside the scrollable list */}
+          {/* Sign Out */}
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors font-semibold"
+            className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors font-semibold text-xs"
           >
-            <LogOut size={20} />
+            <LogOut size={17} />
             Sign Out
           </button>
         </div>
