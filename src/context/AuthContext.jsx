@@ -26,6 +26,9 @@ export function AuthProvider({ children }) {
       } else {
         setLoading(false);
       }
+    }).catch((err) => {
+      console.error('Auth session error:', err);
+      setLoading(false);
     });
 
     // Listen for auth changes
@@ -50,12 +53,16 @@ export function AuthProvider({ children }) {
         .from('user_profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
-      setProfile(data);
+      if (error) {
+        console.warn('Profile fetch warning:', error.message);
+      }
+      if (data) {
+        setProfile(data);
+      }
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.warn('Error fetching profile:', error);
     } finally {
       setLoading(false);
     }
@@ -102,7 +109,7 @@ export function ProtectedRoute({ children }) {
   }
 
   if (!user) {
-    return null; // Will redirect via useEffect
+    return null;
   }
 
   return children;

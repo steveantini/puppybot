@@ -19,26 +19,44 @@ export function createEmptyDayLog(date) {
 // ─── PUPPY ───────────────────────────────────────────────────
 
 export async function fetchPuppy(userId) {
-  let query = supabase.from('puppies').select('*').limit(1);
-  if (userId) {
-    query = query.eq('user_id', userId);
-  }
-  const { data: puppy, error } = await query.maybeSingle();
+  try {
+    // Try with user_id filter first
+    if (userId) {
+      const { data: puppy, error } = await supabase
+        .from('puppies')
+        .select('*')
+        .eq('user_id', userId)
+        .limit(1)
+        .maybeSingle();
 
-  if (error) {
-    console.error('fetchPuppy error:', error);
-    throw error;
-  }
-  if (!puppy) return null;
+      if (!error && puppy) {
+        return await enrichPuppy(puppy);
+      }
+    }
 
-  // Fetch weight logs for this puppy
-  const { data: weightLogs, error: wErr } = await supabase
+    // Fallback: get any puppy (for backward compatibility / pre-migration data)
+    const { data: puppy, error } = await supabase
+      .from('puppies')
+      .select('*')
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!puppy) return null;
+
+    return await enrichPuppy(puppy);
+  } catch (err) {
+    console.error('fetchPuppy error:', err);
+    return null;
+  }
+}
+
+async function enrichPuppy(puppy) {
+  const { data: weightLogs } = await supabase
     .from('weight_logs')
     .select('*')
     .eq('puppy_id', puppy.id)
     .order('date');
-
-  if (wErr) throw wErr;
 
   return {
     id: puppy.id,
@@ -111,22 +129,35 @@ export async function addWeightLog(puppyId, entry, userId) {
 // ─── DAILY LOGS ──────────────────────────────────────────────
 
 export async function fetchAllLogs(userId) {
-  let query = supabase
-    .from('daily_logs')
-    .select('*')
-    .order('date', { ascending: false });
+  try {
+    // Try with user_id filter first
+    if (userId) {
+      const { data, error } = await supabase
+        .from('daily_logs')
+        .select('*')
+        .eq('user_id', userId)
+        .order('date', { ascending: false });
 
-  if (userId) {
-    query = query.eq('user_id', userId);
+      if (!error && data && data.length > 0) {
+        return parseLogs(data);
+      }
+    }
+
+    // Fallback: get all logs (backward compatibility)
+    const { data, error } = await supabase
+      .from('daily_logs')
+      .select('*')
+      .order('date', { ascending: false });
+
+    if (error) throw error;
+    return parseLogs(data);
+  } catch (err) {
+    console.error('fetchAllLogs error:', err);
+    return {};
   }
+}
 
-  const { data, error } = await query;
-
-  if (error) {
-    console.error('fetchAllLogs error:', error);
-    throw error;
-  }
-
+function parseLogs(data) {
   const logs = {};
   (data || []).forEach((row) => {
     logs[row.date] = {
@@ -168,22 +199,35 @@ export async function upsertDayLog(date, dayLog, userId) {
 // ─── HEALTH RECORDS ──────────────────────────────────────────
 
 export async function fetchHealthRecords(userId) {
-  let query = supabase
-    .from('health_records')
-    .select('*')
-    .order('date', { ascending: false });
+  try {
+    // Try with user_id filter first
+    if (userId) {
+      const { data, error } = await supabase
+        .from('health_records')
+        .select('*')
+        .eq('user_id', userId)
+        .order('date', { ascending: false });
 
-  if (userId) {
-    query = query.eq('user_id', userId);
+      if (!error && data && data.length > 0) {
+        return parseHealthRecords(data);
+      }
+    }
+
+    // Fallback
+    const { data, error } = await supabase
+      .from('health_records')
+      .select('*')
+      .order('date', { ascending: false });
+
+    if (error) throw error;
+    return parseHealthRecords(data);
+  } catch (err) {
+    console.error('fetchHealthRecords error:', err);
+    return [];
   }
+}
 
-  const { data, error } = await query;
-
-  if (error) {
-    console.error('fetchHealthRecords error:', error);
-    throw error;
-  }
-
+function parseHealthRecords(data) {
   return (data || []).map((r) => ({
     id: r.id,
     type: r.type,

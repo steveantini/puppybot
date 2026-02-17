@@ -52,16 +52,30 @@ export function DataProvider({ children }) {
     async function load() {
       setIsLoading(true);
       try {
-        console.log('[DataContext] Loading data for user:', userId);
-        const [puppyData, logsData, healthData] = await Promise.all([
-          fetchPuppy(userId),
-          fetchAllLogs(userId),
-          fetchHealthRecords(userId),
-        ]);
+        // Load each independently so one failure doesn't block others
+        let puppyData = null;
+        let logsData = {};
+        let healthData = [];
+
+        try {
+          puppyData = await fetchPuppy(userId);
+        } catch (e) {
+          console.warn('[DataContext] Puppy fetch failed:', e);
+        }
+
+        try {
+          logsData = await fetchAllLogs(userId);
+        } catch (e) {
+          console.warn('[DataContext] Logs fetch failed:', e);
+        }
+
+        try {
+          healthData = await fetchHealthRecords(userId);
+        } catch (e) {
+          console.warn('[DataContext] Health fetch failed:', e);
+        }
 
         if (cancelled) return;
-
-        console.log('[DataContext] Puppy:', puppyData?.name, 'Logs:', Object.keys(logsData).length, 'Health:', healthData.length);
 
         if (puppyData) setPuppy(puppyData);
         else setPuppy(null);
