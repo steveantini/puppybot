@@ -22,6 +22,18 @@ A clean, modern puppy behavior tracker built with React. Log potty breaks, meals
 - **Date Picker on All Forms** — Log entries for any date, not just today
 - **PDF Export** — Generate printable reports from both History and Stats pages
 
+## 🗺️ Product Roadmap
+
+PuppyBot is evolving from a personal app into a multi-tenant SaaS platform! See our complete development roadmap in **[ROADMAP.md](./ROADMAP.md)** for details on:
+
+- **Phase 1 (In Progress)**: Multi-user authentication, multi-puppy support, admin panel
+- **Phase 2 (Next)**: Family sharing and collaboration features  
+- **Phase 3 (Future)**: Two-factor authentication and advanced security
+- **Phase 4 (Future)**: Premium subscriptions and payment processing
+- **Phase 5+**: Enhanced features, mobile apps, and community
+
+Track progress, suggest features, and see what's coming next!
+
 ## Tech Stack
 
 | Layer | Technology |
