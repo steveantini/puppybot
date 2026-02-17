@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
-import { formatTime, getCurrentTime, getGreeting, getTodayKey, formatDate, TZ } from '../utils/helpers';
+import { getGreeting, getTodayKey, formatDate, TZ } from '../utils/helpers';
 import Modal from '../components/Modal';
 import PottyForm from '../components/forms/PottyForm';
 import MealForm from '../components/forms/MealForm';
@@ -12,9 +12,7 @@ import {
   UtensilsCrossed,
   Moon,
   Sun,
-  BedDouble,
   PenLine,
-  Trash2,
 } from 'lucide-react';
 
 const quickAddButtons = [
@@ -26,7 +24,7 @@ const quickAddButtons = [
 ];
 
 export default function Dashboard() {
-  const { todayLog, puppy, deletePottyBreak, deleteMeal, deleteNap, deleteWakeUpTime } = useData();
+  const { puppy } = useData();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeModal, setActiveModal] = useState(null);
 
@@ -36,105 +34,19 @@ export default function Dashboard() {
   }, []);
 
   const today = getTodayKey();
-
-  // Build timeline entries
-  const timelineEntries = [];
-
-  todayLog.wakeUpTimes?.forEach((w) => {
-    const isNight = w.label === 'Night Wake';
-    timelineEntries.push({
-      type: 'wake',
-      time: w.time,
-      data: w,
-      icon: isNight ? Moon : Sun,
-      color: isNight ? 'text-steel-500' : 'text-warm-500',
-      bgColor: isNight ? 'bg-steel-50' : 'bg-warm-50',
-      label: w.label || 'Wake Up',
-      detail: w.notes || undefined,
-      id: w.id,
-    });
-  });
-
-  todayLog.pottyBreaks?.forEach((p) => {
-    const details = [];
-    if (p.pee === 'good') details.push('Pee ✓');
-    if (p.pee === 'accident') details.push('Pee ✗');
-    if (p.poop === 'good') details.push('Poop ✓');
-    if (p.poop === 'accident') details.push('Poop ✗');
-    if (p.ringBell) details.push('Bell 🔔');
-    timelineEntries.push({
-      type: 'potty',
-      time: p.time,
-      data: p,
-      icon: Droplets,
-      color: 'text-steel-500',
-      bgColor: 'bg-steel-50',
-      label: 'Potty Break',
-      detail: details.join(' · '),
-      id: p.id,
-    });
-  });
-
-  todayLog.meals?.forEach((m) => {
-    timelineEntries.push({
-      type: 'meal',
-      time: m.time,
-      data: m,
-      icon: UtensilsCrossed,
-      color: 'text-warm-600',
-      bgColor: 'bg-warm-50',
-      label: 'Meal',
-      detail: `${m.foodGiven || ''}${m.foodEaten ? ' → ' + m.foodEaten : ''}`,
-      id: m.id,
-    });
-  });
-
-  todayLog.naps?.forEach((n) => {
-    timelineEntries.push({
-      type: 'nap',
-      time: n.startTime,
-      data: n,
-      icon: Moon,
-      color: 'text-steel-600',
-      bgColor: 'bg-steel-50',
-      label: 'Nap',
-      detail: `${formatTime(n.startTime)} – ${formatTime(n.endTime)}`,
-      id: n.id,
-    });
-  });
-
-  if (todayLog.bedTime) {
-    timelineEntries.push({
-      type: 'bed',
-      time: todayLog.bedTime,
-      icon: BedDouble,
-      color: 'text-steel-600',
-      bgColor: 'bg-steel-50',
-      label: 'Bed Time',
-    });
-  }
-
-  timelineEntries.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
-
-  const handleDelete = (type, id) => {
-    if (type === 'potty') deletePottyBreak(id);
-    if (type === 'meal') deleteMeal(id);
-    if (type === 'nap') deleteNap(id);
-    if (type === 'wake') deleteWakeUpTime(id);
-  };
+  const puppyName = puppy?.name || 'your puppy';
 
   return (
-    <div className="pb-4 space-y-5">
+    <div className="pb-4 space-y-6">
       {/* Greeting */}
-      <div className="text-center pt-1">
-        <p className="text-sand-700 text-base font-semibold">
-          {getGreeting()}
-          {puppy?.name ? `, ${puppy.name}'s family!` : '!'}
+      <div className="text-center pt-2">
+        <p className="text-sand-800 text-lg font-semibold">
+          {getGreeting()}, {puppyName}&apos;s family!
         </p>
         <p className="text-sand-500 text-sm mt-1">
           {formatDate(today)}
         </p>
-        <div className="text-lg font-medium text-sand-500 tabular-nums tracking-tight mt-0.5">
+        <div className="text-lg font-medium text-sand-400 tabular-nums tracking-tight mt-0.5">
           {currentTime.toLocaleTimeString('en-US', {
             timeZone: TZ,
             hour: 'numeric',
@@ -143,73 +55,30 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Quick Add Buttons — full width */}
-      <div className="grid grid-cols-5 gap-2">
+      {/* Welcome intro */}
+      <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm px-6 py-5 text-center max-w-2xl mx-auto">
+        <p className="text-sand-700 text-sm leading-relaxed">
+          Welcome to <strong className="text-steel-500">PuppyBot</strong> — your companion for tracking {puppyName}&apos;s daily routine.
+          Use the buttons below to log potty breaks, meals, naps, sleep schedules, and notes.
+          Every little entry helps you spot patterns and celebrate progress!
+        </p>
+      </div>
+
+      {/* Quick Add Buttons — full width, closer to square */}
+      <div className="grid grid-cols-5 gap-2 sm:gap-3">
         {quickAddButtons.map((btn) => {
           const Icon = btn.icon;
           return (
             <button
               key={btn.id}
               onClick={() => setActiveModal(btn.id)}
-              className={`flex flex-col items-center justify-center gap-1.5 py-4 rounded-2xl border text-sm font-bold whitespace-nowrap transition-all active:scale-[0.97] shadow-sm ${btn.color}`}
+              className={`flex flex-col items-center justify-center gap-2 py-6 sm:py-8 rounded-2xl border text-sm font-bold whitespace-nowrap transition-all active:scale-[0.97] shadow-sm ${btn.color}`}
             >
-              <Icon size={22} />
+              <Icon size={26} />
               {btn.label}
             </button>
           );
         })}
-      </div>
-
-      {/* Today's Timeline */}
-      <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-sand-100">
-          <h3 className="text-xs font-semibold text-sand-500 uppercase tracking-widest">Today&apos;s Timeline</h3>
-        </div>
-        {timelineEntries.length === 0 ? (
-          <div className="px-5 py-14 text-center">
-            <p className="text-sand-400 text-sm">No entries yet today.</p>
-            <p className="mt-1 text-sand-300 text-xs">Use the buttons above to start logging!</p>
-          </div>
-        ) : (
-          <div className="divide-y divide-sand-100">
-            {timelineEntries.map((entry, i) => {
-              const Icon = entry.icon;
-              return (
-                <div key={`${entry.type}-${entry.time}-${i}`} className="px-5 py-3.5 flex items-start gap-3 group hover:bg-sand-50/50 transition-colors">
-                  <div className={`mt-0.5 p-2 rounded-xl ${entry.bgColor} ${entry.color}`}>
-                    <Icon size={15} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sand-900 text-sm">
-                        {entry.label}
-                      </span>
-                      <span className="text-xs text-sand-400">
-                        {formatTime(entry.time)}
-                      </span>
-                    </div>
-                    {entry.detail && (
-                      <p className="text-xs text-sand-500 mt-0.5">{entry.detail}</p>
-                    )}
-                    {entry.data?.notes && (
-                      <p className="text-xs text-sand-400 mt-0.5 italic">
-                        {entry.data.notes}
-                      </p>
-                    )}
-                  </div>
-                  {entry.id && (
-                    <button
-                      onClick={() => handleDelete(entry.type, entry.id)}
-                      className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1.5 text-sand-300 hover:text-rose-400 transition-all"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
 
       {/* Modals */}

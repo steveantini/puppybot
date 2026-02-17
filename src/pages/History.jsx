@@ -17,6 +17,8 @@ import {
   Square,
   PenLine,
   Filter,
+  Plus,
+  Minus,
 } from 'lucide-react';
 
 const CATEGORY_OPTIONS = [
@@ -52,6 +54,7 @@ function dateHasCategory(log, category) {
 export default function History() {
   const { allLogs, puppy } = useData();
   const [expandedDate, setExpandedDate] = useState(null);
+  const [expandAll, setExpandAll] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedDates, setSelectedDates] = useState(new Set());
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -315,6 +318,19 @@ export default function History() {
         </div>
       </div>
 
+      {/* Expand / Collapse All */}
+      {!selectMode && sortedDates.length > 0 && (
+        <div className="flex justify-end">
+          <button
+            onClick={() => { setExpandAll((prev) => !prev); setExpandedDate(null); }}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-sand-600 bg-sand-100 border border-sand-200 rounded-xl hover:bg-sand-200 transition-colors"
+          >
+            {expandAll ? <Minus size={13} /> : <Plus size={13} />}
+            {expandAll ? 'Collapse All' : 'Expand All'}
+          </button>
+        </div>
+      )}
+
       {/* Active filter indicator */}
       {isFiltered && (
         <div className="text-xs text-sand-400 flex items-center gap-1.5">
@@ -370,7 +386,7 @@ export default function History() {
 
       {sortedDates.map((date) => {
         const log = allLogs[date];
-        const isExpanded = isFiltered || expandedDate === date;
+        const isExpanded = isFiltered || expandAll || expandedDate === date;
         const isSelected = selectedDates.has(date);
         const pottyCount = log.pottyBreaks?.length || 0;
         const mealCount = log.meals?.length || 0;
@@ -400,9 +416,9 @@ export default function History() {
               )}
 
               <button
-                onClick={() => !selectMode && !isFiltered && setExpandedDate(isExpanded ? null : date)}
+                onClick={() => !selectMode && !isFiltered && !expandAll && setExpandedDate(isExpanded ? null : date)}
                 className={`flex-1 px-5 py-4 flex items-center justify-between transition-colors ${
-                  selectMode || isFiltered ? 'cursor-default' : 'hover:bg-sand-50/50'
+                  selectMode || isFiltered || expandAll ? 'cursor-default' : 'hover:bg-sand-50/50'
                 } ${selectMode ? 'pl-2' : ''}`}
               >
                 <div className="text-left">
@@ -423,7 +439,7 @@ export default function History() {
                     </div>
                   )}
                 </div>
-                {!selectMode && !isFiltered && (
+                {!selectMode && !isFiltered && !expandAll && (
                   isExpanded ? (
                     <ChevronUp size={16} className="text-sand-400" />
                   ) : (

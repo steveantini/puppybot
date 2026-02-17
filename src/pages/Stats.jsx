@@ -260,14 +260,20 @@ export default function Stats() {
     return dateRange.map((date) => {
       const log = allLogs[date];
       const breaks = log?.pottyBreaks || [];
-      const total = breaks.length;
-      const accidents = breaks.filter((p) => p.pee === 'accident' || p.poop === 'accident').length;
-      const good = total - accidents;
-      const pct = total > 0 ? Math.round((good / total) * 100) : 0;
+      let totalOutcomes = 0;
+      let accidentOutcomes = 0;
+      breaks.forEach((p) => {
+        if (p.pee === 'good') totalOutcomes++;
+        if (p.pee === 'accident') { totalOutcomes++; accidentOutcomes++; }
+        if (p.poop === 'good') totalOutcomes++;
+        if (p.poop === 'accident') { totalOutcomes++; accidentOutcomes++; }
+      });
+      const successCount = totalOutcomes - accidentOutcomes;
+      const pct = totalOutcomes > 0 ? Math.round((successCount / totalOutcomes) * 100) : 0;
       return {
         date: formatShortDate(date),
-        successPct: total > 0 ? pct : null,
-        accidentPct: total > 0 ? 100 - pct : null,
+        successPct: totalOutcomes > 0 ? pct : null,
+        accidentPct: totalOutcomes > 0 ? 100 - pct : null,
       };
     });
   }, [allLogs, dateRange]);

@@ -2,34 +2,34 @@
 
 /* ── Design Tokens ── */
 @theme {
-  --color-sand-50: #FAFAF8;
-  --color-sand-100: #F4F1EC;
-  --color-sand-200: #EBE6DE;
-  --color-sand-300: #D9D1C5;
-  --color-sand-400: #B8AC9C;
-  --color-sand-500: #918272;
-  --color-sand-600: #6E6052;
-  --color-sand-700: #4D4237;
-  --color-sand-800: #37302A;
-  --color-sand-900: #2A231D;
+  --color-sand-50: #F9F8F4;
+  --color-sand-100: #F0ECE3;
+  --color-sand-200: #E3DCD0;
+  --color-sand-300: #CFC3B3;
+  --color-sand-400: #A89780;
+  --color-sand-500: #7F6E5C;
+  --color-sand-600: #615240;
+  --color-sand-700: #473828;
+  --color-sand-800: #332A1E;
+  --color-sand-900: #261E14;
 
-  --color-steel-50: #EFF4F8;
-  --color-steel-100: #D8E4EE;
-  --color-steel-200: #B4CCDC;
-  --color-steel-300: #85ADBE;
-  --color-steel-400: #5D8FA6;
-  --color-steel-500: #48778F;
-  --color-steel-600: #3B6179;
-  --color-steel-700: #2E4D60;
+  --color-steel-50: #EBF2FA;
+  --color-steel-100: #CEDFEF;
+  --color-steel-200: #A5C5DE;
+  --color-steel-300: #72A3C4;
+  --color-steel-400: #4A87AE;
+  --color-steel-500: #3872A0;
+  --color-steel-600: #2D5D85;
+  --color-steel-700: #204968;
 
-  --color-warm-50: #FBF7F1;
-  --color-warm-100: #F3EBE0;
-  --color-warm-200: #E4D5C2;
-  --color-warm-300: #CFBA9F;
-  --color-warm-400: #B59B7A;
-  --color-warm-500: #9F8362;
-  --color-warm-600: #7D6548;
-  --color-warm-700: #5E4B35;
+  --color-warm-50: #FBF5EC;
+  --color-warm-100: #F0E4D3;
+  --color-warm-200: #DFCDB4;
+  --color-warm-300: #C9AD8C;
+  --color-warm-400: #B08E66;
+  --color-warm-500: #9A7650;
+  --color-warm-600: #7B5D38;
+  --color-warm-700: #5C4328;
 
   --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
 }
@@ -44,7 +44,7 @@ body {
   overscroll-behavior-y: contain;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #2A231D;
+  color: #261E14;
 }
 
 * {

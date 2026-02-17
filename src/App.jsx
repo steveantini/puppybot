@@ -25,8 +25,8 @@ function AppShell() {
         {/* Header */}
         <header className="bg-white border-b border-sand-200/80 sticky top-0 z-50 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-            <div className="w-[50px]" />
-            <h1 className="text-4xl font-bold tracking-tight flex items-center gap-2.5">
+            <div className="w-[62px]" />
+            <h1 className="text-5xl font-bold tracking-tight flex items-center gap-3">
               <span className="text-warm-400">🐾</span>
               <span><span className="text-steel-400">Puppy</span><span className="text-steel-500">Bot</span></span>
             </h1>
@@ -35,10 +35,10 @@ function AppShell() {
                 <img
                   src={puppy.photoUrl}
                   alt={puppy.name || 'Puppy'}
-                  className="w-[50px] h-[50px] rounded-full object-cover border-2 border-sand-200 shadow-sm hover:border-steel-300 transition-colors"
+                  className="w-[62px] h-[62px] rounded-full object-cover border-2 border-sand-200 shadow-sm hover:border-steel-300 transition-colors"
                 />
               ) : (
-                <div className="w-[50px] h-[50px] rounded-full bg-sand-100 border-2 border-sand-200 flex items-center justify-center text-xl hover:border-steel-300 transition-colors">
+                <div className="w-[62px] h-[62px] rounded-full bg-sand-100 border-2 border-sand-200 flex items-center justify-center text-2xl hover:border-steel-300 transition-colors">
                   🐶
                 </div>
               )}
