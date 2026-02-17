@@ -29,9 +29,12 @@ export default function AdminPanel({ isOpen, onClose }) {
       />
 
       {/* Panel */}
-      <div className="fixed top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl z-50 transform transition-transform flex flex-col">
+      <div
+        className="fixed top-0 right-0 bottom-0 w-full max-w-sm bg-white shadow-2xl z-50"
+        style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}
+      >
         {/* Header */}
-        <div className="bg-gradient-to-r from-steel-500 to-steel-600 p-6 flex-shrink-0">
+        <div className="bg-gradient-to-r from-steel-500 to-steel-600 p-6" style={{ flexShrink: 0 }}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-white">Settings</h2>
             <button
@@ -52,8 +55,8 @@ export default function AdminPanel({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Menu Items */}
-        <div className="overflow-y-auto flex-1">
+        {/* Menu Items - scrollable middle */}
+        <div style={{ flex: '1 1 auto', overflowY: 'auto', minHeight: 0 }}>
           <div className="p-4 space-y-1">
             {/* Account Settings */}
             <button
@@ -168,8 +171,11 @@ export default function AdminPanel({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Footer - Sign Out */}
-        <div className="p-4 border-t border-sand-200 bg-white flex-shrink-0">
+        {/* Footer - Sign Out (always pinned to bottom) */}
+        <div
+          className="p-4 border-t border-sand-200 bg-white"
+          style={{ flexShrink: 0 }}
+        >
           <button
             onClick={handleSignOut}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors font-semibold"
