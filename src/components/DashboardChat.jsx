@@ -1,14 +1,14 @@
-import { useState, useRef, useEffect } from 'react'
-import { Send, Loader2, Mic, MicOff, Save, Download, Trash2, PawPrint } from 'lucide-react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { Send, Loader2, Mic, MicOff, Save, Download, Trash2, PawPrint, ArrowUp } from 'lucide-react'
 import { useData } from '../context/DataContext'
 import { getTodayKey } from '../utils/helpers'
 
 const SUGGESTED_QUESTIONS = [
-  { emoji: '🚽', text: 'How is potty training progress?', category: 'potty' },
-  { emoji: '😴', text: 'Analyze sleep patterns', category: 'sleep' },
-  { emoji: '🍽️', text: 'Is eating schedule consistent?', category: 'meals' },
-  { emoji: '📈', text: 'Show weekly trends', category: 'trends' },
-  { emoji: '💡', text: 'Any training recommendations?', category: 'advice' },
+  { emoji: '🚽', text: 'How is potty training progress?' },
+  { emoji: '😴', text: 'Analyze sleep patterns' },
+  { emoji: '🍽️', text: 'Is eating schedule consistent?' },
+  { emoji: '📈', text: 'Show weekly trends' },
+  { emoji: '💡', text: 'Any training recommendations?' },
 ]
 
 export default function DashboardChat() {
@@ -20,6 +20,7 @@ export default function DashboardChat() {
   const [isListening, setIsListening] = useState(false)
   const messagesEndRef = useRef(null)
   const recognitionRef = useRef(null)
+  const textareaRef = useRef(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -28,6 +29,18 @@ export default function DashboardChat() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Auto-resize textarea
+  const resizeTextarea = useCallback(() => {
+    const ta = textareaRef.current
+    if (!ta) return
+    ta.style.height = 'auto'
+    ta.style.height = Math.min(ta.scrollHeight, 150) + 'px'
+  }, [])
+
+  useEffect(() => {
+    resizeTextarea()
+  }, [input, resizeTextarea])
 
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -162,20 +175,28 @@ export default function DashboardChat() {
     }
   }
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
+  }
+
   const puppyName = puppy?.name || 'Puppy'
+  const hasMessages = messages.length > 0
 
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Title — on page background, not in a card */}
-      <div className="flex items-center gap-3 mb-4">
-        <PawPrint size={28} className="text-warm-300" />
+    <div className="max-w-3xl mx-auto">
+      {/* Centered title — on page background */}
+      <div className="flex items-center justify-center gap-3 mb-3">
+        <PawPrint size={26} className="text-warm-300" />
         <h2 className="text-2xl font-bold text-sand-900">
           Welcome to <span className="text-steel-400">{puppyName}</span><span className="text-steel-500">Bot</span>!
         </h2>
       </div>
 
-      {/* Date range selector — subtle, on background */}
-      <div className="flex items-center gap-2 mb-3">
+      {/* Centered data range */}
+      <div className="flex items-center justify-center gap-2 mb-6">
         <span className="text-xs text-sand-400 font-medium">Data range:</span>
         <div className="flex gap-1.5">
           {['week', 'month', 'ytd', 'all'].map((range) => (
@@ -193,9 +214,8 @@ export default function DashboardChat() {
           ))}
         </div>
 
-        {/* Action buttons when messages exist */}
-        {messages.length > 0 && (
-          <div className="flex items-center gap-1 ml-auto">
+        {hasMessages && (
+          <div className="flex items-center gap-1 ml-3">
             <button
               onClick={exportConversation}
               className="text-sand-400 hover:text-steel-500 p-1.5 rounded-lg transition-colors"
@@ -214,43 +234,20 @@ export default function DashboardChat() {
         )}
       </div>
 
-      {/* Chat window — clean white rectangle */}
-      <div className="bg-white rounded-2xl border border-sand-200/60 shadow-sm overflow-hidden">
-        {/* Messages area */}
-        <div className="h-[420px] overflow-y-auto p-5 relative">
-          {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full">
-              <p className="text-sand-400 text-sm mb-6">
-                Ask about training, patterns, or advice
-              </p>
-              
-              {/* Suggested questions */}
-              <div className="w-full max-w-md space-y-2">
-                {SUGGESTED_QUESTIONS.map((q, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleSuggestedQuestion(q)}
-                    className="w-full text-left px-4 py-2.5 border border-sand-200/80 rounded-xl text-xs text-sand-600 hover:border-steel-300 hover:bg-sand-50 transition-colors flex items-center gap-2.5"
-                  >
-                    <span className="text-sm">{q.emoji}</span>
-                    <span>{q.text}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
+      {/* Conversation — free on page background, no card */}
+      {hasMessages && (
+        <div className="mb-6 max-h-[50vh] overflow-y-auto px-1 space-y-4">
           {messages.map((msg, i) => (
             <div
               key={i}
-              className={`flex mb-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div className="flex flex-col gap-1 max-w-[85%]">
                 <div
                   className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                     msg.role === 'user'
                       ? 'bg-steel-500 text-white'
-                      : 'bg-sand-50 text-sand-900 border border-sand-200/60'
+                      : 'bg-white text-sand-900 border border-sand-200/60 shadow-sm'
                   }`}
                   style={{ whiteSpace: 'pre-wrap' }}
                 >
@@ -277,8 +274,8 @@ export default function DashboardChat() {
           ))}
 
           {loading && (
-            <div className="flex justify-start mb-4">
-              <div className="bg-sand-50 px-4 py-3 rounded-2xl flex items-center gap-2 border border-sand-200/60">
+            <div className="flex justify-start">
+              <div className="bg-white px-4 py-3 rounded-2xl flex items-center gap-2 border border-sand-200/60 shadow-sm">
                 <Loader2 className="animate-spin text-steel-500" size={16} />
                 <span className="text-xs text-sand-500">Thinking...</span>
               </div>
@@ -287,27 +284,49 @@ export default function DashboardChat() {
 
           <div ref={messagesEndRef} />
         </div>
+      )}
 
-        {/* Input area */}
-        <div className="px-5 pb-4 pt-2 border-t border-sand-100">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-              placeholder={`Ask about ${puppyName}'s training, patterns, or advice...`}
-              className="flex-1 px-4 py-2.5 border border-sand-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 placeholder:text-sand-300"
-              disabled={loading}
-            />
+      {/* Suggested questions — shown only when no messages */}
+      {!hasMessages && (
+        <div className="flex flex-wrap justify-center gap-2 mb-5">
+          {SUGGESTED_QUESTIONS.map((q, i) => (
+            <button
+              key={i}
+              onClick={() => handleSuggestedQuestion(q)}
+              className="px-3.5 py-2 border border-sand-200/80 rounded-full text-xs text-sand-500 hover:border-steel-300 hover:text-steel-600 hover:bg-white transition-colors flex items-center gap-1.5"
+            >
+              <span>{q.emoji}</span>
+              <span>{q.text}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Claude-style input container */}
+      <div className="bg-white rounded-2xl border border-sand-200/80 shadow-[0_2px_12px_rgba(0,0,0,0.06)] p-3">
+        <textarea
+          ref={textareaRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={`Ask about ${puppyName}'s training, patterns, or advice...`}
+          rows={1}
+          className="w-full resize-none bg-transparent text-sm text-sand-900 placeholder:text-sand-300 focus:outline-none leading-relaxed px-1 py-1"
+          disabled={loading}
+        />
+        <div className="flex items-center justify-between mt-1">
+          <p className="text-[10px] text-sand-300 pl-1">
+            powered by Claude 3.5 Sonnet
+          </p>
+          <div className="flex items-center gap-1.5">
             {recognitionRef.current && (
               <button
                 onClick={toggleVoiceInput}
                 disabled={loading}
-                className={`px-3 py-2.5 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                className={`p-2 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                   isListening
                     ? 'bg-warm-400 text-white'
-                    : 'bg-sand-100 text-sand-500 hover:bg-sand-200'
+                    : 'text-sand-400 hover:bg-sand-100 hover:text-sand-600'
                 }`}
                 title="Voice input"
               >
@@ -317,17 +336,15 @@ export default function DashboardChat() {
             <button
               onClick={() => handleSend()}
               disabled={loading || !input.trim()}
-              className="px-4 py-2.5 bg-steel-500 text-white rounded-xl hover:bg-steel-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`p-2 rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                input.trim()
+                  ? 'bg-steel-500 text-white hover:bg-steel-600'
+                  : 'bg-sand-100 text-sand-400'
+              }`}
+              title="Send"
             >
-              <Send size={18} />
+              <ArrowUp size={18} strokeWidth={2.5} />
             </button>
-          </div>
-
-          {/* Powered by Claude — bottom right */}
-          <div className="flex justify-end mt-2">
-            <p className="text-[10px] text-sand-300">
-              powered by Claude 3.5 Sonnet
-            </p>
           </div>
         </div>
       </div>
