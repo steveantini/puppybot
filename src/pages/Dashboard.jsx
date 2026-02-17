@@ -116,13 +116,6 @@ export default function Dashboard() {
 
   timelineEntries.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
 
-  const pottyCount = todayLog.pottyBreaks?.length || 0;
-  const mealCount = todayLog.meals?.length || 0;
-  const napCount = todayLog.naps?.length || 0;
-  const pottyGood = todayLog.pottyBreaks?.filter(
-    (p) => p.pee === 'good' || p.poop === 'good'
-  ).length || 0;
-
   const handleDelete = (type, id) => {
     if (type === 'potty') deletePottyBreak(id);
     if (type === 'meal') deleteMeal(id);
@@ -132,31 +125,16 @@ export default function Dashboard() {
 
   return (
     <div className="pb-4 space-y-5">
-      {/* Quick Add Buttons — top, large */}
-      <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide justify-start sm:justify-center pt-1">
-        {quickAddButtons.map((btn) => {
-          const Icon = btn.icon;
-          return (
-            <button
-              key={btn.id}
-              onClick={() => setActiveModal(btn.id)}
-              className={`flex items-center gap-2.5 px-6 py-4 rounded-2xl border text-base font-bold whitespace-nowrap transition-all active:scale-[0.97] shadow-sm ${btn.color}`}
-            >
-              <Icon size={22} />
-              {btn.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Greeting & Clock */}
-      <div className="text-center">
-        <p className="text-sand-500 text-sm">
+      {/* Greeting */}
+      <div className="text-center pt-1">
+        <p className="text-sand-700 text-base font-semibold">
           {getGreeting()}
-          {puppy?.name ? `, ${puppy.name}'s family` : ''} &middot;{' '}
+          {puppy?.name ? `, ${puppy.name}'s family!` : '!'}
+        </p>
+        <p className="text-sand-500 text-sm mt-1">
           {formatDate(today)}
         </p>
-        <div className="text-lg font-medium text-sand-500 tabular-nums tracking-tight mt-1">
+        <div className="text-lg font-medium text-sand-500 tabular-nums tracking-tight mt-0.5">
           {currentTime.toLocaleTimeString('en-US', {
             timeZone: TZ,
             hour: 'numeric',
@@ -165,110 +143,73 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-white rounded-2xl p-4 text-center border border-sand-200/80 shadow-sm">
-          <Droplets className="mx-auto text-steel-400" size={20} />
-          <div className="text-2xl font-bold text-sand-900 mt-1.5">{pottyCount}</div>
-          <div className="text-[11px] text-sand-500 font-medium">
-            Potty{pottyGood > 0 ? ` (${pottyGood} good)` : ''}
-          </div>
-        </div>
-        <div className="bg-white rounded-2xl p-4 text-center border border-sand-200/80 shadow-sm">
-          <UtensilsCrossed className="mx-auto text-warm-400" size={20} />
-          <div className="text-2xl font-bold text-sand-900 mt-1.5">{mealCount}</div>
-          <div className="text-[11px] text-sand-500 font-medium">Meals</div>
-        </div>
-        <div className="bg-white rounded-2xl p-4 text-center border border-sand-200/80 shadow-sm">
-          <Moon className="mx-auto text-steel-400" size={20} />
-          <div className="text-2xl font-bold text-sand-900 mt-1.5">{napCount}</div>
-          <div className="text-[11px] text-sand-500 font-medium">Naps</div>
-        </div>
+      {/* Quick Add Buttons — full width */}
+      <div className="grid grid-cols-5 gap-2">
+        {quickAddButtons.map((btn) => {
+          const Icon = btn.icon;
+          return (
+            <button
+              key={btn.id}
+              onClick={() => setActiveModal(btn.id)}
+              className={`flex flex-col items-center justify-center gap-1.5 py-4 rounded-2xl border text-sm font-bold whitespace-nowrap transition-all active:scale-[0.97] shadow-sm ${btn.color}`}
+            >
+              <Icon size={22} />
+              {btn.label}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Main content area */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Timeline */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-sand-200/80 shadow-sm overflow-hidden">
-          <div className="px-5 py-3.5 border-b border-sand-100">
-            <h3 className="text-xs font-semibold text-sand-500 uppercase tracking-widest">Today&apos;s Timeline</h3>
+      {/* Today's Timeline */}
+      <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm overflow-hidden">
+        <div className="px-5 py-3.5 border-b border-sand-100">
+          <h3 className="text-xs font-semibold text-sand-500 uppercase tracking-widest">Today&apos;s Timeline</h3>
+        </div>
+        {timelineEntries.length === 0 ? (
+          <div className="px-5 py-14 text-center">
+            <p className="text-sand-400 text-sm">No entries yet today.</p>
+            <p className="mt-1 text-sand-300 text-xs">Use the buttons above to start logging!</p>
           </div>
-          {timelineEntries.length === 0 ? (
-            <div className="px-5 py-14 text-center">
-              <p className="text-sand-400 text-sm">No entries yet today.</p>
-              <p className="mt-1 text-sand-300 text-xs">Use the buttons below to start logging!</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-sand-100">
-              {timelineEntries.map((entry, i) => {
-                const Icon = entry.icon;
-                return (
-                  <div key={`${entry.type}-${entry.time}-${i}`} className="px-5 py-3.5 flex items-start gap-3 group hover:bg-sand-50/50 transition-colors">
-                    <div className={`mt-0.5 p-2 rounded-xl ${entry.bgColor} ${entry.color}`}>
-                      <Icon size={15} />
+        ) : (
+          <div className="divide-y divide-sand-100">
+            {timelineEntries.map((entry, i) => {
+              const Icon = entry.icon;
+              return (
+                <div key={`${entry.type}-${entry.time}-${i}`} className="px-5 py-3.5 flex items-start gap-3 group hover:bg-sand-50/50 transition-colors">
+                  <div className={`mt-0.5 p-2 rounded-xl ${entry.bgColor} ${entry.color}`}>
+                    <Icon size={15} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-sand-900 text-sm">
+                        {entry.label}
+                      </span>
+                      <span className="text-xs text-sand-400">
+                        {formatTime(entry.time)}
+                      </span>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sand-900 text-sm">
-                          {entry.label}
-                        </span>
-                        <span className="text-xs text-sand-400">
-                          {formatTime(entry.time)}
-                        </span>
-                      </div>
-                      {entry.detail && (
-                        <p className="text-xs text-sand-500 mt-0.5">{entry.detail}</p>
-                      )}
-                      {entry.data?.notes && (
-                        <p className="text-xs text-sand-400 mt-0.5 italic">
-                          {entry.data.notes}
-                        </p>
-                      )}
-                    </div>
-                    {entry.id && (
-                      <button
-                        onClick={() => handleDelete(entry.type, entry.id)}
-                        className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1.5 text-sand-300 hover:text-rose-400 transition-all"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                    {entry.detail && (
+                      <p className="text-xs text-sand-500 mt-0.5">{entry.detail}</p>
+                    )}
+                    {entry.data?.notes && (
+                      <p className="text-xs text-sand-400 mt-0.5 italic">
+                        {entry.data.notes}
+                      </p>
                     )}
                   </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Skills & Notes Summary */}
-        <div className="space-y-4">
-          {(todayLog.skills || todayLog.notes) ? (
-            <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5 space-y-3">
-              {todayLog.skills && (
-                <div>
-                  <span className="text-xs font-semibold text-sand-500 uppercase tracking-widest">
-                    Skills
-                  </span>
-                  <p className="text-sm text-sand-800 mt-1 leading-relaxed">{todayLog.skills}</p>
+                  {entry.id && (
+                    <button
+                      onClick={() => handleDelete(entry.type, entry.id)}
+                      className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1.5 text-sand-300 hover:text-rose-400 transition-all"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
                 </div>
-              )}
-              {todayLog.notes && (
-                <div>
-                  <span className="text-xs font-semibold text-sand-500 uppercase tracking-widest">
-                    Notes
-                  </span>
-                  <p className="text-sm text-sand-800 mt-1 leading-relaxed">{todayLog.notes}</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-6 text-center">
-              <PenLine className="mx-auto text-sand-300 mb-2" size={20} />
-              <p className="text-sand-500 text-sm">No skills or notes yet today.</p>
-              <p className="text-xs mt-1 text-sand-300">Tap &quot;Notes&quot; below to add.</p>
-            </div>
-          )}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Modals */}
