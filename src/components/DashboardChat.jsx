@@ -1,12 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Send, Loader2, Mic, MicOff, Save, Download, Trash2, PawPrint, ArrowUp } from 'lucide-react'
 import { useData } from '../context/DataContext'
-import { useAuth } from '../context/AuthContext'
 import { getGreeting, getTodayKey } from '../utils/helpers'
 
 export default function DashboardChat() {
   const { puppy, updateNotes } = useData()
-  const { profile, user } = useAuth()
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -173,7 +171,6 @@ export default function DashboardChat() {
   }
 
   const puppyName = puppy?.name || 'your puppy'
-  const userName = profile?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || ''
   const hasMessages = messages.length > 0
 
   return (
@@ -182,7 +179,7 @@ export default function DashboardChat() {
       <div className="flex items-center justify-center gap-3 mb-3">
         <PawPrint size={26} className="text-warm-300" />
         <h2 className="text-2xl font-bold text-sand-900">
-          {getGreeting()}{userName ? `, ${userName}` : ''}! What would you like to know about {puppyName}?
+          {getGreeting()}! What would you like to know about {puppyName}?
         </h2>
       </div>
 
