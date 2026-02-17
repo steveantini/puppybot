@@ -6,10 +6,18 @@ A clean, modern puppy behavior tracker built with React. Log potty breaks, meals
 
 ## Features
 
-- **Dashboard** — Live clock, today's quick stats, chronological timeline of all logged activities, and sticky quick-add buttons for fast entry (3 taps or fewer)
-- **History** — Browse past days in a scrollable list; tap any day to expand full details. Select individual dates or all dates and export to PDF.
-- **Stats & Trends** — 7-day bar and line charts for potty success rate, meal tracking, and nap frequency (powered by Recharts). Export stats to PDF.
-- **Puppy Profile** — Store your puppy's name, breed, birthday (with auto-calculated age), photo, and a running weight log
+- **Dashboard** — Live clock, today's quick stats, chronological timeline of all logged activities, and prominent quick-add buttons at the top for fast entry (3 taps or fewer)
+- **History** — Browse past days in a scrollable list; tap any day to expand full details. Filter by category (Potty, Meals, Naps, Schedule, Skills, Notes) to see all matching entries across all dates. Select individual dates or all dates and export to PDF.
+- **Stats & Trends** — Comprehensive charts powered by Recharts with a date range selector (All Time, Last 7 Days, Last 30 Days, Year to Date):
+  - Potty success rate % chart (stacked green/red bars)
+  - Separate Pee and Poop count charts with good vs. accident breakdowns
+  - Calories eaten chart (food calories from meals + snack calories, stacked)
+  - Nap schedule heatmap (Gantt-style, 6 AM–9 PM timeline with total hours per day)
+  - Sleep schedule line chart (morning wake, night wake, and bed time)
+  - Export stats to PDF
+- **Snack Tracking** — Log number of snacks per day (4 calories each); snack calories are shown separately in the Calories chart
+- **Wake/Bed Schedule** — Log morning wake, multiple night wakes, and bed time all at once in a single form
+- **Puppy Profile** — Store your puppy's name, breed, birthday (with auto-calculated age), photo (shown as avatar in the header), and a running weight log
 - **Health Tracker** — Record immunizations, vet visits, and medications with date, description, and filterable categories
 - **Date Picker on All Forms** — Log entries for any date, not just today
 - **PDF Export** — Generate printable reports from both History and Stats pages
@@ -52,7 +60,7 @@ Enable them for Production, Preview, and Development environments.
 |-------|---------|
 | `puppies` | Puppy profile (name, breed, birthday, photo) |
 | `weight_logs` | Weight entries linked to a puppy |
-| `daily_logs` | One row per day with JSONB columns for potty breaks, meals, naps, schedule, skills, and notes |
+| `daily_logs` | One row per day with JSONB columns for potty breaks, meals, naps, schedule, skills, notes, and snack count |
 | `health_records` | Immunizations, vet visits, and medications |
 
 **To set up the database:** Open the Supabase SQL Editor, paste the contents of `supabase/migration.sql`, and run it. The migration also creates permissive RLS policies (no authentication required for now).
@@ -104,13 +112,13 @@ src/
 │       ├── MealForm.jsx       # Meal logging (amount given/eaten/notes)
 │       ├── NapForm.jsx        # Nap logging (start/end time)
 │       ├── WakeUpForm.jsx     # Wake up & bed time logging
-│       └── SkillsNotesForm.jsx # Free-text skills & notes
+│       └── SkillsNotesForm.jsx # Snacks count, skills & notes
 ├── context/
 │   └── DataContext.jsx        # React Context provider — async Supabase state
 ├── pages/
 │   ├── Dashboard.jsx          # Today's timeline + quick stats + quick-add
 │   ├── History.jsx            # Past days with expandable details + PDF export
-│   ├── Stats.jsx              # 7-day trend charts + PDF export
+│   ├── Stats.jsx              # Trend charts + heatmap + PDF export
 │   ├── PuppyProfile.jsx      # Puppy info + weight log
 │   └── HealthTracker.jsx     # Immunizations, vet visits, medications
 ├── utils/
@@ -140,11 +148,12 @@ weight_logs: [{ date, weight }]
 ```
 {
   date,
-  wake_up_times[] (JSONB),
+  wake_up_times[] (JSONB — each with label: Morning Wake / Night Wake),
   bed_time,
   potty_breaks[] (time, pee, poop, ringBell),
   naps[] (startTime, endTime),
   meals[] (time, foodGiven, foodEaten, notes),
+  snacks (integer — number of snacks, 4 cal each),
   skills, notes
 }
 ```
@@ -162,11 +171,27 @@ weight_logs: [{ date, weight }]
 - Bottom sheet modals on mobile, centered dialogs on desktop
 - Touch-optimized with `active:scale` feedback and large tap targets
 
+## Calorie Tracking
+
+Meals and snacks are tracked in calories on the Stats page:
+
+| Source | Conversion |
+|--------|-----------|
+| Meals | 1 cup of food = **367 calories** (calculated from food given × fraction eaten) |
+| Snacks | 1 snack = **4 calories** |
+
+The Calories chart shows food and snack calories as separate stacked bars with a combined total in the tooltip.
+
 ## Roadmap
 
 - [x] Supabase backend for cloud sync and multi-device access
 - [x] Export daily log / stats as PDF
 - [x] Date picker for logging past days
+- [x] Calorie tracking (meals + snacks)
+- [x] Nap schedule heatmap
+- [x] Sleep schedule chart (morning wake, night wake, bed time)
+- [x] Category filtering in History
+- [x] Date range selector for Stats (All Time, 7d, 30d, YTD)
 - [ ] Push notifications for feeding/potty reminders
 - [ ] Multi-puppy support
 - [ ] Photo gallery per day
