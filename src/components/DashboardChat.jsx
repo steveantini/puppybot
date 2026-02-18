@@ -1,13 +1,17 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Send, Loader2, Mic, MicOff, Save, Download, Trash2, PawPrint, ArrowUp } from 'lucide-react'
 import { useData } from '../context/DataContext'
+import { useAuth } from '../context/AuthContext'
+import { supabase } from '../utils/supabase'
 import { getGreeting, getTodayKey } from '../utils/helpers'
 
 export default function DashboardChat() {
   const { puppy, updateNotes } = useData()
+  const { user } = useAuth()
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [historyLoaded, setHistoryLoaded] = useState(false)
   const [dateRange, setDateRange] = useState('all')
   const [isListening, setIsListening] = useState(false)
   const messagesEndRef = useRef(null)
@@ -21,6 +25,23 @@ export default function DashboardChat() {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  useEffect(() => {
+    if (!user?.id || historyLoaded) return
+    const loadHistory = async () => {
+      const { data } = await supabase
+        .from('chat_history')
+        .select('role, message, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true })
+        .limit(100)
+      if (data && data.length > 0) {
+        setMessages(data.map((row) => ({ role: row.role, content: row.message })))
+      }
+      setHistoryLoaded(true)
+    }
+    loadHistory()
+  }, [user?.id, historyLoaded])
 
   // Auto-resize textarea
   const resizeTextarea = useCallback(() => {
@@ -115,6 +136,12 @@ export default function DashboardChat() {
           ...prev,
           { role: 'assistant', content: data.response },
         ])
+        if (user?.id) {
+          supabase.from('chat_history').insert([
+            { message: messageText, role: 'user', date_range: dateRange, user_id: user.id },
+            { message: data.response, role: 'assistant', date_range: dateRange, user_id: user.id },
+          ]).then(() => {})
+        }
       } else {
         throw new Error(data.error || 'Unknown error')
       }
@@ -166,9 +193,12 @@ export default function DashboardChat() {
     }
   }
 
-  const clearChat = () => {
+  const clearChat = async () => {
     if (confirm('Clear all messages?')) {
       setMessages([])
+      if (user?.id) {
+        await supabase.from('chat_history').delete().eq('user_id', user.id)
+      }
     }
   }
 

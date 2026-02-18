@@ -114,10 +114,6 @@ Guidelines:
     const result = await anthropicResponse.json()
     const assistantMessage = result.content?.[0]?.text || 'No response generated.'
 
-    // Save to chat history (non-blocking, ignore errors)
-    supabase.from('chat_history').insert({ message, role: 'user', date_range: dateRange }).then(() => {})
-    supabase.from('chat_history').insert({ message: assistantMessage, role: 'assistant', date_range: dateRange }).then(() => {})
-
     return new Response(
       JSON.stringify({
         success: true,

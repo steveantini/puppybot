@@ -84,6 +84,7 @@ CREATE INDEX idx_weight_logs_puppy_date ON weight_logs(puppy_id, date);
 -- Chat history (for AI assistant conversations)
 CREATE TABLE chat_history (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id uuid REFERENCES auth.users(id),
   message text NOT NULL,
   role text NOT NULL CHECK (role IN ('user', 'assistant')),
   date_range text,
@@ -110,6 +111,7 @@ CREATE POLICY "Allow all on weekly_insights" ON weekly_insights
 
 -- Indexes for chat tables
 CREATE INDEX idx_chat_history_created ON chat_history(created_at);
+CREATE INDEX idx_chat_history_user ON chat_history(user_id, created_at);
 CREATE INDEX idx_weekly_insights_week ON weekly_insights(week_start);
 
 -- ============================================================
