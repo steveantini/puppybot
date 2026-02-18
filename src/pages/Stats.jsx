@@ -222,7 +222,7 @@ function PottySchedule({ dateRange, allLogs }) {
   const dotColor = (type) => {
     if (type === 'pee') return '#E2B735';
     if (type === 'poop') return '#926940';
-    return '#8B5CF6';
+    return '#E87C3E';
   };
 
   if (pottyRows.length === 0) return <p className="text-sm text-sand-400 italic text-center py-6">No data in range.</p>;
@@ -272,7 +272,7 @@ function PottySchedule({ dateRange, allLogs }) {
         <div className="flex items-center justify-center gap-5 mt-3 text-[10px] text-sand-500">
           <span className="flex items-center gap-1.5"><span className="inline-block w-1.5 h-3 rounded-sm" style={{ background: '#E2B735' }} /> Pee</span>
           <span className="flex items-center gap-1.5"><span className="inline-block w-1.5 h-3 rounded-sm" style={{ background: '#926940' }} /> Poop</span>
-          <span className="flex items-center gap-1.5"><span className="inline-block w-1.5 h-3 rounded-sm" style={{ background: '#8B5CF6' }} /> Both</span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-1.5 h-3 rounded-sm" style={{ background: '#E87C3E' }} /> Both</span>
         </div>
       </div>
 
@@ -539,7 +539,7 @@ export default function Stats() {
             </h3>
             <ResponsiveContainer width="100%" height={240}>
               <LineChart data={pottyComboData}>
-                <CartesianGrid horizontal={true} vertical={false} stroke="#B8AFA3" strokeWidth={1} />
+                <CartesianGrid vertical={false} stroke="#A09688" strokeOpacity={1} />
                 <XAxis {...xAxisProps} />
                 <YAxis yAxisId="left" {...yAxisProps} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                 <YAxis yAxisId="right" orientation="right" {...yAxisProps} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
@@ -558,7 +558,7 @@ export default function Stats() {
             </h3>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={pottyData}>
-                <CartesianGrid horizontal={true} vertical={false} stroke="#B8AFA3" strokeWidth={1} />
+                <CartesianGrid vertical={false} stroke="#A09688" strokeOpacity={1} />
                 <XAxis {...xAxisProps} />
                 <YAxis yAxisId="left" {...yAxisProps} domain={[0, maxPeePerDay]} />
                 <YAxis yAxisId="right" orientation="right" {...yAxisProps} domain={[0, maxPeePerDay]} />
@@ -580,7 +580,7 @@ export default function Stats() {
             </h3>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={pottyData}>
-                <CartesianGrid horizontal={true} vertical={false} stroke="#B8AFA3" strokeWidth={1} />
+                <CartesianGrid vertical={false} stroke="#A09688" strokeOpacity={1} />
                 <XAxis {...xAxisProps} />
                 <YAxis yAxisId="left" {...yAxisProps} domain={[0, maxPoopPerDay]} />
                 <YAxis yAxisId="right" orientation="right" {...yAxisProps} domain={[0, maxPoopPerDay]} />
@@ -640,7 +640,7 @@ export default function Stats() {
             </h3>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={calorieData}>
-                <CartesianGrid horizontal={true} vertical={false} stroke="#B8AFA3" strokeWidth={1} />
+                <CartesianGrid vertical={false} stroke="#A09688" strokeOpacity={1} />
                 <XAxis {...xAxisProps} />
                 <YAxis yAxisId="left" {...yAxisProps} allowDecimals={false} domain={[0, maxCalPerDay]} />
                 <YAxis yAxisId="right" orientation="right" {...yAxisProps} allowDecimals={false} domain={[0, maxCalPerDay]} />
