@@ -1,42 +1,41 @@
 # PuppyBot
 
-A clean, modern puppy behavior tracker built with React. Log potty breaks, meals, naps, wake/bed times, training skills, and general notes — all from a fast, mobile-friendly interface. Designed to replace paper daily dog logs with something you can tap through in seconds.
+A clean, modern puppy behavior tracker built with React. Log potty breaks, meals, naps, wake/bed times, training skills, and general notes — all from a fast, mobile-friendly interface. Designed to replace paper daily dog logs with something you can tap through in seconds. Includes an AI-powered assistant for analyzing patterns and getting training advice.
 
-**Live app:** [puppybot.vercel.app](https://puppybot.vercel.app/)
+**Live app:** [puppybot.ai](https://puppybot.ai)
 
 ## Features
 
-- **Dashboard** — Clean welcome intro, large quick-add buttons for fast entry (3 taps or fewer), and a Claude-inspired AI chat input
+- **Dashboard** — Clean welcome intro, large quick-add buttons for fast entry (3 taps or fewer), and a Claude-inspired AI chat input with time-aware greeting
 - **History** — Browse past days in a scrollable list; tap any day to expand full details. Expand All / Collapse All toggle to view everything at once. Filter by category (Potty, Meals, Naps, Schedule, Skills, Notes) to see all matching entries across all dates. Select individual dates or all dates and export to PDF.
 - **Stats & Trends** — Comprehensive charts powered by Recharts with a date range selector (All Time, Last 7 Days, Last 30 Days, Year to Date):
   - Potty success rate line chart tracking daily % trend; hover shows total, good, accidents, and %
   - Separate Pee (yellow/red) and Poop (brown/red) bar charts; tooltips show category-specific totals, accidents, and success rate
-  - Calories eaten chart in shades of blue (dark blue for food, light blue for snacks)
+  - Calories eaten chart in shades of blue (dark blue for food, light blue for treats)
   - Nap schedule heatmap in light blue (Gantt-style, 6 AM–9 PM timeline with total hours per day)
   - Sleep schedule line chart (morning wake, night wake, and bed time)
   - Export stats to PDF
-- **Snack Tracking** — Log number of snacks per day (4 calories each); snack calories are shown separately in the Calories chart
+- **Treat Tracking** — Log number of treats per day (4 calories each); treat calories are shown separately in the Calories chart
 - **Wake/Bed Schedule** — Log morning wake, multiple night wakes, and bed time all at once in a single form
 - **Puppy Profile** — Store your puppy's name, breed, birthday (with auto-calculated age and dog years), gotcha day, breeder info, vet info, microchip number/company, insurance carrier/policy number, photo (shown as avatar in the header), and a running weight log. Collapsible "+More Info" section for reference details
 - **Health Tracker** — Record immunizations, vet visits, and medications with date, description, and filterable categories
 - **Date Picker on All Forms** — Log entries for any date, not just today
 - **PDF Export** — Generate printable reports from both History and Stats pages
 - **Clickable Header** — Tap the PuppyBot logo/title from any page to return to the dashboard
+- **AI Chat Assistant** — Claude-powered assistant on the dashboard with voice input, save-to-notes, export conversations, and data range filtering
 - **Multi-User Auth** — Email/password login and signup via Supabase Auth with protected routes
 - **Admin Panel** — Slide-out settings menu with account management, puppy management, and family sharing
 - **Family Sharing** — Invite family members by email with role-based access (Owner, Editor, Viewer); auto-accept invites on signup/login
 
-## 🗺️ Product Roadmap
+## Product Roadmap
 
-PuppyBot is evolving from a personal app into a multi-tenant SaaS platform! See our complete development roadmap in **[ROADMAP.md](./ROADMAP.md)** for details on:
+See **[ROADMAP.md](./ROADMAP.md)** for the full development roadmap:
 
-- **Phase 1 (In Progress)**: Multi-user authentication, multi-puppy support, admin panel
-- **Phase 2 (Next)**: Family sharing and collaboration features  
+- **Phase 1 (Mostly Complete)**: Multi-user authentication, multi-puppy support, admin panel, profile enhancements, dashboard UI
+- **Phase 2 (Partially Complete)**: Family sharing and collaboration features
 - **Phase 3 (Future)**: Two-factor authentication and advanced security
 - **Phase 4 (Future)**: Premium subscriptions and payment processing
 - **Phase 5+**: Enhanced features, mobile apps, and community
-
-Track progress, suggest features, and see what's coming next!
 
 ## Tech Stack
 
@@ -49,7 +48,10 @@ Track progress, suggest features, and see what's coming next!
 | Charts | Recharts |
 | PDF Export | jsPDF + jspdf-autotable |
 | Database | Supabase (PostgreSQL) |
+| Auth | Supabase Auth (email/password) |
+| AI | Anthropic Claude 3.5 Sonnet (via Supabase Edge Functions) |
 | Hosting | Vercel |
+| Domain | puppybot.ai |
 
 ## Deployment
 
@@ -57,7 +59,7 @@ Track progress, suggest features, and see what's coming next!
 
 The app is hosted on [Vercel](https://vercel.com) with automatic deployments from the `main` branch.
 
-**Live URL:** [https://puppybot.vercel.app/](https://puppybot.vercel.app/)
+**Live URL:** [https://puppybot.ai](https://puppybot.ai)
 
 Two environment variables must be set in Vercel under **Settings → Environment Variables**:
 
@@ -70,16 +72,21 @@ Enable them for Production, Preview, and Development environments.
 
 ### Supabase
 
-[Supabase](https://supabase.com) provides the PostgreSQL database for all app data. The schema is defined in `supabase/migration.sql` and creates four tables:
+[Supabase](https://supabase.com) provides the PostgreSQL database, authentication, and Edge Functions. The base schema is defined in `supabase/migration.sql` with incremental migrations in `supabase/migrations/`.
 
 | Table | Purpose |
 |-------|---------|
 | `puppies` | Puppy profile (name, breed, birthday, vet, microchip, insurance, photo) |
 | `weight_logs` | Weight entries linked to a puppy |
-| `daily_logs` | One row per day with JSONB columns for potty breaks, meals, naps, schedule, skills, notes, and snack count |
+| `daily_logs` | One row per day with JSONB columns for potty breaks, meals, naps, schedule, skills, notes, and treat count |
 | `health_records` | Immunizations, vet visits, and medications |
+| `user_profiles` | User accounts (full name, subscription tier) |
+| `puppy_members` | Links users to puppies with roles (owner, editor, viewer) |
+| `puppy_invites` | Pending family sharing invitations |
+| `chat_history` | AI assistant conversation logs |
+| `weekly_insights` | AI-generated weekly summaries |
 
-**To set up the database:** Open the Supabase SQL Editor, paste the contents of `supabase/migration.sql`, and run it. The migration also creates permissive RLS policies (no authentication required for now).
+**To set up the database:** Open the Supabase SQL Editor, paste the contents of `supabase/migration.sql`, and run it. Then run each migration in `supabase/migrations/` in order. Update the Site URL in Supabase Auth settings to match your domain.
 
 ## Getting Started
 
@@ -88,6 +95,7 @@ Enable them for Production, Preview, and Development environments.
 - Node.js 18+
 - npm
 - A Supabase project (free tier works)
+- An Anthropic API key (for AI chat assistant)
 
 ### Install & Run
 
@@ -116,6 +124,19 @@ npm run build
 npm run preview
 ```
 
+### Deploy AI Chat Assistant
+
+```bash
+# Link to your Supabase project
+npx supabase link --project-ref YOUR_PROJECT_REF
+
+# Set your Anthropic API key
+npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-your-key-here
+
+# Deploy the Edge Function
+npx supabase functions deploy chat-assistant
+```
+
 ## Project Structure
 
 ```
@@ -130,7 +151,7 @@ src/
 │       ├── MealForm.jsx       # Meal logging (amount given/eaten/notes)
 │       ├── NapForm.jsx        # Nap logging (start/end time)
 │       ├── WakeUpForm.jsx     # Wake up & bed time logging
-│       └── SkillsNotesForm.jsx # Snacks count, skills & notes
+│       └── SkillsNotesForm.jsx # Treats count, skills & notes
 ├── context/
 │   ├── AuthContext.jsx        # Authentication state, session, auto-accept invites
 │   └── DataContext.jsx        # Auth-aware data provider — async Supabase state
@@ -157,9 +178,12 @@ src/
 
 supabase/
 ├── migration.sql              # Base database schema + RLS policies
-└── migrations/
-    ├── 001_auth_and_multi_user.sql  # Auth, profiles, sharing tables
-    └── 002_add_microchip_insurance.sql  # Microchip & insurance columns
+├── migrations/
+│   ├── 001_auth_and_multi_user.sql  # Auth, profiles, sharing tables
+│   └── 002_add_microchip_insurance.sql  # Microchip & insurance columns
+└── functions/
+    ├── chat-assistant/index.ts    # AI chat Edge Function (calls Anthropic API)
+    └── weekly-insights/index.ts   # Weekly AI summary generator
 ```
 
 ## Data Model
@@ -183,7 +207,7 @@ weight_logs: [{ date, weight }]
   potty_breaks[] (time, pee, poop, ringBell),
   naps[] (startTime, endTime),
   meals[] (time, foodGiven, foodEaten, notes),
-  snacks (integer — number of snacks, 4 cal each),
+  snacks (integer — number of treats, 4 cal each),
   skills, notes
 }
 ```
@@ -202,31 +226,32 @@ weight_logs: [{ date, weight }]
 - Touch-optimized with `active:scale` feedback and large tap targets
 - Puppy profile photo displayed as an avatar in the header
 - Header paw icon (Lucide SVG) in light brown; "Puppy" in lighter steel blue, "Bot" in deeper steel blue
+- Clickable header logo returns to dashboard from any page
 
 ## Calorie Tracking
 
-Meals and snacks are tracked in calories on the Stats page:
+Meals and treats are tracked in calories on the Stats page:
 
 | Source | Conversion |
 |--------|-----------|
-| Meals | 1 cup of food = **367 calories** (calculated from food given × fraction eaten) |
-| Snacks | 1 snack = **4 calories** |
+| Meals | 1 cup of food = **381 calories** (calculated from food given × fraction eaten) |
+| Treats | 1 treat = **4 calories** |
 
-The Calories chart shows food and snack calories as separate stacked bars with a combined total in the tooltip.
+The Calories chart shows food and treat calories as separate stacked bars with a combined total in the tooltip.
 
 ## AI Chat Assistant
 
-PuppyBot includes an intelligent chat assistant powered by **Anthropic's Claude 3.5 Sonnet** that can analyze your puppy's data and provide insights, training advice, and answer questions.
+PuppyBot includes an intelligent chat assistant powered by **Anthropic's Claude 3.5 Sonnet** that can analyze your puppy's data and provide insights, training advice, and answer questions. The assistant runs as a Supabase Edge Function that calls the Anthropic API directly.
 
 ### Features
 
-- **🤖 Smart Analysis**: Ask questions about potty training progress, sleep patterns, eating habits, and trends
-- **📊 Context-Aware**: Analyzes your data across different time ranges (week, month, year-to-date, all time)
-- **💡 Training Tips**: Provides actionable recommendations based on behavioral patterns
-- **🎤 Voice Input**: Speak your questions using browser speech recognition
-- **💾 Save Insights**: Save helpful responses directly to your daily notes
-- **📥 Export Conversations**: Download chat history as text files
-- **🎨 Claude-Inspired UI**: Clean standalone input bar with auto-resizing textarea, time-aware greeting, and "powered by Claude 3.5 Sonnet" branding
+- **Smart Analysis**: Ask questions about potty training progress, sleep patterns, eating habits, and trends
+- **Context-Aware**: Analyzes your data across different time ranges (week, month, year-to-date, all time)
+- **Training Tips**: Provides actionable recommendations based on behavioral patterns
+- **Voice Input**: Speak your questions using browser speech recognition
+- **Save Insights**: Save helpful responses directly to your daily notes
+- **Export Conversations**: Download chat history as text files
+- **Claude-Inspired UI**: Clean standalone input bar with auto-resizing textarea, time-aware greeting, and "powered by Claude 3.5 Sonnet" branding
 
 ### Setup Instructions
 
@@ -236,15 +261,15 @@ PuppyBot includes an intelligent chat assistant powered by **Anthropic's Claude 
 2. Generate an API key from the dashboard
 3. Copy your key (starts with `sk-ant-...`)
 
-#### 2. Install Supabase CLI
+#### 2. Deploy the Edge Function
 
 ```bash
-npm install supabase --save-dev
-```
+# Link your Supabase project (one-time)
+npx supabase link --project-ref YOUR_PROJECT_REF
 
-#### 3. Deploy Edge Functions
+# Set your Anthropic API key as a secret
+npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-your-key-here
 
-```bash
 # Deploy the chat assistant function
 npx supabase functions deploy chat-assistant
 
@@ -252,53 +277,9 @@ npx supabase functions deploy chat-assistant
 npx supabase functions deploy weekly-insights
 ```
 
-#### 4. Set Environment Secrets
-
-```bash
-# Set your Anthropic API key
-npx supabase secrets set ANTHROPIC_API_KEY=sk-ant-your-key-here
-```
-
 The following environment variables are automatically available in Edge Functions:
 - `SUPABASE_URL` (auto-injected)
 - `SUPABASE_ANON_KEY` (auto-injected)
-
-#### 5. Run Database Migration
-
-Run the following SQL in your Supabase SQL Editor to create the chat tables:
-
-```sql
--- Chat history (for AI assistant conversations)
-CREATE TABLE chat_history (
-  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  message text NOT NULL,
-  role text NOT NULL CHECK (role IN ('user', 'assistant')),
-  date_range text,
-  created_at timestamptz DEFAULT now()
-);
-
--- Weekly insights (AI-generated summaries)
-CREATE TABLE weekly_insights (
-  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  week_start date NOT NULL,
-  insight text NOT NULL,
-  created_at timestamptz DEFAULT now()
-);
-
--- Enable RLS
-ALTER TABLE chat_history ENABLE ROW LEVEL SECURITY;
-ALTER TABLE weekly_insights ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Allow all on chat_history" ON chat_history
-  FOR ALL USING (true) WITH CHECK (true);
-
-CREATE POLICY "Allow all on weekly_insights" ON weekly_insights
-  FOR ALL USING (true) WITH CHECK (true);
-
--- Indexes
-CREATE INDEX idx_chat_history_created ON chat_history(created_at);
-CREATE INDEX idx_weekly_insights_week ON weekly_insights(week_start);
-```
 
 ### Usage
 
@@ -318,12 +299,11 @@ CREATE INDEX idx_weekly_insights_week ON weekly_insights(week_start);
 - "Why are accidents increasing?"
 - "How many calories per day on average?"
 
-### Cost Optimization
+### Cost
 
-The assistant uses **prompt caching** to reduce costs by 90% for repeated queries. With typical usage:
+With typical usage:
 - Average query: $0.01 - $0.03
 - 100 queries/month: ~$1-3
-- Cached context reused within 5-minute windows
 
 ### Weekly Insights (Optional)
 
@@ -338,7 +318,7 @@ The `weekly-insights` Edge Function can generate automated weekly summaries. To 
 - [x] Supabase backend for cloud sync and multi-device access
 - [x] Export daily log / stats as PDF
 - [x] Date picker for logging past days
-- [x] Calorie tracking (meals + snacks)
+- [x] Calorie tracking (meals + treats)
 - [x] Nap schedule heatmap
 - [x] Sleep schedule chart (morning wake, night wake, bed time)
 - [x] Category filtering in History
@@ -346,18 +326,21 @@ The `weekly-insights` Edge Function can generate automated weekly summaries. To 
 - [x] Expand All / Collapse All in History
 - [x] Vibrant, modern color palette (iteratively refined)
 - [x] Potty success rate combo chart (bars + trend line)
-- [x] AI Chat Assistant (Claude-powered insights, voice input, save to notes)
+- [x] AI Chat Assistant (Claude-powered, voice input, save to notes)
 - [x] Weekly insights generation with AI summaries
 - [x] User authentication (Supabase Auth, email/password)
 - [x] Multi-puppy support
 - [x] Admin panel with account, puppy, and sharing management
 - [x] Family sharing with auto-accept invites
-- [x] Puppy profile: microchip, insurance, vet, breeder fields
+- [x] Puppy profile: microchip, insurance, vet, breeder, gotcha day
 - [x] Claude-inspired chat UI with time-aware greeting
 - [x] Clickable header logo navigates to dashboard
+- [x] Custom domain (puppybot.ai)
 - [ ] Push notifications for feeding/potty reminders
 - [ ] Photo gallery per day
 - [ ] Two-factor authentication
+- [ ] Public shareable puppy profiles
+- [ ] Email invite notifications
 
 ## License
 

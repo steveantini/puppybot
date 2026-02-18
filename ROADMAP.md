@@ -2,53 +2,60 @@
 
 This document outlines the development roadmap for transforming PuppyBot from a personal app into a multi-tenant SaaS application.
 
-## 🎯 Current Status: Multi-User App with Auth & Sharing
-- ✅ Core puppy tracking features
-- ✅ AI assistant powered by Claude (Claude-inspired UI)
-- ✅ Stats and history visualization
-- ✅ PDF export functionality
+## Current Status: Multi-User App with Auth, Sharing & AI
+
+- ✅ Core puppy tracking (potty, meals, naps, sleep, treats, skills, notes)
+- ✅ AI assistant powered by Claude 3.5 Sonnet (deployed Edge Function, Claude-inspired UI)
+- ✅ Stats and history visualization with Recharts
+- ✅ PDF export from History and Stats
 - ✅ Supabase Auth (email/password login/signup)
 - ✅ Admin panel with account, puppy, and sharing management
-- ✅ Family sharing with auto-accept invites
-- ✅ Puppy profile: microchip, insurance, vet, breeder fields
+- ✅ Family sharing with role-based access and auto-accept invites
+- ✅ Puppy profile: microchip, insurance, vet, breeder, gotcha day, dog years
 - ✅ Clickable header logo navigates to dashboard
+- ✅ Custom domain: **puppybot.ai**
 
 ---
 
-## 🚀 Development Phases
+## Development Phases
 
-### **Phase 1: Foundation - Multi-User Support** ✅ In Progress
+### **Phase 1: Foundation — Multi-User Support** ✅ Mostly Complete
 
-#### 1.1 Authentication & Security ✅ In Progress
+#### 1.1 Authentication & Security ✅ Complete
 - [x] Supabase Authentication setup
 - [x] Email/password login and signup
-- [x] Row Level Security (RLS) policies
-- [x] User profile system
+- [x] Row Level Security (RLS) policies (permissive, to be tightened)
+- [x] User profile system (`user_profiles` table)
+- [x] Protected routes (redirect to login when unauthenticated)
 - [ ] Password reset flow
-- [ ] Email verification
-- [ ] Session management
+- [ ] Email verification enforcement
+- [ ] Session management UI
 
-#### 1.2 Multi-Puppy Support ✅ In Progress
+#### 1.2 Multi-Puppy Support ✅ Core Complete
 - [x] Multiple puppies per user
-- [x] Puppy switcher in navigation
-- [x] Puppy selection context
+- [x] Puppy management page
 - [x] "Add New Puppy" functionality
+- [x] Active puppy selection via localStorage
+- [ ] Puppy switcher dropdown in header
 - [ ] Archive/restore puppies
 - [ ] Puppy transfer between users
 
-#### 1.3 Basic Admin Panel ✅ In Progress
-- [x] Hamburger menu navigation
-- [x] Account settings
-- [x] Puppy management
-- [ ] Profile photo upload
-- [ ] Password change
+#### 1.3 Admin Panel ✅ Complete
+- [x] Hamburger menu navigation (slide-out panel)
+- [x] Account settings page (name, email display)
+- [x] Puppy management page
+- [x] Family & Sharing management page
+- [x] Greyed-out "Coming soon" items for future features
+- [x] Sign out from admin panel
+- [ ] Profile photo upload (Supabase Storage)
+- [ ] Password change from settings
 - [ ] Account deletion
 
 #### 1.4 Puppy Profile Enhancements ✅ Complete
-- [x] Dog years calculation
-- [x] Breeder name with website link
+- [x] Dog years calculation (to one decimal)
+- [x] Breeder name with clickable website link
 - [x] Gotcha day
-- [x] Veterinarian name with website link
+- [x] Veterinarian name with clickable website link
 - [x] Microchip number and company
 - [x] Insurance carrier and policy number
 - [x] Collapsible "+More Info" section
@@ -58,15 +65,27 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 - [x] Time-aware greeting ("Good morning/afternoon/evening!")
 - [x] "Powered by Claude 3.5 Sonnet" branding
 - [x] Clickable PuppyBot header logo navigates to dashboard
-- [x] Welcome text on page background (no card)
+- [x] Welcome text on page background (no card wrapper)
 - [x] Clean spacing between sections
+- [x] Renamed "Snacks" to "Treats" throughout UI and charts
+- [x] Updated calorie calculation (381 cal/cup)
+
+#### 1.6 AI Chat Assistant ✅ Deployed & Working
+- [x] Supabase Edge Function (`chat-assistant`)
+- [x] Direct Anthropic API integration (no SDK dependency)
+- [x] Data-aware context (puppy profile + daily logs)
+- [x] Date range filtering (week, month, YTD, all)
+- [x] Voice input via Web Speech API
+- [x] Save responses to daily notes
+- [x] Export conversations as text files
+- [x] Resilient error handling (non-blocking chat history, per-entry try/catch)
 
 ---
 
-### **Phase 2: Collaboration Features** 🔄 In Progress
+### **Phase 2: Collaboration Features** 🔄 Partially Complete
 
-#### 2.1 Family Sharing ✅ Partially Complete
-- [x] Invite system (send invites by email from app)
+#### 2.1 Family Sharing ✅ Core Complete
+- [x] Invite system (send invites by email from the app)
 - [x] Role-based access (Owner, Editor, Viewer)
   - **Owner**: Full control, can delete puppy, manage members
   - **Editor**: Can log data, edit entries
@@ -92,6 +111,11 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 - [ ] Time-limited access links
 - [ ] Revoke access anytime
 
+#### 2.4 Public Puppy Profiles
+- [ ] Shareable read-only URL (e.g., puppybot.ai/public/arlo)
+- [ ] Public view bypasses auth — shows profile, recent stats summary
+- [ ] Owner controls what's visible on public profile
+
 ---
 
 ### **Phase 3: Security & Trust** 📅 Future
@@ -109,6 +133,11 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 - [ ] IP-based access controls (optional)
 - [ ] Audit log for all actions
 - [ ] GDPR compliance tools (data export, deletion)
+
+#### 3.3 RLS Hardening
+- [ ] Replace permissive "Allow all" RLS policies with proper per-user policies
+- [ ] Use `SECURITY DEFINER` functions to avoid circular policy dependencies
+- [ ] Test multi-user data isolation
 
 ---
 
@@ -209,7 +238,7 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 
 ---
 
-## 📊 Success Metrics
+## Success Metrics
 
 ### User Engagement
 - Daily active users (DAU)
@@ -234,7 +263,7 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 
 ---
 
-## 🛠️ Technical Debt & Maintenance
+## Technical Debt & Maintenance
 
 ### Ongoing Tasks
 - [ ] Code splitting for better performance
@@ -246,10 +275,11 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 - [ ] E2E testing with Playwright
 - [ ] Performance monitoring (Vercel Analytics)
 - [ ] Error tracking (Sentry integration)
+- [ ] Tighten RLS policies (currently permissive "Allow all")
 
 ---
 
-## 💡 Innovation Backlog (Ideas to Explore)
+## Innovation Backlog (Ideas to Explore)
 
 - AI-powered photo recognition (breed identification, health issues)
 - Voice logging ("Alexa, log a potty break for Max")
@@ -262,7 +292,7 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 
 ---
 
-## 📝 Decision Log
+## Decision Log
 
 ### Technology Choices
 
@@ -275,8 +305,11 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 **Hosting**: Vercel
 - **Rationale**: Zero-config, auto-scaling, excellent for React apps
 
-**AI**: Anthropic Claude 3.5 Sonnet
-- **Rationale**: Best-in-class reasoning, good for data analysis
+**Domain**: puppybot.ai
+- **Rationale**: Short, memorable, reflects the AI-powered nature of the app
+
+**AI**: Anthropic Claude 3.5 Sonnet (direct API, no SDK)
+- **Rationale**: Best-in-class reasoning, good for data analysis. Direct fetch avoids SDK version issues in Deno Edge Functions.
 
 **Payments**: Stripe (planned)
 - **Rationale**: Industry standard, excellent docs, full feature set
@@ -286,33 +319,39 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 
 ---
 
-## 🔄 Version History
+## Version History
 
-### v0.2.0 (Current) - Multi-User with Auth & Sharing
+### v0.2.0 (Current) — Multi-User with Auth, Sharing & AI
 - Authentication (email/password login/signup)
 - Admin panel, account settings, puppy & sharing management
-- Family sharing with auto-accept invites
-- Puppy profile: microchip, insurance, vet, breeder fields
+- Family sharing with auto-accept invites (Option B)
+- Puppy profile: microchip, insurance, vet, breeder, gotcha day, dog years
 - Claude-inspired chat UI with time-aware greeting
-- Clickable header logo
+- AI Edge Function rewritten for reliability (direct API, no SDK)
+- Clickable header logo returns to dashboard
+- Renamed "Snacks" to "Treats" throughout
+- Updated calorie calculation to 381 cal/cup
+- Custom domain: puppybot.ai
 
-### v0.1.0 - Personal App
-- Core tracking features
-- AI assistant
+### v0.1.0 — Personal App
+- Core tracking features (potty, meals, naps, sleep, skills, notes)
+- AI assistant (initial implementation)
+- Stats and history with charts
+- PDF export
 - Single-user functionality
 
-### v1.0.0 (Target: Q2 2026) - Multi-User MVP
-- Authentication
-- Multi-puppy support
-- Basic admin panel
-- Family sharing
+### v1.0.0 (Target: Q2 2026) — Multi-User MVP
+- Tightened RLS policies
+- Password reset and email verification
+- Puppy switcher in header
+- Public shareable profiles
 
-### v1.1.0 (Target: Q3 2026) - Security & Trust
+### v1.1.0 (Target: Q3 2026) — Security & Trust
 - Two-factor authentication
 - Advanced security features
 - Audit logging
 
-### v2.0.0 (Target: Q4 2026) - Premium Launch
+### v2.0.0 (Target: Q4 2026) — Premium Launch
 - Subscription tiers
 - Payment processing
 - Feature gating
@@ -320,13 +359,13 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 
 ---
 
-## 📞 Feedback & Support
+## Feedback & Support
 
 We're building PuppyBot for puppy parents everywhere. Your feedback shapes our roadmap!
 
 - **Feature Requests**: [GitHub Issues](https://github.com/steveantini/puppybot/issues)
 - **Bug Reports**: [GitHub Issues](https://github.com/steveantini/puppybot/issues)
-- **General Feedback**: feedback@puppybot.app (future)
+- **Website**: [puppybot.ai](https://puppybot.ai)
 
 ---
 
