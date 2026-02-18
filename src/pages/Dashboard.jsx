@@ -32,7 +32,7 @@ export default function Dashboard() {
   return (
     <div className="pb-4">
       {/* Welcome intro — no card, just text on background */}
-      <div className="px-2 text-center pt-1">
+      <div className="max-w-3xl mx-auto px-2 text-center pt-1">
         <p className="text-sand-600 text-sm leading-relaxed">
           Welcome to <strong className="text-steel-500">PuppyBot</strong> — your intelligent companion for tracking {puppyName}&apos;s daily routine.
           {' '}Use the buttons below to log potty breaks, meals, naps, sleep schedules, and notes.
