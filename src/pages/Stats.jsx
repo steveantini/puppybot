@@ -458,6 +458,10 @@ export default function Stats() {
   const totalAccidents = totalPeeAccidents + totalPoopAccidents;
   const successRate = totalPotty > 0 ? Math.round(((totalPotty - totalAccidents) / totalPotty) * 100) : 0;
 
+  const maxPeePerDay = Math.max(1, ...pottyData.map((d) => d.peeGood + d.peeAccident));
+  const maxPoopPerDay = Math.max(1, ...pottyData.map((d) => d.poopGood + d.poopAccident));
+  const maxCalPerDay = Math.max(1, ...calorieData.map((d) => d.foodCal + d.snackCal));
+
   const hasData = Object.keys(allLogs).length > 0;
   const rangeLabel = getRangeLabel(range);
   const dayCount = dateRange.length;
@@ -555,8 +559,8 @@ export default function Stats() {
               <BarChart data={pottyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#DDD2C2" />
                 <XAxis {...xAxisProps} />
-                <YAxis yAxisId="left" {...yAxisProps} />
-                <YAxis yAxisId="right" orientation="right" {...yAxisProps} />
+                <YAxis yAxisId="left" {...yAxisProps} domain={[0, maxPeePerDay]} />
+                <YAxis yAxisId="right" orientation="right" {...yAxisProps} domain={[0, maxPeePerDay]} />
                 <Tooltip content={<PeeTooltip />} />
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#9A8568' }} />
                 <Bar yAxisId="left" dataKey="peeGood" stackId="pee" fill="#E2B735" name="Pee (Good)" radius={[0, 0, 0, 0]} />
@@ -575,8 +579,8 @@ export default function Stats() {
               <BarChart data={pottyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#DDD2C2" />
                 <XAxis {...xAxisProps} />
-                <YAxis yAxisId="left" {...yAxisProps} />
-                <YAxis yAxisId="right" orientation="right" {...yAxisProps} />
+                <YAxis yAxisId="left" {...yAxisProps} domain={[0, maxPoopPerDay]} />
+                <YAxis yAxisId="right" orientation="right" {...yAxisProps} domain={[0, maxPoopPerDay]} />
                 <Tooltip content={<PoopTooltip />} />
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#9A8568' }} />
                 <Bar yAxisId="left" dataKey="poopGood" stackId="poop" fill="#926940" name="Poop (Good)" radius={[0, 0, 0, 0]} />
@@ -604,8 +608,8 @@ export default function Stats() {
               <BarChart data={calorieData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
                 <XAxis {...xAxisProps} />
-                <YAxis yAxisId="left" {...yAxisProps} allowDecimals={false} />
-                <YAxis yAxisId="right" orientation="right" {...yAxisProps} allowDecimals={false} />
+                <YAxis yAxisId="left" {...yAxisProps} allowDecimals={false} domain={[0, maxCalPerDay]} />
+                <YAxis yAxisId="right" orientation="right" {...yAxisProps} allowDecimals={false} domain={[0, maxCalPerDay]} />
                 <Tooltip content={<CaloriesTooltip />} />
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#918272' }} />
                 <Bar yAxisId="left" dataKey="foodCal" stackId="cal" fill="#2B6AAF" name="Food" radius={[0, 0, 0, 0]} />
