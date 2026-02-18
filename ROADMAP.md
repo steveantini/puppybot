@@ -206,12 +206,15 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 - [ ] Export to pet health apps
 - [ ] Import from other tracking apps
 
-#### 5.4 Mobile Apps
+#### 5.4 Mobile Apps — [See full iOS Roadmap](iOS_ROADMAP.md)
 - [ ] Progressive Web App (PWA) optimization
-- [ ] Native iOS app (React Native or Swift)
-- [ ] Native Android app (React Native or Kotlin)
+- [ ] Native iOS app via Capacitor (wraps existing React app, ~95% code reuse)
+- [ ] Native Android app via Capacitor (same approach, added after iOS)
 - [ ] Offline-first functionality
 - [ ] Camera integration for quick photo logging
+- [ ] Push notifications (APNs / FCM)
+- [ ] Biometric auth (Face ID / Touch ID)
+- [ ] Haptic feedback on quick-add buttons
 
 ---
 
