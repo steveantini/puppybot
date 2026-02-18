@@ -249,8 +249,8 @@ function PottySchedule({ dateRange, allLogs }) {
               {row.breaks.map((b, i) => (
                 <div
                   key={i}
-                  className="absolute rounded-full cursor-default"
-                  style={{ left: `${b.leftPct}%`, top: '50%', transform: 'translate(-50%, -50%)', width: 10, height: 10, background: dotColor(b.type), border: '1.5px solid #fff', boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }}
+                  className="absolute top-0 bottom-0 rounded-sm cursor-default"
+                  style={{ left: `${b.leftPct}%`, transform: 'translateX(-50%)', width: 5, background: dotColor(b.type), opacity: 0.9 }}
                   onMouseEnter={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const parts = [];
@@ -270,9 +270,9 @@ function PottySchedule({ dateRange, allLogs }) {
 
         {/* Legend */}
         <div className="flex items-center justify-center gap-5 mt-3 text-[10px] text-sand-500">
-          <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: '#E2B735' }} /> Pee</span>
-          <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: '#926940' }} /> Poop</span>
-          <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: '#8B5CF6' }} /> Both</span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-1.5 h-3 rounded-sm" style={{ background: '#E2B735' }} /> Pee</span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-1.5 h-3 rounded-sm" style={{ background: '#926940' }} /> Poop</span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-1.5 h-3 rounded-sm" style={{ background: '#8B5CF6' }} /> Both</span>
         </div>
       </div>
 
@@ -545,6 +545,7 @@ export default function Stats() {
                 <YAxis yAxisId="right" orientation="right" {...yAxisProps} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                 <Tooltip content={<SuccessComboTooltip />} />
                 <Line yAxisId="left" type="monotone" dataKey="successPct" stroke="#2B6AAF" strokeWidth={2.5} dot={{ fill: '#2B6AAF', r: 4, strokeWidth: 0 }} name="Success %" connectNulls activeDot={{ r: 6, fill: '#2B6AAF', strokeWidth: 2, stroke: '#fff' }} />
+                <Line yAxisId="right" type="monotone" dataKey="successPct" stroke="transparent" dot={false} activeDot={false} legendType="none" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -565,6 +566,8 @@ export default function Stats() {
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#9A8568' }} />
                 <Bar yAxisId="left" dataKey="peeGood" stackId="pee" fill="#E2B735" name="Pee (Good)" radius={[0, 0, 0, 0]} />
                 <Bar yAxisId="left" dataKey="peeAccident" stackId="pee" fill="#D4726A" name="Pee (Accident)" radius={[4, 4, 0, 0]} />
+                <Bar yAxisId="right" dataKey="peeGood" stackId="pee-r" fill="transparent" legendType="none" />
+                <Bar yAxisId="right" dataKey="peeAccident" stackId="pee-r" fill="transparent" legendType="none" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -585,6 +588,8 @@ export default function Stats() {
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#9A8568' }} />
                 <Bar yAxisId="left" dataKey="poopGood" stackId="poop" fill="#926940" name="Poop (Good)" radius={[0, 0, 0, 0]} />
                 <Bar yAxisId="left" dataKey="poopAccident" stackId="poop" fill="#D4726A" name="Poop (Accident)" radius={[4, 4, 0, 0]} />
+                <Bar yAxisId="right" dataKey="poopGood" stackId="poop-r" fill="transparent" legendType="none" />
+                <Bar yAxisId="right" dataKey="poopAccident" stackId="poop-r" fill="transparent" legendType="none" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -596,26 +601,6 @@ export default function Stats() {
               Potty Schedule ({dayCount}d)
             </h3>
             <PottySchedule dateRange={dateRange} allLogs={allLogs} />
-          </div>
-
-          {/* Calories Chart */}
-          <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
-            <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
-              <TrendingUp size={14} className="text-sand-400" />
-              Calories Eaten ({dayCount}d)
-            </h3>
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={calorieData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
-                <XAxis {...xAxisProps} />
-                <YAxis yAxisId="left" {...yAxisProps} allowDecimals={false} domain={[0, maxCalPerDay]} />
-                <YAxis yAxisId="right" orientation="right" {...yAxisProps} allowDecimals={false} domain={[0, maxCalPerDay]} />
-                <Tooltip content={<CaloriesTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#918272' }} />
-                <Bar yAxisId="left" dataKey="foodCal" stackId="cal" fill="#2B6AAF" name="Food" radius={[0, 0, 0, 0]} />
-                <Bar yAxisId="left" dataKey="snackCal" stackId="cal" fill="#96BDE0" name="Treats" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
           </div>
 
           {/* Nap Heatmap */}
@@ -644,6 +629,28 @@ export default function Stats() {
                 <Line type="monotone" dataKey="nightWake" stroke="#3B6179" strokeWidth={2.5} strokeDasharray="6 3" dot={dayCount <= 31 ? { fill: '#3B6179', r: 3.5, strokeWidth: 0 } : false} name="Night Wake" connectNulls />
                 <Line type="monotone" dataKey="bed" stroke="#48778F" strokeWidth={2.5} dot={dayCount <= 31 ? { fill: '#48778F', r: 3.5, strokeWidth: 0 } : false} name="Bed Time" connectNulls />
               </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Calories Chart */}
+          <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+            <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
+              <TrendingUp size={14} className="text-sand-400" />
+              Calories Eaten ({dayCount}d)
+            </h3>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={calorieData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
+                <XAxis {...xAxisProps} />
+                <YAxis yAxisId="left" {...yAxisProps} allowDecimals={false} domain={[0, maxCalPerDay]} />
+                <YAxis yAxisId="right" orientation="right" {...yAxisProps} allowDecimals={false} domain={[0, maxCalPerDay]} />
+                <Tooltip content={<CaloriesTooltip />} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#918272' }} />
+                <Bar yAxisId="left" dataKey="foodCal" stackId="cal" fill="#2B6AAF" name="Food" radius={[0, 0, 0, 0]} />
+                <Bar yAxisId="left" dataKey="snackCal" stackId="cal" fill="#96BDE0" name="Treats" radius={[4, 4, 0, 0]} />
+                <Bar yAxisId="right" dataKey="foodCal" stackId="cal-r" fill="transparent" legendType="none" />
+                <Bar yAxisId="right" dataKey="snackCal" stackId="cal-r" fill="transparent" legendType="none" />
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </>
