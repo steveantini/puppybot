@@ -47,6 +47,7 @@ function AppShell() {
                   <Link to="/" className="text-5xl font-bold tracking-tight flex items-center gap-3 hover:opacity-90 transition-opacity">
                     <PawPrint size={36} className="text-warm-200" />
                     <span><span className="text-steel-400">Puppy</span><span className="text-steel-500">Bot</span></span>
+                    <span className="text-[10px] font-semibold tracking-widest uppercase text-steel-400 border border-steel-200 rounded-full px-2 py-0.5 self-start mt-2">beta</span>
                   </Link>
                   <div className="flex items-center gap-3 shrink-0">
                     <Link to="/profile">
