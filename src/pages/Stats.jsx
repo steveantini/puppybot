@@ -195,6 +195,101 @@ for (let m = NAP_START; m <= NAP_END; m += 60) {
   HOUR_TICKS.push(m);
 }
 
+function PottySchedule({ dateRange, allLogs }) {
+  const [hoveredDot, setHoveredDot] = useState(null);
+
+  const pottyRows = useMemo(() => {
+    const dates = [...dateRange].sort((a, b) => b.localeCompare(a));
+    return dates.map((date) => {
+      const log = allLogs[date];
+      const breaks = (log?.pottyBreaks || []).map((b) => {
+        const min = timeToMinutes(b.time);
+        if (min == null) return null;
+        const clipped = Math.max(NAP_START, Math.min(NAP_END, min));
+        const hasPee = b.pee === 'good' || b.pee === 'accident';
+        const hasPoop = b.poop === 'good' || b.poop === 'accident';
+        if (!hasPee && !hasPoop) return null;
+        let type = 'both';
+        if (hasPee && !hasPoop) type = 'pee';
+        else if (!hasPee && hasPoop) type = 'poop';
+        return { min, clipped, type, leftPct: ((clipped - NAP_START) / NAP_SPAN) * 100, peeStatus: b.pee, poopStatus: b.poop };
+      }).filter(Boolean);
+      const dateLabel = new Date(date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return { date, dateLabel, breaks };
+    });
+  }, [dateRange, allLogs]);
+
+  const dotColor = (type) => {
+    if (type === 'pee') return '#E2B735';
+    if (type === 'poop') return '#926940';
+    return '#8B5CF6';
+  };
+
+  if (pottyRows.length === 0) return <p className="text-sm text-sand-400 italic text-center py-6">No data in range.</p>;
+
+  return (
+    <div className="overflow-x-auto">
+      <div style={{ minWidth: 600 }}>
+        <div className="flex items-end mb-1">
+          <div className="shrink-0" style={{ width: 70 }} />
+          <div className="flex-1 relative" style={{ height: 20 }}>
+            {HOUR_TICKS.map((m) => {
+              const pct = ((m - NAP_START) / NAP_SPAN) * 100;
+              return <span key={m} className="absolute text-[10px] text-sand-400 font-medium" style={{ left: `${pct}%`, transform: 'translateX(-50%)' }}>{minutesToShortLabel(m)}</span>;
+            })}
+          </div>
+          <div className="shrink-0" style={{ width: 56 }} />
+        </div>
+
+        {pottyRows.map((row) => (
+          <div key={row.date} className="flex items-center" style={{ height: 28 }}>
+            <div className="shrink-0 text-[11px] text-sand-600 font-medium truncate pr-2" style={{ width: 70 }}>{row.dateLabel}</div>
+            <div className="flex-1 relative bg-sand-100/60 rounded-sm" style={{ height: 18 }}>
+              {HOUR_TICKS.map((m) => <div key={m} className="absolute top-0 bottom-0" style={{ left: `${((m - NAP_START) / NAP_SPAN) * 100}%`, width: 1, background: 'rgba(209, 199, 186, 0.4)' }} />)}
+              {row.breaks.map((b, i) => (
+                <div
+                  key={i}
+                  className="absolute rounded-full cursor-default"
+                  style={{ left: `${b.leftPct}%`, top: '50%', transform: 'translate(-50%, -50%)', width: 10, height: 10, background: dotColor(b.type), border: '1.5px solid #fff', boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }}
+                  onMouseEnter={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const parts = [];
+                    if (b.type === 'pee' || b.type === 'both') parts.push(`Pee: ${b.peeStatus}`);
+                    if (b.type === 'poop' || b.type === 'both') parts.push(`Poop: ${b.poopStatus}`);
+                    setHoveredDot({ time: minutesToTimeLabel(b.min), details: parts, type: b.type, x: rect.left + rect.width / 2, y: rect.top });
+                  }}
+                  onMouseLeave={() => setHoveredDot(null)}
+                />
+              ))}
+            </div>
+            <div className="shrink-0 text-[11px] font-semibold text-sand-700 text-right pl-2" style={{ width: 56 }}>
+              {row.breaks.length > 0 ? `${row.breaks.length}x` : '—'}
+            </div>
+          </div>
+        ))}
+
+        {/* Legend */}
+        <div className="flex items-center justify-center gap-5 mt-3 text-[10px] text-sand-500">
+          <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: '#E2B735' }} /> Pee</span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: '#926940' }} /> Poop</span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: '#8B5CF6' }} /> Both</span>
+        </div>
+      </div>
+
+      {hoveredDot && (
+        <div className="fixed z-50 pointer-events-none" style={{ left: hoveredDot.x, top: hoveredDot.y - 8, transform: 'translate(-50%, -100%)' }}>
+          <div style={{ borderRadius: '10px', border: '1px solid #EBE6DE', fontSize: '11px', fontFamily: 'DM Sans, system-ui, sans-serif', boxShadow: '0 4px 16px rgba(42, 35, 29, 0.12)', background: '#fff', padding: '8px 12px', whiteSpace: 'nowrap' }}>
+            <div style={{ fontWeight: 600, color: '#4A3F35' }}>{hoveredDot.time}</div>
+            {hoveredDot.details.map((d, i) => (
+              <div key={i} style={{ color: '#918272', marginTop: 2 }}>{d}</div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function NapHeatmap({ dateRange, allLogs }) {
   const [hoveredNap, setHoveredNap] = useState(null);
 
@@ -442,9 +537,10 @@ export default function Stats() {
               <LineChart data={pottyComboData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#DDD2C2" />
                 <XAxis {...xAxisProps} />
-                <YAxis {...yAxisProps} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
+                <YAxis yAxisId="left" {...yAxisProps} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
+                <YAxis yAxisId="right" orientation="right" {...yAxisProps} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                 <Tooltip content={<SuccessComboTooltip />} />
-                <Line type="monotone" dataKey="successPct" stroke="#2B6AAF" strokeWidth={2.5} dot={{ fill: '#2B6AAF', r: 4, strokeWidth: 0 }} name="Success %" connectNulls activeDot={{ r: 6, fill: '#2B6AAF', strokeWidth: 2, stroke: '#fff' }} />
+                <Line yAxisId="left" type="monotone" dataKey="successPct" stroke="#2B6AAF" strokeWidth={2.5} dot={{ fill: '#2B6AAF', r: 4, strokeWidth: 0 }} name="Success %" connectNulls activeDot={{ r: 6, fill: '#2B6AAF', strokeWidth: 2, stroke: '#fff' }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -459,11 +555,12 @@ export default function Stats() {
               <BarChart data={pottyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#DDD2C2" />
                 <XAxis {...xAxisProps} />
-                <YAxis {...yAxisProps} />
+                <YAxis yAxisId="left" {...yAxisProps} />
+                <YAxis yAxisId="right" orientation="right" {...yAxisProps} />
                 <Tooltip content={<PeeTooltip />} />
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#9A8568' }} />
-                <Bar dataKey="peeGood" stackId="pee" fill="#E2B735" name="Pee (Good)" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="peeAccident" stackId="pee" fill="#D4726A" name="Pee (Accident)" radius={[4, 4, 0, 0]} />
+                <Bar yAxisId="left" dataKey="peeGood" stackId="pee" fill="#E2B735" name="Pee (Good)" radius={[0, 0, 0, 0]} />
+                <Bar yAxisId="left" dataKey="peeAccident" stackId="pee" fill="#D4726A" name="Pee (Accident)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -478,13 +575,23 @@ export default function Stats() {
               <BarChart data={pottyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#DDD2C2" />
                 <XAxis {...xAxisProps} />
-                <YAxis {...yAxisProps} />
+                <YAxis yAxisId="left" {...yAxisProps} />
+                <YAxis yAxisId="right" orientation="right" {...yAxisProps} />
                 <Tooltip content={<PoopTooltip />} />
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#9A8568' }} />
-                <Bar dataKey="poopGood" stackId="poop" fill="#926940" name="Poop (Good)" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="poopAccident" stackId="poop" fill="#D4726A" name="Poop (Accident)" radius={[4, 4, 0, 0]} />
+                <Bar yAxisId="left" dataKey="poopGood" stackId="poop" fill="#926940" name="Poop (Good)" radius={[0, 0, 0, 0]} />
+                <Bar yAxisId="left" dataKey="poopAccident" stackId="poop" fill="#D4726A" name="Poop (Accident)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+
+          {/* Potty Schedule Heatmap */}
+          <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+            <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
+              <TrendingUp size={14} className="text-sand-400" />
+              Potty Schedule ({dayCount}d)
+            </h3>
+            <PottySchedule dateRange={dateRange} allLogs={allLogs} />
           </div>
 
           {/* Calories Chart */}
