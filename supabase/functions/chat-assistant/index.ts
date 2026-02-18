@@ -1,5 +1,4 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import Anthropic from 'https://esm.sh/@anthropic-ai/sdk@0.20.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,7 +12,6 @@ interface ChatRequest {
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -21,9 +19,14 @@ Deno.serve(async (req) => {
   try {
     const { message, dateRange = 'all', includeContext = true }: ChatRequest = await req.json()
 
-    // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!
+    const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY')
+
+    if (!anthropicKey) {
+      throw new Error('ANTHROPIC_API_KEY is not set')
+    }
+
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     // Fetch puppy profile
@@ -39,7 +42,6 @@ Deno.serve(async (req) => {
       .select('*')
       .order('date', { ascending: false })
 
-    // Apply date filters
     if (dateRange !== 'all') {
       const today = new Date()
       let startDate = new Date()
@@ -59,19 +61,10 @@ Deno.serve(async (req) => {
       query = query.gte('date', startDate.toISOString().split('T')[0])
     }
 
-    const { data: logs, error } = await query
+    const { data: logs } = await query
 
-    if (error) throw error
-
-    // Format data for Claude
     const context = formatDataForClaude(logs || [], puppy)
 
-    // Initialize Anthropic
-    const anthropic = new Anthropic({
-      apiKey: Deno.env.get('ANTHROPIC_API_KEY')!,
-    })
-
-    // Create system prompt with data context
     const systemPrompt = `You are PuppyBot Assistant, a helpful AI that analyzes puppy behavior data and provides insights.
 
 ${includeContext ? `PUPPY PROFILE:
@@ -94,43 +87,42 @@ Guidelines:
 - When discussing statistics, cite specific numbers from the data
 - Focus on actionable insights rather than just restating data`
 
-    // Call Claude API with prompt caching
-    const response = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 1024,
-      system: [
-        {
-          type: 'text',
-          text: systemPrompt,
-          cache_control: { type: 'ephemeral' },
-        },
-      ],
-      messages: [
-        {
-          role: 'user',
-          content: message,
-        },
-      ],
+    // Call Anthropic API directly via fetch (no SDK dependency issues)
+    const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': anthropicKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-3-5-sonnet-20241022',
+        max_tokens: 1024,
+        system: systemPrompt,
+        messages: [
+          { role: 'user', content: message },
+        ],
+      }),
     })
 
-    // Save to chat history
-    await supabase.from('chat_history').insert({
-      message,
-      role: 'user',
-      date_range: dateRange,
-    })
+    if (!anthropicResponse.ok) {
+      const errBody = await anthropicResponse.text()
+      console.error('Anthropic API error:', anthropicResponse.status, errBody)
+      throw new Error(`Anthropic API returned ${anthropicResponse.status}: ${errBody}`)
+    }
 
-    await supabase.from('chat_history').insert({
-      message: response.content[0].text,
-      role: 'assistant',
-      date_range: dateRange,
-    })
+    const result = await anthropicResponse.json()
+    const assistantMessage = result.content?.[0]?.text || 'No response generated.'
+
+    // Save to chat history (non-blocking, ignore errors)
+    supabase.from('chat_history').insert({ message, role: 'user', date_range: dateRange }).then(() => {})
+    supabase.from('chat_history').insert({ message: assistantMessage, role: 'assistant', date_range: dateRange }).then(() => {})
 
     return new Response(
       JSON.stringify({
         success: true,
-        response: response.content[0].text,
-        usage: response.usage,
+        response: assistantMessage,
+        usage: result.usage,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -151,49 +143,53 @@ Guidelines:
   }
 })
 
-// Helper function to format logs for Claude
 function formatDataForClaude(logs: any[], puppy: any): string {
   if (!logs || logs.length === 0) return 'No data available for the selected time range.'
 
   const formatted = logs.map((log) => {
-    // Calculate potty stats
-    const pottyBreaks = log.potty_breaks || []
-    const pottyTotal = pottyBreaks.length
-    const accidents = pottyBreaks.filter((p: any) => 
-      p.peeStatus === 'accident' || p.poopStatus === 'accident'
-    ).length
-    const successRate = pottyTotal > 0 ? Math.round(((pottyTotal - accidents) / pottyTotal) * 100) : 0
-    
-    // Calculate nap duration
-    const naps = log.naps || []
-    const napDuration = naps.reduce((total: number, nap: any) => {
-      const start = new Date(nap.startTime)
-      const end = new Date(nap.endTime)
-      return total + (end.getTime() - start.getTime()) / (1000 * 60)
-    }, 0)
+    try {
+      const pottyBreaks = log.potty_breaks || []
+      const pottyTotal = pottyBreaks.length
+      const accidents = pottyBreaks.filter((p: any) => 
+        p.peeStatus === 'accident' || p.poopStatus === 'accident'
+      ).length
+      const successRate = pottyTotal > 0 ? Math.round(((pottyTotal - accidents) / pottyTotal) * 100) : 0
+      
+      const naps = log.naps || []
+      const napDuration = naps.reduce((total: number, nap: any) => {
+        try {
+          const start = new Date(nap.startTime)
+          const end = new Date(nap.endTime)
+          return total + (end.getTime() - start.getTime()) / (1000 * 60)
+        } catch {
+          return total
+        }
+      }, 0)
 
-    // Calculate calories
-    const meals = log.meals || []
-    const foodCalories = meals.reduce((sum: number, meal: any) => {
-      const eaten = parseFraction(meal.foodEaten)
-      const given = parseFraction(meal.foodGiven)
-      return sum + (eaten / given * 367)
-    }, 0)
-    const snackCalories = (log.snacks || 0) * 4
-    const totalCalories = foodCalories + snackCalories
+      const meals = log.meals || []
+      const foodCalories = meals.reduce((sum: number, meal: any) => {
+        const eaten = parseFraction(meal.foodEaten)
+        const given = parseFraction(meal.foodGiven)
+        if (given === 0) return sum
+        return sum + (eaten / given * 381)
+      }, 0)
+      const snackCalories = (log.snacks || 0) * 4
+      const totalCalories = foodCalories + snackCalories
 
-    // Wake times
-    const wakeTimesStr = (log.wake_up_times || [])
-      .map((w: any) => `${w.time} (${w.type})`)
-      .join(', ')
+      const wakeTimesStr = (log.wake_up_times || [])
+        .map((w: any) => `${w.time} (${w.type})`)
+        .join(', ')
 
-    return `📅 ${log.date}
+      return `📅 ${log.date}
 ⏰ Wake: ${wakeTimesStr || 'Not logged'} | Bed: ${log.bed_time || 'Not logged'}
 🚽 Potty: ${pottyTotal} times, ${accidents} accidents (${successRate}% success)
-🍽️ Meals: ${meals.length} meals | Calories: ${Math.round(totalCalories)} (${Math.round(foodCalories)} food + ${snackCalories} snacks)
+🍽️ Meals: ${meals.length} meals | Calories: ${Math.round(totalCalories)} (${Math.round(foodCalories)} food + ${snackCalories} treats)
 😴 Naps: ${naps.length} naps, ${Math.round(napDuration)} minutes total
 💪 Skills practiced: ${log.skills || 'None logged'}
 📝 Notes: ${log.notes || 'None'}`
+    } catch {
+      return `📅 ${log.date} — (error formatting this entry)`
+    }
   }).join('\n\n')
 
   return formatted
