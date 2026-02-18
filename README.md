@@ -11,10 +11,11 @@ A clean, modern puppy behavior tracker built with React. Log potty breaks, meals
 - **Stats & Trends** — Comprehensive charts powered by Recharts with a date range selector (All Time, Last 7 Days, Last 30 Days, Year to Date):
   - Potty success rate line chart tracking daily % trend; hover shows total, good, accidents, and %
   - Separate Pee (yellow/red) and Poop (brown/red) bar charts with dual Y axes; tooltips show category-specific totals, accidents, and success rate
-  - Potty schedule heatmap (6 AM–9 PM timeline with colored dots: yellow for pee, brown for poop, purple for both)
-  - Calories eaten chart in shades of blue (dark blue for food, light blue for treats)
+  - Potty schedule heatmap (6 AM–9 PM timeline with colored vertical lines: yellow for pee, brown for poop, purple for both)
   - Nap schedule heatmap in light blue (Gantt-style, 6 AM–9 PM timeline with total hours per day)
   - Sleep schedule line chart (morning wake, night wake, and bed time)
+  - Calories eaten chart in shades of blue (dark blue for food, light blue for treats)
+  - All bar/line charts (Potty Success Rate, Pee, Poop, Calories) feature dual Y axes for easy reading from either side
   - Export stats to PDF
 - **Treat Tracking** — Log number of treats per day (4 calories each); treat calories are shown separately in the Calories chart
 - **Wake/Bed Schedule** — Log morning wake, multiple night wakes, and bed time all at once in a single form
