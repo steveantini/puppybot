@@ -100,6 +100,14 @@ export default function DashboardChat() {
         }
       )
 
+      if (!response.ok) {
+        const text = await response.text()
+        console.error('Edge Function HTTP error:', response.status, text)
+        let detail = `HTTP ${response.status}`
+        try { const j = JSON.parse(text); if (j.error) detail = j.error } catch {}
+        throw new Error(detail)
+      }
+
       const data = await response.json()
 
       if (data.success) {
@@ -112,11 +120,12 @@ export default function DashboardChat() {
       }
     } catch (error) {
       console.error('Chat error:', error)
+      const errMsg = error?.message || 'Unknown error'
       setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: '❌ Sorry, I encountered an error. Please make sure the chat-assistant Edge Function is deployed in Supabase.',
+          content: `❌ Sorry, I encountered an error: ${errMsg}`,
         },
       ])
     } finally {
@@ -288,7 +297,7 @@ export default function DashboardChat() {
         />
         <div className="flex items-center justify-between mt-1">
           <p className="text-[10px] text-sand-300 pl-1">
-            powered by Claude 3.5 Sonnet
+            powered by Claude Sonnet 4.5
           </p>
           <div className="flex items-center gap-1.5">
             {recognitionRef.current && (

@@ -96,7 +96,7 @@ Guidelines:
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-sonnet-4-5-20241022',
         max_tokens: 1024,
         system: systemPrompt,
         messages: [
