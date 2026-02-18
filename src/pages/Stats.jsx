@@ -539,7 +539,7 @@ export default function Stats() {
             </h3>
             <ResponsiveContainer width="100%" height={240}>
               <LineChart data={pottyComboData}>
-                <CartesianGrid vertical={false} stroke="#A09688" strokeOpacity={1} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
                 <XAxis {...xAxisProps} />
                 <YAxis yAxisId="left" {...yAxisProps} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                 <YAxis yAxisId="right" orientation="right" {...yAxisProps} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
@@ -558,7 +558,7 @@ export default function Stats() {
             </h3>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={pottyData}>
-                <CartesianGrid vertical={false} stroke="#A09688" strokeOpacity={1} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
                 <XAxis {...xAxisProps} />
                 <YAxis yAxisId="left" {...yAxisProps} domain={[0, maxPeePerDay]} />
                 <YAxis yAxisId="right" orientation="right" {...yAxisProps} domain={[0, maxPeePerDay]} />
@@ -580,7 +580,7 @@ export default function Stats() {
             </h3>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={pottyData}>
-                <CartesianGrid vertical={false} stroke="#A09688" strokeOpacity={1} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
                 <XAxis {...xAxisProps} />
                 <YAxis yAxisId="left" {...yAxisProps} domain={[0, maxPoopPerDay]} />
                 <YAxis yAxisId="right" orientation="right" {...yAxisProps} domain={[0, maxPoopPerDay]} />
@@ -640,7 +640,7 @@ export default function Stats() {
             </h3>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={calorieData}>
-                <CartesianGrid vertical={false} stroke="#A09688" strokeOpacity={1} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
                 <XAxis {...xAxisProps} />
                 <YAxis yAxisId="left" {...yAxisProps} allowDecimals={false} domain={[0, maxCalPerDay]} />
                 <YAxis yAxisId="right" orientation="right" {...yAxisProps} allowDecimals={false} domain={[0, maxCalPerDay]} />
