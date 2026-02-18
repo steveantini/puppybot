@@ -229,7 +229,7 @@ export default function DashboardChat() {
               key={i}
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              <div className="flex flex-col gap-1 max-w-[85%]">
+              <div className={`flex flex-col gap-1 ${msg.role === 'user' ? 'max-w-[85%]' : 'w-full'}`}>
                 <div
                   className={`text-sm leading-relaxed ${
                     msg.role === 'user'
