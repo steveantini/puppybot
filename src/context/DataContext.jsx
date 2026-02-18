@@ -27,10 +27,16 @@ export function DataProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState('owner');
 
-  // Keep userId ref updated for callbacks
+  const roleRef = useRef('owner');
+
+  // Keep refs updated for callbacks
   useEffect(() => {
     userIdRef.current = user?.id || null;
   }, [user?.id]);
+
+  useEffect(() => {
+    roleRef.current = userRole;
+  }, [userRole]);
 
   // ─── Load data when user changes (login/logout) ───────────
   useEffect(() => {
@@ -136,9 +142,12 @@ export function DataProvider({ children }) {
     return () => clearInterval(interval);
   }, [todayLog.date, allLogs]);
 
+  const isViewer = () => roleRef.current === 'viewer';
+
   // ─── Puppy ───────────────────────────────────────────────
 
   const updatePuppy = useCallback(async (data) => {
+    if (isViewer()) return;
     const updated = { ...puppy, ...data };
     setPuppy(updated);
     try {
@@ -152,6 +161,7 @@ export function DataProvider({ children }) {
   }, [puppy]);
 
   const addWeightEntry = useCallback(async (entry) => {
+    if (isViewer()) return;
     const tempId = generateId();
     const tempEntry = { ...entry, id: tempId };
     setPuppy((prev) => ({
@@ -174,6 +184,7 @@ export function DataProvider({ children }) {
   // ─── Day logs ────────────────────────────────────────────
 
   const updateDayLog = useCallback((date, updater) => {
+    if (isViewer()) return;
     setAllLogs((prevLogs) => {
       const currentLog = prevLogs[date] || createEmptyDayLog(date);
       const updated =
@@ -288,6 +299,7 @@ export function DataProvider({ children }) {
   // ─── Health records ──────────────────────────────────────
 
   const addHealthRecord = useCallback(async (record) => {
+    if (isViewer()) return;
     const tempId = generateId();
     const tempRecord = { ...record, id: tempId };
     setHealthRecords((prev) => [...prev, tempRecord]);
@@ -302,6 +314,7 @@ export function DataProvider({ children }) {
   }, []);
 
   const deleteHealthRecord = useCallback(async (id) => {
+    if (isViewer()) return;
     setHealthRecords((prev) => prev.filter((r) => r.id !== id));
     try {
       await deleteHealthRecordById(id);

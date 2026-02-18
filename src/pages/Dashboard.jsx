@@ -24,7 +24,7 @@ const quickAddButtons = [
 ];
 
 export default function Dashboard() {
-  const { puppy, canEdit } = useData();
+  const { puppy } = useData();
   const [activeModal, setActiveModal] = useState(null);
 
   const puppyName = puppy?.name || 'your puppy';
@@ -35,9 +35,8 @@ export default function Dashboard() {
       <div className="px-2 text-center pt-1">
         <p className="text-sand-600 text-sm leading-relaxed">
           Welcome to <strong className="text-steel-500">PuppyBot</strong> — your intelligent companion for tracking {puppyName}&apos;s daily routine.
-          {canEdit
-            ? ' Use the buttons below to log potty breaks, meals, naps, sleep schedules, and notes. Every little entry helps you spot patterns and celebrate progress!'
-            : ' Explore the dashboard, stats, and history to see how PuppyBot tracks daily routines.'}
+          {' '}Use the buttons below to log potty breaks, meals, naps, sleep schedules, and notes.
+          Every little entry helps you spot patterns and celebrate progress!
         </p>
       </div>
 
@@ -48,13 +47,8 @@ export default function Dashboard() {
           return (
             <button
               key={btn.id}
-              onClick={() => canEdit && setActiveModal(btn.id)}
-              disabled={!canEdit}
-              className={`flex flex-col items-center justify-center gap-2 py-6 sm:py-8 rounded-2xl border text-sm font-bold whitespace-nowrap transition-all shadow-sm ${
-                canEdit
-                  ? `${btn.color} active:scale-[0.97]`
-                  : 'bg-sand-50 text-sand-300 border-sand-200 cursor-not-allowed'
-              }`}
+              onClick={() => setActiveModal(btn.id)}
+              className={`flex flex-col items-center justify-center gap-2 py-6 sm:py-8 rounded-2xl border text-sm font-bold whitespace-nowrap transition-all active:scale-[0.97] shadow-sm ${btn.color}`}
             >
               <Icon size={26} />
               {btn.label}
@@ -63,10 +57,8 @@ export default function Dashboard() {
         })}
       </div>
 
-      {/* Modals (only rendered for editors) */}
-      {canEdit && (
-        <>
-          <Modal
+      {/* Modals */}
+      <Modal
             isOpen={activeModal === 'potty'}
             onClose={() => setActiveModal(null)}
             title="Log Potty Break"
@@ -101,8 +93,6 @@ export default function Dashboard() {
           >
             <SkillsNotesForm onClose={() => setActiveModal(null)} />
           </Modal>
-        </>
-      )}
 
       {/* AI Chat Assistant */}
       <div className="mt-16">
