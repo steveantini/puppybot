@@ -139,50 +139,51 @@ Guidelines:
   }
 })
 
-function formatDataForClaude(logs: any[], puppy: any): string {
+function formatDataForClaude(logs: any[], _puppy: any): string {
   if (!logs || logs.length === 0) return 'No data available for the selected time range.'
 
   const formatted = logs.map((log) => {
     try {
       const pottyBreaks = log.potty_breaks || []
-      const pottyTotal = pottyBreaks.length
-      const accidents = pottyBreaks.filter((p: any) => 
-        p.peeStatus === 'accident' || p.poopStatus === 'accident'
-      ).length
-      const successRate = pottyTotal > 0 ? Math.round(((pottyTotal - accidents) / pottyTotal) * 100) : 0
-      
+      const pottyDetails = pottyBreaks.map((p: any, i: number) => {
+        const parts: string[] = []
+        if (p.pee) parts.push(`Pee: ${p.pee}`)
+        if (p.poop) parts.push(`Poop: ${p.poop}`)
+        if (p.ringBell) parts.push('Bell: yes')
+        if (p.notes) parts.push(`Note: ${p.notes}`)
+        return `  ${i + 1}. ${p.time || '?'} — ${parts.join(', ') || 'no details'}`
+      }).join('\n')
+
       const naps = log.naps || []
-      const napDuration = naps.reduce((total: number, nap: any) => {
-        try {
-          const start = new Date(nap.startTime)
-          const end = new Date(nap.endTime)
-          return total + (end.getTime() - start.getTime()) / (1000 * 60)
-        } catch {
-          return total
-        }
-      }, 0)
+      const napDetails = naps.map((n: any, i: number) => {
+        return `  ${i + 1}. ${n.startTime || '?'} – ${n.endTime || '?'}${n.notes ? ` (${n.notes})` : ''}`
+      }).join('\n')
 
       const meals = log.meals || []
-      const foodCalories = meals.reduce((sum: number, meal: any) => {
-        const eaten = parseFraction(meal.foodEaten)
-        const given = parseFraction(meal.foodGiven)
-        if (given === 0) return sum
-        return sum + (eaten / given * 381)
-      }, 0)
-      const snackCalories = (log.snacks || 0) * 4
-      const totalCalories = foodCalories + snackCalories
+      const mealDetails = meals.map((m: any, i: number) => {
+        const parts: string[] = []
+        if (m.foodGiven) parts.push(`given: ${m.foodGiven} cup`)
+        if (m.foodEaten) parts.push(`eaten: ${m.foodEaten} cup`)
+        if (m.notes) parts.push(`note: ${m.notes}`)
+        return `  ${i + 1}. ${m.time || '?'} — ${parts.join(', ') || 'no details'}`
+      }).join('\n')
+
+      const treats = log.snacks || 0
+      const treatCalories = treats * 4
 
       const wakeTimesStr = (log.wake_up_times || [])
         .map((w: any) => `${w.time} (${w.type})`)
         .join(', ')
 
-      return `📅 ${log.date}
-⏰ Wake: ${wakeTimesStr || 'Not logged'} | Bed: ${log.bed_time || 'Not logged'}
-🚽 Potty: ${pottyTotal} times, ${accidents} accidents (${successRate}% success)
-🍽️ Meals: ${meals.length} meals | Calories: ${Math.round(totalCalories)} (${Math.round(foodCalories)} food + ${snackCalories} treats)
-😴 Naps: ${naps.length} naps, ${Math.round(napDuration)} minutes total
-💪 Skills practiced: ${log.skills || 'None logged'}
-📝 Notes: ${log.notes || 'None'}`
+      let entry = `📅 ${log.date}\n`
+      entry += `⏰ Wake: ${wakeTimesStr || 'Not logged'} | Bed: ${log.bed_time || 'Not logged'}\n`
+      entry += `🚽 Potty Breaks (${pottyBreaks.length}):\n${pottyDetails || '  None logged'}\n`
+      entry += `🍽️ Meals (${meals.length}):\n${mealDetails || '  None logged'}\n`
+      entry += `🦴 Treats: ${treats} (${treatCalories} cal)\n`
+      entry += `😴 Naps (${naps.length}):\n${napDetails || '  None logged'}\n`
+      entry += `💪 Skills: ${log.skills || 'None logged'}\n`
+      entry += `📝 Notes: ${log.notes || 'None'}`
+      return entry
     } catch {
       return `📅 ${log.date} — (error formatting this entry)`
     }
