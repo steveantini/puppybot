@@ -4,8 +4,8 @@ import { Camera, Plus, Scale, Dog, ChevronDown, ChevronUp } from 'lucide-react';
 import Modal from '../components/Modal';
 
 export default function PuppyProfile() {
-  const { puppy, updatePuppy, addWeightEntry } = useData();
-  const [isEditing, setIsEditing] = useState(!puppy?.name);
+  const { puppy, updatePuppy, addWeightEntry, canEdit } = useData();
+  const [isEditing, setIsEditing] = useState(!puppy?.name && canEdit);
   const [showWeightModal, setShowWeightModal] = useState(false);
   const [showMoreInfo, setShowMoreInfo] = useState(false);
 
@@ -407,7 +407,7 @@ export default function PuppyProfile() {
                 Save Profile
               </button>
             </div>
-          ) : (
+          ) : canEdit ? (
             <div className="p-5">
               <button
                 onClick={() => setIsEditing(true)}
@@ -416,7 +416,7 @@ export default function PuppyProfile() {
                 Edit Profile
               </button>
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Weight Log */}
@@ -426,12 +426,14 @@ export default function PuppyProfile() {
               <Scale size={14} className="text-sand-400" />
               Weight Log
             </h3>
-            <button
-              onClick={() => setShowWeightModal(true)}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-steel-600 bg-steel-50 rounded-lg hover:bg-steel-100 transition-colors"
-            >
-              <Plus size={13} /> Add
-            </button>
+            {canEdit && (
+              <button
+                onClick={() => setShowWeightModal(true)}
+                className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-steel-600 bg-steel-50 rounded-lg hover:bg-steel-100 transition-colors"
+              >
+                <Plus size={13} /> Add
+              </button>
+            )}
           </div>
 
           {sortedWeights.length === 0 ? (

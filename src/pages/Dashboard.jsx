@@ -24,7 +24,7 @@ const quickAddButtons = [
 ];
 
 export default function Dashboard() {
-  const { puppy } = useData();
+  const { puppy, canEdit } = useData();
   const [activeModal, setActiveModal] = useState(null);
 
   const puppyName = puppy?.name || 'your puppy';
@@ -35,67 +35,72 @@ export default function Dashboard() {
       <div className="px-2 text-center pt-1">
         <p className="text-sand-600 text-sm leading-relaxed">
           Welcome to <strong className="text-steel-500">PuppyBot</strong> — your intelligent companion for tracking {puppyName}&apos;s daily routine.
-          Use the buttons below to log potty breaks, meals, naps, sleep schedules, and notes.
-          Every little entry helps you spot patterns and celebrate progress!
+          {canEdit
+            ? ' Use the buttons below to log potty breaks, meals, naps, sleep schedules, and notes. Every little entry helps you spot patterns and celebrate progress!'
+            : ' Explore the dashboard, stats, and history to see how PuppyBot tracks daily routines.'}
         </p>
       </div>
 
-      {/* Quick Add Buttons — full width, closer to square */}
-      <div className="grid grid-cols-5 gap-2 sm:gap-3 mt-16">
-        {quickAddButtons.map((btn) => {
-          const Icon = btn.icon;
-          return (
-            <button
-              key={btn.id}
-              onClick={() => setActiveModal(btn.id)}
-              className={`flex flex-col items-center justify-center gap-2 py-6 sm:py-8 rounded-2xl border text-sm font-bold whitespace-nowrap transition-all active:scale-[0.97] shadow-sm ${btn.color}`}
-            >
-              <Icon size={26} />
-              {btn.label}
-            </button>
-          );
-        })}
-      </div>
+      {canEdit && (
+        <>
+          {/* Quick Add Buttons — full width, closer to square */}
+          <div className="grid grid-cols-5 gap-2 sm:gap-3 mt-16">
+            {quickAddButtons.map((btn) => {
+              const Icon = btn.icon;
+              return (
+                <button
+                  key={btn.id}
+                  onClick={() => setActiveModal(btn.id)}
+                  className={`flex flex-col items-center justify-center gap-2 py-6 sm:py-8 rounded-2xl border text-sm font-bold whitespace-nowrap transition-all active:scale-[0.97] shadow-sm ${btn.color}`}
+                >
+                  <Icon size={26} />
+                  {btn.label}
+                </button>
+              );
+            })}
+          </div>
 
-      {/* Modals */}
-      <Modal
-        isOpen={activeModal === 'potty'}
-        onClose={() => setActiveModal(null)}
-        title="Log Potty Break"
-      >
-        <PottyForm onClose={() => setActiveModal(null)} />
-      </Modal>
-      <Modal
-        isOpen={activeModal === 'meal'}
-        onClose={() => setActiveModal(null)}
-        title="Log Meal"
-      >
-        <MealForm onClose={() => setActiveModal(null)} />
-      </Modal>
-      <Modal
-        isOpen={activeModal === 'nap'}
-        onClose={() => setActiveModal(null)}
-        title="Log Nap"
-      >
-        <NapForm onClose={() => setActiveModal(null)} />
-      </Modal>
-      <Modal
-        isOpen={activeModal === 'wake'}
-        onClose={() => setActiveModal(null)}
-        title="Log Wake / Bed Time"
-      >
-        <WakeUpForm onClose={() => setActiveModal(null)} />
-      </Modal>
-      <Modal
-        isOpen={activeModal === 'notes'}
-        onClose={() => setActiveModal(null)}
-        title="Skills & Notes"
-      >
-        <SkillsNotesForm onClose={() => setActiveModal(null)} />
-      </Modal>
+          {/* Modals */}
+          <Modal
+            isOpen={activeModal === 'potty'}
+            onClose={() => setActiveModal(null)}
+            title="Log Potty Break"
+          >
+            <PottyForm onClose={() => setActiveModal(null)} />
+          </Modal>
+          <Modal
+            isOpen={activeModal === 'meal'}
+            onClose={() => setActiveModal(null)}
+            title="Log Meal"
+          >
+            <MealForm onClose={() => setActiveModal(null)} />
+          </Modal>
+          <Modal
+            isOpen={activeModal === 'nap'}
+            onClose={() => setActiveModal(null)}
+            title="Log Nap"
+          >
+            <NapForm onClose={() => setActiveModal(null)} />
+          </Modal>
+          <Modal
+            isOpen={activeModal === 'wake'}
+            onClose={() => setActiveModal(null)}
+            title="Log Wake / Bed Time"
+          >
+            <WakeUpForm onClose={() => setActiveModal(null)} />
+          </Modal>
+          <Modal
+            isOpen={activeModal === 'notes'}
+            onClose={() => setActiveModal(null)}
+            title="Skills & Notes"
+          >
+            <SkillsNotesForm onClose={() => setActiveModal(null)} />
+          </Modal>
+        </>
+      )}
 
-      {/* AI Chat Assistant — extra spacing from buttons */}
-      <div className="mt-16">
+      {/* AI Chat Assistant */}
+      <div className={canEdit ? 'mt-16' : 'mt-8'}>
         <DashboardChat />
       </div>
     </div>

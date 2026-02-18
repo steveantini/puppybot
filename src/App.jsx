@@ -17,7 +17,7 @@ import PuppyManagement from './pages/settings/PuppyManagement';
 import SharingManagement from './pages/settings/SharingManagement';
 
 function AppShell() {
-  const { isLoading, puppy } = useData();
+  const { isLoading, puppy, canEdit } = useData();
   const [showAdminPanel, setShowAdminPanel] = useState(false);
 
   if (isLoading) {
@@ -62,13 +62,15 @@ function AppShell() {
                         </div>
                       )}
                     </Link>
-                    <button
-                      onClick={() => setShowAdminPanel(true)}
-                      className="w-10 h-10 flex items-center justify-center text-sand-600 hover:bg-sand-100 rounded-lg transition-colors"
-                      aria-label="Open settings"
-                    >
-                      <Menu size={24} />
-                    </button>
+                    {canEdit && (
+                      <button
+                        onClick={() => setShowAdminPanel(true)}
+                        className="w-10 h-10 flex items-center justify-center text-sand-600 hover:bg-sand-100 rounded-lg transition-colors"
+                        aria-label="Open settings"
+                      >
+                        <Menu size={24} />
+                      </button>
+                    )}
                   </div>
                 </div>
               </header>

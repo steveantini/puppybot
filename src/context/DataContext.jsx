@@ -10,6 +10,7 @@ import {
   deleteHealthRecordById,
   createEmptyDayLog,
 } from '../utils/storage';
+import { supabase } from '../utils/supabase';
 import { getTodayKey, generateId } from '../utils/helpers';
 import { useAuth } from './AuthContext';
 
@@ -24,6 +25,7 @@ export function DataProvider({ children }) {
   const [allLogs, setAllLogs] = useState({});
   const [healthRecords, setHealthRecords] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState('owner');
 
   // Keep userId ref updated for callbacks
   useEffect(() => {
@@ -52,25 +54,52 @@ export function DataProvider({ children }) {
     async function load() {
       setIsLoading(true);
       try {
-        // Load each independently so one failure doesn't block others
+        let dataOwnerId = userId;
+        let role = 'owner';
+
+        // Check if user owns a puppy directly
+        const { data: ownedPuppy } = await supabase
+          .from('puppies')
+          .select('id')
+          .eq('user_id', userId)
+          .limit(1)
+          .maybeSingle();
+
+        if (!ownedPuppy) {
+          // Not an owner — check puppy_members for shared access
+          const { data: membership } = await supabase
+            .from('puppy_members')
+            .select('role, puppy_id, puppies(user_id)')
+            .eq('user_id', userId)
+            .limit(1)
+            .maybeSingle();
+
+          if (membership) {
+            role = membership.role || 'viewer';
+            dataOwnerId = membership.puppies?.user_id || userId;
+          }
+        }
+
+        setUserRole(role);
+
         let puppyData = null;
         let logsData = {};
         let healthData = [];
 
         try {
-          puppyData = await fetchPuppy(userId);
+          puppyData = await fetchPuppy(dataOwnerId);
         } catch (e) {
           console.warn('[DataContext] Puppy fetch failed:', e);
         }
 
         try {
-          logsData = await fetchAllLogs(userId);
+          logsData = await fetchAllLogs(dataOwnerId);
         } catch (e) {
           console.warn('[DataContext] Logs fetch failed:', e);
         }
 
         try {
-          healthData = await fetchHealthRecords(userId);
+          healthData = await fetchHealthRecords(dataOwnerId);
         } catch (e) {
           console.warn('[DataContext] Health fetch failed:', e);
         }
@@ -332,6 +361,8 @@ export function DataProvider({ children }) {
 
   // ─── Context value ──────────────────────────────────────
 
+  const canEdit = userRole === 'owner' || userRole === 'editor';
+
   const value = {
     isLoading,
     puppy,
@@ -357,6 +388,8 @@ export function DataProvider({ children }) {
     healthRecords,
     addHealthRecord,
     deleteHealthRecord,
+    userRole,
+    canEdit,
   };
 
   return (
