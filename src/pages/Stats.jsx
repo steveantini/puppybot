@@ -604,11 +604,12 @@ export default function Stats() {
               <BarChart data={calorieData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
                 <XAxis {...xAxisProps} />
-                <YAxis {...yAxisProps} allowDecimals={false} />
+                <YAxis yAxisId="left" {...yAxisProps} allowDecimals={false} />
+                <YAxis yAxisId="right" orientation="right" {...yAxisProps} allowDecimals={false} />
                 <Tooltip content={<CaloriesTooltip />} />
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#918272' }} />
-                <Bar dataKey="foodCal" stackId="cal" fill="#2B6AAF" name="Food" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="snackCal" stackId="cal" fill="#96BDE0" name="Treats" radius={[4, 4, 0, 0]} />
+                <Bar yAxisId="left" dataKey="foodCal" stackId="cal" fill="#2B6AAF" name="Food" radius={[0, 0, 0, 0]} />
+                <Bar yAxisId="left" dataKey="snackCal" stackId="cal" fill="#96BDE0" name="Treats" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
