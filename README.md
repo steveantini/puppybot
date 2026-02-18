@@ -24,7 +24,7 @@ A clean, modern puppy behavior tracker built with React. Log potty breaks, meals
 - **Date Picker on All Forms** — Log entries for any date, not just today
 - **PDF Export** — Generate printable reports from both History and Stats pages
 - **Clickable Header** — Tap the PuppyBot logo/title from any page to return to the dashboard
-- **AI Chat Assistant** — Claude-powered assistant on the dashboard with voice input, save-to-notes, export conversations, and per-user chat history persisted to Supabase
+- **AI Chat Assistant** — Claude-powered assistant on the dashboard with full access to granular daily log data (individual potty breaks, meals, naps), voice input, copy-to-clipboard, and per-user chat history persisted to Supabase
 - **Demo Mode** — A read-only demo account (`demo@puppybot.ai`) lets visitors explore the full UI with real data; all write operations are silently blocked
 - **Multi-User Auth** — Email/password login and signup via Supabase Auth with protected routes
 - **Admin Panel** — Slide-out settings menu with account management, puppy management, and family sharing
@@ -254,9 +254,9 @@ PuppyBot includes an intelligent chat assistant powered by **Anthropic's Claude 
 - **Context-Aware**: Analyzes all of your puppy's data to provide relevant insights
 - **Training Tips**: Provides actionable recommendations based on behavioral patterns
 - **Voice Input**: Speak your questions using browser speech recognition
-- **Save Insights**: Save helpful responses directly to your daily notes
-- **Export Conversations**: Download chat history as text files
+- **Copy to Clipboard**: One-click copy any AI response (with confirmation checkmark)
 - **Persistent History**: Chat conversations are saved per-user in Supabase and restored on return
+- **Granular Data Access**: AI receives every individual potty break, meal, and nap entry — not just daily summaries — so it can answer specific questions like "how many poops today?"
 - **Claude-Inspired UI**: Clean standalone input bar with auto-resizing textarea and "powered by Claude Sonnet 4.5" branding
 
 ### Setup Instructions
@@ -291,8 +291,8 @@ The following environment variables are automatically available in Edge Function
 
 1. **Scroll to Chat**: The AI assistant is on the dashboard below the quick-add buttons
 2. **Ask Questions**: Type or speak your question in the Claude-style input bar
-4. **Get Insights**: Claude analyzes your data and responds with specific insights
-5. **Save Useful Tips**: Click "Save to notes" to preserve helpful advice
+3. **Get Insights**: Claude analyzes your data and responds with specific insights
+4. **Copy or Clear**: Copy any response to your clipboard, or clear the conversation
 
 ### Example Questions
 
@@ -331,7 +331,7 @@ The `weekly-insights` Edge Function can generate automated weekly summaries. To 
 - [x] Expand All / Collapse All in History
 - [x] Vibrant, modern color palette (iteratively refined)
 - [x] Potty success rate combo chart (bars + trend line)
-- [x] AI Chat Assistant (Claude-powered, voice input, save to notes)
+- [x] AI Chat Assistant (Claude-powered, voice input, copy to clipboard, granular data context)
 - [x] Weekly insights generation with AI summaries
 - [x] User authentication (Supabase Auth, email/password)
 - [x] Multi-puppy support

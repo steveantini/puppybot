@@ -5,7 +5,7 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 ## Current Status: Multi-User App with Auth, Sharing & AI
 
 - ✅ Core puppy tracking (potty, meals, naps, sleep, treats, skills, notes)
-- ✅ AI assistant powered by Claude 3.5 Sonnet (deployed Edge Function, Claude-inspired UI)
+- ✅ AI assistant powered by Claude Sonnet 4.5 (deployed Edge Function, Claude-inspired UI)
 - ✅ Stats and history visualization with Recharts
 - ✅ PDF export from History and Stats
 - ✅ Supabase Auth (email/password login/signup)
@@ -63,7 +63,7 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 #### 1.5 Dashboard & UI Enhancements ✅ Complete
 - [x] Claude-inspired AI chat input (standalone input bar, auto-resizing textarea)
 - [x] Time-aware greeting ("Good morning/afternoon/evening!")
-- [x] "Powered by Claude 3.5 Sonnet" branding
+- [x] "Powered by Claude Sonnet 4.5" branding
 - [x] Clickable PuppyBot header logo navigates to dashboard
 - [x] Welcome text on page background (no card wrapper)
 - [x] Clean spacing between sections
@@ -73,12 +73,12 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 #### 1.6 AI Chat Assistant ✅ Deployed & Working
 - [x] Supabase Edge Function (`chat-assistant`)
 - [x] Direct Anthropic API integration (no SDK dependency)
-- [x] Data-aware context (puppy profile + daily logs)
-- [x] Date range filtering (week, month, YTD, all)
+- [x] Granular data context (individual potty breaks, meals, naps — not just summaries)
 - [x] Voice input via Web Speech API
-- [x] Save responses to daily notes
-- [x] Export conversations as text files
+- [x] Copy response to clipboard (with confirmation checkmark)
+- [x] Per-user chat history persistence (Supabase)
 - [x] Resilient error handling (non-blocking chat history, per-entry try/catch)
+- [x] Custom paw print favicon (steel-blue, matches header branding)
 
 ---
 
@@ -311,7 +311,7 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 **Domain**: puppybot.ai
 - **Rationale**: Short, memorable, reflects the AI-powered nature of the app
 
-**AI**: Anthropic Claude 3.5 Sonnet (direct API, no SDK)
+**AI**: Anthropic Claude Sonnet 4.5 (direct API, no SDK)
 - **Rationale**: Best-in-class reasoning, good for data analysis. Direct fetch avoids SDK version issues in Deno Edge Functions.
 
 **Payments**: Stripe (planned)
@@ -324,7 +324,17 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 
 ## Version History
 
-### v0.2.0 (Current) — Multi-User with Auth, Sharing & AI
+### v0.3.0 (Current) — Polished AI & UX
+- Upgraded AI model to Claude Sonnet 4.5
+- AI now receives granular data (individual potty breaks, meals, naps) for precise answers
+- Copy-to-clipboard replaces save-to-notes and export on AI responses
+- Per-user chat history persistence (Supabase)
+- Demo mode (read-only viewer account)
+- Custom paw print favicon (steel-blue)
+- "Beta" badge in header
+- iOS app roadmap (Capacitor-based)
+
+### v0.2.0 — Multi-User with Auth, Sharing & AI
 - Authentication (email/password login/signup)
 - Admin panel, account settings, puppy & sharing management
 - Family sharing with auto-accept invites (Option B)
