@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Send, Loader2, Mic, MicOff, Save, Download, Trash2, PawPrint, ArrowUp } from 'lucide-react'
+import { Send, Loader2, Mic, MicOff, Copy, Check, Trash2, PawPrint, ArrowUp } from 'lucide-react'
 import { useData } from '../context/DataContext'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../utils/supabase'
-import { getTodayKey } from '../utils/helpers'
 
 export default function DashboardChat() {
-  const { puppy, updateNotes } = useData()
+  const { puppy } = useData()
   const { user } = useAuth()
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
@@ -159,36 +158,26 @@ export default function DashboardChat() {
     }
   }
 
-  const exportConversation = () => {
-    const text = messages
-      .map((m) => `${m.role === 'user' ? 'You' : 'PuppyBot'}: ${m.content}`)
-      .join('\n\n')
-    
-    const blob = new Blob([text], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `puppybot-chat-${new Date().toISOString().split('T')[0]}.txt`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
-  const saveToNotes = async (content, messageIndex) => {
+  const copyMessage = async (content, messageIndex) => {
     try {
-      await updateNotes(content, getTodayKey())
-      setMessages((prev) => 
-        prev.map((msg, i) => 
-          i === messageIndex ? { ...msg, saved: true } : msg
+      await navigator.clipboard.writeText(content)
+      setMessages((prev) =>
+        prev.map((msg, i) =>
+          i === messageIndex ? { ...msg, copied: true } : msg
         )
       )
       setTimeout(() => {
-        setMessages((prev) => 
-          prev.map((msg) => ({ ...msg, saved: false }))
+        setMessages((prev) =>
+          prev.map((msg) => ({ ...msg, copied: false }))
         )
       }, 2000)
-    } catch (error) {
-      console.error('Error saving to notes:', error)
-      alert('Failed to save to notes')
+    } catch {
+      const textarea = document.createElement('textarea')
+      textarea.value = content
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
     }
   }
 
@@ -242,26 +231,20 @@ export default function DashboardChat() {
                 </div>
                 {msg.role === 'assistant' && (
                   <div className="flex items-center gap-3 ml-1 mt-0.5">
-                    {msg.saved ? (
-                      <span className="text-[10px] text-emerald-600 font-medium">✓ Saved</span>
+                    {msg.copied ? (
+                      <span className="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
+                        <Check size={10} /> Copied
+                      </span>
                     ) : (
                       <button
-                        onClick={() => saveToNotes(msg.content, i)}
+                        onClick={() => copyMessage(msg.content, i)}
                         className="text-[10px] text-sand-400 hover:text-steel-500 transition-colors flex items-center gap-1"
-                        title="Save to today's notes"
+                        title="Copy to clipboard"
                       >
-                        <Save size={10} />
-                        Save
+                        <Copy size={10} />
+                        Copy
                       </button>
                     )}
-                    <button
-                      onClick={exportConversation}
-                      className="text-[10px] text-sand-400 hover:text-steel-500 transition-colors flex items-center gap-1"
-                      title="Export conversation"
-                    >
-                      <Download size={10} />
-                      Export
-                    </button>
                     <button
                       onClick={clearChat}
                       className="text-[10px] text-sand-400 hover:text-red-500 transition-colors flex items-center gap-1"
