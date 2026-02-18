@@ -74,14 +74,17 @@ export default function HealthTracker() {
     <div className="space-y-4 pb-4">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-sand-900">Health Tracker</h2>
-        {canEdit && (
-          <button
-            onClick={() => setShowModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-steel-500 rounded-xl hover:bg-steel-600 transition-colors shadow-sm"
-          >
-            <Plus size={15} /> Add Record
-          </button>
-        )}
+        <button
+          onClick={() => canEdit && setShowModal(true)}
+          disabled={!canEdit}
+          className={`flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-xl transition-colors shadow-sm ${
+            canEdit
+              ? 'text-white bg-steel-500 hover:bg-steel-600'
+              : 'text-sand-300 bg-sand-100 cursor-not-allowed'
+          }`}
+        >
+          <Plus size={15} /> Add Record
+        </button>
       </div>
 
       {/* Filters */}
@@ -163,14 +166,17 @@ export default function HealthTracker() {
                       </p>
                     )}
                   </div>
-                  {canEdit && (
-                    <button
-                      onClick={() => deleteHealthRecord(record.id)}
-                      className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1.5 text-sand-300 hover:text-rose-400 transition-all"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  )}
+                  <button
+                    onClick={() => canEdit && deleteHealthRecord(record.id)}
+                    disabled={!canEdit}
+                    className={`p-1.5 transition-all ${
+                      canEdit
+                        ? 'opacity-100 sm:opacity-0 sm:group-hover:opacity-100 text-sand-300 hover:text-rose-400'
+                        : 'text-sand-200 cursor-not-allowed'
+                    }`}
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </div>
               </div>
             );

@@ -62,15 +62,18 @@ function AppShell() {
                         </div>
                       )}
                     </Link>
-                    {canEdit && (
-                      <button
-                        onClick={() => setShowAdminPanel(true)}
-                        className="w-10 h-10 flex items-center justify-center text-sand-600 hover:bg-sand-100 rounded-lg transition-colors"
-                        aria-label="Open settings"
-                      >
-                        <Menu size={24} />
-                      </button>
-                    )}
+                    <button
+                      onClick={() => canEdit && setShowAdminPanel(true)}
+                      disabled={!canEdit}
+                      className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors ${
+                        canEdit
+                          ? 'text-sand-600 hover:bg-sand-100'
+                          : 'text-sand-300 cursor-not-allowed'
+                      }`}
+                      aria-label="Open settings"
+                    >
+                      <Menu size={24} />
+                    </button>
                   </div>
                 </div>
               </header>

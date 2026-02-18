@@ -41,26 +41,31 @@ export default function Dashboard() {
         </p>
       </div>
 
+      {/* Quick Add Buttons — full width, closer to square */}
+      <div className="grid grid-cols-5 gap-2 sm:gap-3 mt-16">
+        {quickAddButtons.map((btn) => {
+          const Icon = btn.icon;
+          return (
+            <button
+              key={btn.id}
+              onClick={() => canEdit && setActiveModal(btn.id)}
+              disabled={!canEdit}
+              className={`flex flex-col items-center justify-center gap-2 py-6 sm:py-8 rounded-2xl border text-sm font-bold whitespace-nowrap transition-all shadow-sm ${
+                canEdit
+                  ? `${btn.color} active:scale-[0.97]`
+                  : 'bg-sand-50 text-sand-300 border-sand-200 cursor-not-allowed'
+              }`}
+            >
+              <Icon size={26} />
+              {btn.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Modals (only rendered for editors) */}
       {canEdit && (
         <>
-          {/* Quick Add Buttons — full width, closer to square */}
-          <div className="grid grid-cols-5 gap-2 sm:gap-3 mt-16">
-            {quickAddButtons.map((btn) => {
-              const Icon = btn.icon;
-              return (
-                <button
-                  key={btn.id}
-                  onClick={() => setActiveModal(btn.id)}
-                  className={`flex flex-col items-center justify-center gap-2 py-6 sm:py-8 rounded-2xl border text-sm font-bold whitespace-nowrap transition-all active:scale-[0.97] shadow-sm ${btn.color}`}
-                >
-                  <Icon size={26} />
-                  {btn.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Modals */}
           <Modal
             isOpen={activeModal === 'potty'}
             onClose={() => setActiveModal(null)}
@@ -100,7 +105,7 @@ export default function Dashboard() {
       )}
 
       {/* AI Chat Assistant */}
-      <div className={canEdit ? 'mt-16' : 'mt-8'}>
+      <div className="mt-16">
         <DashboardChat />
       </div>
     </div>

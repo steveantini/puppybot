@@ -407,16 +407,21 @@ export default function PuppyProfile() {
                 Save Profile
               </button>
             </div>
-          ) : canEdit ? (
+          ) : (
             <div className="p-5">
               <button
-                onClick={() => setIsEditing(true)}
-                className="w-full py-2.5 border border-sand-200 text-sand-700 font-semibold rounded-xl hover:bg-sand-50 transition-colors text-sm"
+                onClick={() => canEdit && setIsEditing(true)}
+                disabled={!canEdit}
+                className={`w-full py-2.5 border font-semibold rounded-xl transition-colors text-sm ${
+                  canEdit
+                    ? 'border-sand-200 text-sand-700 hover:bg-sand-50'
+                    : 'border-sand-100 text-sand-300 cursor-not-allowed'
+                }`}
               >
                 Edit Profile
               </button>
             </div>
-          ) : null}
+          )}
         </div>
 
         {/* Weight Log */}
@@ -426,14 +431,17 @@ export default function PuppyProfile() {
               <Scale size={14} className="text-sand-400" />
               Weight Log
             </h3>
-            {canEdit && (
-              <button
-                onClick={() => setShowWeightModal(true)}
-                className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-steel-600 bg-steel-50 rounded-lg hover:bg-steel-100 transition-colors"
-              >
-                <Plus size={13} /> Add
-              </button>
-            )}
+            <button
+              onClick={() => canEdit && setShowWeightModal(true)}
+              disabled={!canEdit}
+              className={`flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+                canEdit
+                  ? 'text-steel-600 bg-steel-50 hover:bg-steel-100'
+                  : 'text-sand-300 bg-sand-50 cursor-not-allowed'
+              }`}
+            >
+              <Plus size={13} /> Add
+            </button>
           </div>
 
           {sortedWeights.length === 0 ? (
