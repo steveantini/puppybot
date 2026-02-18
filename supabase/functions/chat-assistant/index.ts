@@ -28,9 +28,10 @@ Deno.serve(async (req) => {
 
     // Fetch puppy profile
     const { data: puppy } = await supabase
-      .from('puppy_profile')
+      .from('puppies')
       .select('*')
-      .single()
+      .limit(1)
+      .maybeSingle()
 
     // Fetch daily logs based on date range
     let query = supabase
