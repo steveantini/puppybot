@@ -11,7 +11,7 @@ A clean, modern puppy behavior tracker built with React. Log potty breaks, meals
 - **Stats & Trends** — Comprehensive charts powered by Recharts with a date range selector (All Time, Last 7 Days, Last 30 Days, Year to Date):
   - Potty success rate line chart tracking daily % trend; hover shows total, good, accidents, and %
   - Separate Pee (yellow/red) and Poop (brown/red) bar charts with dual Y axes; tooltips show category-specific totals, accidents, and success rate
-  - Potty schedule heatmap (6 AM–9 PM timeline with colored vertical lines: yellow for pee, brown for poop, purple for both)
+  - Potty schedule heatmap (6 AM–9 PM timeline with colored vertical lines: yellow for pee, brown for poop, orange for both)
   - Nap schedule heatmap in light blue (Gantt-style, 6 AM–9 PM timeline with total hours per day)
   - Sleep schedule line chart (morning wake, night wake, and bed time)
   - Calories eaten chart in shades of blue (dark blue for food, light blue for treats)
@@ -24,7 +24,8 @@ A clean, modern puppy behavior tracker built with React. Log potty breaks, meals
 - **Date Picker on All Forms** — Log entries for any date, not just today
 - **PDF Export** — Generate printable reports from both History and Stats pages
 - **Clickable Header** — Tap the PuppyBot logo/title from any page to return to the dashboard
-- **AI Chat Assistant** — Claude-powered assistant on the dashboard with voice input, save-to-notes, export conversations, and data range filtering
+- **AI Chat Assistant** — Claude-powered assistant on the dashboard with voice input, save-to-notes, export conversations, and per-user chat history persisted to Supabase
+- **Demo Mode** — A read-only demo account (`demo@puppybot.ai`) lets visitors explore the full UI with real data; all write operations are silently blocked
 - **Multi-User Auth** — Email/password login and signup via Supabase Auth with protected routes
 - **Admin Panel** — Slide-out settings menu with account management, puppy management, and family sharing
 - **Family Sharing** — Invite family members by email with role-based access (Owner, Editor, Viewer); auto-accept invites on signup/login
@@ -38,6 +39,7 @@ See **[ROADMAP.md](./ROADMAP.md)** for the full development roadmap:
 - **Phase 3 (Future)**: Two-factor authentication and advanced security
 - **Phase 4 (Future)**: Premium subscriptions and payment processing
 - **Phase 5+**: Enhanced features, mobile apps, and community
+- **iOS App**: See [iOS_ROADMAP.md](./iOS_ROADMAP.md) for the Capacitor-based native iOS plan
 
 ## Tech Stack
 
@@ -51,7 +53,7 @@ See **[ROADMAP.md](./ROADMAP.md)** for the full development roadmap:
 | PDF Export | jsPDF + jspdf-autotable |
 | Database | Supabase (PostgreSQL) |
 | Auth | Supabase Auth (email/password) |
-| AI | Anthropic Claude 3.5 Sonnet (via Supabase Edge Functions) |
+| AI | Anthropic Claude Sonnet 4.5 (via Supabase Edge Functions) |
 | Hosting | Vercel |
 | Domain | puppybot.ai |
 
@@ -182,7 +184,8 @@ supabase/
 ├── migration.sql              # Base database schema + RLS policies
 ├── migrations/
 │   ├── 001_auth_and_multi_user.sql  # Auth, profiles, sharing tables
-│   └── 002_add_microchip_insurance.sql  # Microchip & insurance columns
+│   ├── 002_add_microchip_insurance.sql  # Microchip & insurance columns
+│   └── 003_chat_history_user_id.sql     # Per-user chat history persistence
 └── functions/
     ├── chat-assistant/index.ts    # AI chat Edge Function (calls Anthropic API)
     └── weekly-insights/index.ts   # Weekly AI summary generator
@@ -227,7 +230,7 @@ weight_logs: [{ date, weight }]
 - Bottom sheet modals on mobile, centered dialogs on desktop
 - Touch-optimized with `active:scale` feedback and large tap targets
 - Puppy profile photo displayed as an avatar in the header
-- Header paw icon (Lucide SVG) in light brown; "Puppy" in lighter steel blue, "Bot" in deeper steel blue
+- Header paw icon (Lucide SVG) in light brown; "Puppy" in lighter steel blue, "Bot" in deeper steel blue, with a "beta" pill badge
 - Clickable header logo returns to dashboard from any page
 
 ## Calorie Tracking
@@ -243,17 +246,18 @@ The Calories chart shows food and treat calories as separate stacked bars with a
 
 ## AI Chat Assistant
 
-PuppyBot includes an intelligent chat assistant powered by **Anthropic's Claude 3.5 Sonnet** that can analyze your puppy's data and provide insights, training advice, and answer questions. The assistant runs as a Supabase Edge Function that calls the Anthropic API directly.
+PuppyBot includes an intelligent chat assistant powered by **Anthropic's Claude Sonnet 4.5** that can analyze your puppy's data and provide insights, training advice, and answer questions. The assistant runs as a Supabase Edge Function that calls the Anthropic API directly. Chat history is persisted per-user in Supabase, so conversations survive page navigation and browser refreshes.
 
 ### Features
 
 - **Smart Analysis**: Ask questions about potty training progress, sleep patterns, eating habits, and trends
-- **Context-Aware**: Analyzes your data across different time ranges (week, month, year-to-date, all time)
+- **Context-Aware**: Analyzes all of your puppy's data to provide relevant insights
 - **Training Tips**: Provides actionable recommendations based on behavioral patterns
 - **Voice Input**: Speak your questions using browser speech recognition
 - **Save Insights**: Save helpful responses directly to your daily notes
 - **Export Conversations**: Download chat history as text files
-- **Claude-Inspired UI**: Clean standalone input bar with auto-resizing textarea, time-aware greeting, and "powered by Claude 3.5 Sonnet" branding
+- **Persistent History**: Chat conversations are saved per-user in Supabase and restored on return
+- **Claude-Inspired UI**: Clean standalone input bar with auto-resizing textarea and "powered by Claude Sonnet 4.5" branding
 
 ### Setup Instructions
 
@@ -286,8 +290,7 @@ The following environment variables are automatically available in Edge Function
 ### Usage
 
 1. **Scroll to Chat**: The AI assistant is on the dashboard below the quick-add buttons
-2. **Select Time Range**: Choose Week, Month, YTD, or All Time for data context
-3. **Ask Questions**: Type or speak your question in the Claude-style input bar
+2. **Ask Questions**: Type or speak your question in the Claude-style input bar
 4. **Get Insights**: Claude analyzes your data and responds with specific insights
 5. **Save Useful Tips**: Click "Save to notes" to preserve helpful advice
 
@@ -336,8 +339,11 @@ The `weekly-insights` Edge Function can generate automated weekly summaries. To 
 - [x] Family sharing with auto-accept invites
 - [x] Puppy profile: microchip, insurance, vet, breeder, gotcha day
 - [x] Claude-inspired chat UI with time-aware greeting
+- [x] Per-user chat history persistence (Supabase)
+- [x] Demo mode (read-only viewer account)
 - [x] Clickable header logo navigates to dashboard
 - [x] Custom domain (puppybot.ai)
+- [x] iOS app roadmap (Capacitor-based)
 - [ ] Push notifications for feeding/potty reminders
 - [ ] Photo gallery per day
 - [ ] Two-factor authentication
