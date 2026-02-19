@@ -7,6 +7,7 @@ import {
   upsertDayLog,
   fetchHealthRecords,
   insertHealthRecord,
+  updateHealthRecordById,
   deleteHealthRecordById,
   createEmptyDayLog,
 } from '../utils/storage';
@@ -313,6 +314,18 @@ export function DataProvider({ children }) {
     }
   }, []);
 
+  const updateHealthRecord = useCallback(async (id, data) => {
+    if (isViewer()) return;
+    setHealthRecords((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, ...data } : r))
+    );
+    try {
+      await updateHealthRecordById(id, data);
+    } catch (err) {
+      console.error('Failed to update health record:', err);
+    }
+  }, []);
+
   const deleteHealthRecord = useCallback(async (id) => {
     if (isViewer()) return;
     setHealthRecords((prev) => prev.filter((r) => r.id !== id));
@@ -451,6 +464,7 @@ export function DataProvider({ children }) {
     getDayLogByDate,
     healthRecords,
     addHealthRecord,
+    updateHealthRecord,
     deleteHealthRecord,
     userRole,
     canEdit,

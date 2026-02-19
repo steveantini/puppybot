@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import {
   Syringe,
@@ -6,6 +6,7 @@ import {
   Pill,
   Plus,
   Trash2,
+  Pencil,
   Calendar,
 } from 'lucide-react';
 import Modal from '../components/Modal';
@@ -35,8 +36,9 @@ const healthTypes = [
 ];
 
 export default function HealthTracker() {
-  const { healthRecords, addHealthRecord, deleteHealthRecord } = useData();
+  const { healthRecords, addHealthRecord, updateHealthRecord, deleteHealthRecord } = useData();
   const [showModal, setShowModal] = useState(false);
+  const [editingRecord, setEditingRecord] = useState(null);
   const [filter, setFilter] = useState('all');
 
   const [type, setType] = useState('immunization');
@@ -45,19 +47,56 @@ export default function HealthTracker() {
   const [description, setDescription] = useState('');
   const [notes, setNotes] = useState('');
 
+  const resetForm = () => {
+    setType('immunization');
+    setDate(new Date().toISOString().split('T')[0]);
+    setTitle('');
+    setDescription('');
+    setNotes('');
+    setEditingRecord(null);
+  };
+
+  const openAdd = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  const openEdit = (record) => {
+    setEditingRecord(record);
+    setType(record.type);
+    setDate(record.date);
+    setTitle(record.title);
+    setDescription(record.description || '');
+    setNotes(record.notes || '');
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    resetForm();
+  };
+
   const handleSave = () => {
     if (!title.trim()) return;
-    addHealthRecord({
+    const data = {
       type,
       date,
       title: title.trim(),
       description: description.trim(),
       notes: notes.trim(),
-    });
-    setTitle('');
-    setDescription('');
-    setNotes('');
-    setShowModal(false);
+    };
+    if (editingRecord) {
+      updateHealthRecord(editingRecord.id, data);
+    } else {
+      addHealthRecord(data);
+    }
+    closeModal();
+  };
+
+  const handleDelete = (id) => {
+    if (confirm('Delete this health record?')) {
+      deleteHealthRecord(id);
+    }
   };
 
   const filtered =
@@ -75,7 +114,7 @@ export default function HealthTracker() {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold text-sand-900">Health Tracker</h2>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={openAdd}
           className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-steel-500 rounded-xl hover:bg-steel-600 transition-colors shadow-sm"
         >
           <Plus size={15} /> Add Record
@@ -161,12 +200,22 @@ export default function HealthTracker() {
                       </p>
                     )}
                   </div>
-                  <button
-                    onClick={() => deleteHealthRecord(record.id)}
-                    className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1.5 text-sand-300 hover:text-rose-400 transition-all"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    <button
+                      onClick={() => openEdit(record)}
+                      className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1.5 text-sand-300 hover:text-steel-500 transition-all"
+                      title="Edit"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(record.id)}
+                      className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-1.5 text-sand-300 hover:text-rose-400 transition-all"
+                      title="Delete"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -174,11 +223,11 @@ export default function HealthTracker() {
         </div>
       )}
 
-      {/* Add Modal */}
+      {/* Add / Edit Modal */}
       <Modal
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        title="Add Health Record"
+        onClose={closeModal}
+        title={editingRecord ? 'Edit Health Record' : 'Add Health Record'}
       >
         <div className="space-y-4">
           <div>
@@ -262,7 +311,7 @@ export default function HealthTracker() {
                 : 'bg-sand-100 text-sand-300 cursor-not-allowed'
             }`}
           >
-            Save Record
+            {editingRecord ? 'Update Record' : 'Save Record'}
           </button>
         </div>
       </Modal>

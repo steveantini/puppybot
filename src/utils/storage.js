@@ -274,6 +274,34 @@ export async function insertHealthRecord(record, userId) {
   };
 }
 
+export async function updateHealthRecordById(id, record) {
+  const row = {
+    type: record.type,
+    date: record.date,
+    title: record.title,
+    description: record.description || '',
+    notes: record.notes || '',
+  };
+
+  const { data, error } = await supabase
+    .from('health_records')
+    .update(row)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+
+  return {
+    id: data.id,
+    type: data.type,
+    date: data.date,
+    title: data.title,
+    description: data.description || '',
+    notes: data.notes || '',
+  };
+}
+
 export async function deleteHealthRecordById(id) {
   const { error } = await supabase
     .from('health_records')
