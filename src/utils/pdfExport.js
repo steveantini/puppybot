@@ -77,7 +77,7 @@ function drawBrandedLogo(doc, rightEdge, baselineY, fontSize, pawPng) {
 
 // ─── STATS PDF (graph images) ────────────────────────────────
 export function exportStatsPdf({ chartImages, rangeLabel, pawPng, puppyName }) {
-  const doc = new jsPDF();
+  const doc = new jsPDF('l');
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 14;
@@ -116,22 +116,30 @@ export function exportStatsPdf({ chartImages, rangeLabel, pawPng, puppyName }) {
   // Divider
   doc.setDrawColor(...COLORS.light);
   doc.line(margin, y, pageW - margin, y);
-  y += 8;
+  y += 6;
 
-  // Add each chart image
-  for (const chart of chartImages) {
-    const aspectRatio = chart.height / chart.width;
-    const imgW = contentW;
-    const imgH = imgW * aspectRatio;
+  // One chart per page, scaled to fill the available space
+  const chartAreaH = pageH - footerY > 0 ? footerY - 4 : pageH - margin - 12;
 
-    if (y + imgH > pageH - margin - 12) {
+  chartImages.forEach((chart, idx) => {
+    if (idx > 0) {
       doc.addPage();
       y = margin;
     }
 
-    doc.addImage(chart.dataUrl, 'PNG', margin, y, imgW, imgH);
-    y += imgH + 8;
-  }
+    const availH = chartAreaH - y;
+    const aspectRatio = chart.height / chart.width;
+    let imgW = contentW;
+    let imgH = imgW * aspectRatio;
+
+    if (imgH > availH) {
+      imgH = availH;
+      imgW = imgH / aspectRatio;
+    }
+
+    const xOffset = margin + (contentW - imgW) / 2;
+    doc.addImage(chart.dataUrl, 'PNG', xOffset, y, imgW, imgH);
+  });
 
   // Footer on every page
   const totalPages = doc.internal.getNumberOfPages();
