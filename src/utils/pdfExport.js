@@ -37,6 +37,55 @@ function addSectionTitle(doc, y, title) {
   return y + 6;
 }
 
+// Draws "powered by <paw> PuppyBot.ai" right-aligned at the given baseline y
+function drawBrandedLogo(doc, rightEdge, baselineY, fontSize, pawPng) {
+  const iconSize = fontSize * 0.55;
+  const gap = 1.5;
+
+  // Measure total width right-to-left so we can right-align
+  doc.setFontSize(fontSize * 0.57);
+  doc.setFont(undefined, 'normal');
+  const dotAiW = doc.getTextWidth('.ai');
+
+  doc.setFontSize(fontSize);
+  doc.setFont(undefined, 'bold');
+  const botW = doc.getTextWidth('Bot');
+  const puppyW = doc.getTextWidth('Puppy');
+
+  doc.setFontSize(fontSize * 0.71);
+  doc.setFont(undefined, 'normal');
+  const poweredW = doc.getTextWidth('powered by');
+
+  const totalW = poweredW + gap + iconSize + gap + puppyW + botW + dotAiW;
+  let x = rightEdge - totalW;
+
+  doc.setFontSize(fontSize * 0.71);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(...COLORS.medium);
+  doc.text('powered by', x, baselineY);
+  x += poweredW + gap;
+
+  if (pawPng) {
+    try { doc.addImage(pawPng, 'PNG', x, baselineY - iconSize + 1, iconSize, iconSize); } catch {}
+  }
+  x += iconSize + gap;
+
+  doc.setFontSize(fontSize);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(...COLORS.steel400);
+  doc.text('Puppy', x, baselineY);
+  x += puppyW;
+
+  doc.setTextColor(...COLORS.steel500);
+  doc.text('Bot', x, baselineY);
+  x += botW;
+
+  doc.setFontSize(fontSize * 0.57);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(...COLORS.steel400);
+  doc.text('.ai', x, baselineY);
+}
+
 // ─── STATS PDF (graph images) ────────────────────────────────
 export function exportStatsPdf({ chartImages, rangeLabel, pawPng, puppyName }) {
   const doc = new jsPDF();
@@ -44,47 +93,18 @@ export function exportStatsPdf({ chartImages, rangeLabel, pawPng, puppyName }) {
   const pageH = doc.internal.pageSize.getHeight();
   const margin = 14;
   const contentW = pageW - margin * 2;
+  const footerY = pageH - 10;
   let y = margin;
 
-  // Line 1: "<name>'s Daily Progress Report"
+  // Header line: title left, branded logo right
+  const headerBaseline = y + 6;
+
   doc.setFontSize(16);
   doc.setFont(undefined, 'bold');
   doc.setTextColor(...COLORS.dark);
-  doc.text(`${puppyName}'s Daily Progress Report`, margin, y + 6);
-  y += 12;
+  doc.text(`${puppyName}'s Daily Progress Report`, margin, headerBaseline);
 
-  // Line 2: "powered by <paw> PuppyBot.ai"
-  const logoSize = 14;
-  const logoBaseline = y + 5;
-  let x = margin;
-
-  doc.setFontSize(10);
-  doc.setFont(undefined, 'normal');
-  doc.setTextColor(...COLORS.medium);
-  doc.text('powered by', x, logoBaseline);
-  x += doc.getTextWidth('powered by') + 2.5;
-
-  const iconSize = logoSize * 0.55;
-  if (pawPng) {
-    try { doc.addImage(pawPng, 'PNG', x, y + 0.5, iconSize, iconSize); } catch {}
-  }
-  x += iconSize + 1.5;
-
-  doc.setFontSize(logoSize);
-  doc.setFont(undefined, 'bold');
-  doc.setTextColor(...COLORS.steel400);
-  doc.text('Puppy', x, logoBaseline);
-  x += doc.getTextWidth('Puppy');
-
-  doc.setTextColor(...COLORS.steel500);
-  doc.text('Bot', x, logoBaseline);
-  x += doc.getTextWidth('Bot');
-
-  doc.setFontSize(8);
-  doc.setFont(undefined, 'normal');
-  doc.setTextColor(...COLORS.steel400);
-  doc.text('.ai', x, logoBaseline);
-
+  drawBrandedLogo(doc, pageW - margin, headerBaseline, 12, pawPng);
   y += 12;
 
   // Date range + timestamp
@@ -115,14 +135,20 @@ export function exportStatsPdf({ chartImages, rangeLabel, pawPng, puppyName }) {
     const imgW = contentW;
     const imgH = imgW * aspectRatio;
 
-    // If the image won't fit on the current page, add a new page
-    if (y + imgH > pageH - margin) {
+    if (y + imgH > pageH - margin - 12) {
       doc.addPage();
       y = margin;
     }
 
     doc.addImage(chart.dataUrl, 'PNG', margin, y, imgW, imgH);
     y += imgH + 8;
+  }
+
+  // Footer on every page
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    drawBrandedLogo(doc, pageW - margin, footerY, 8, pawPng);
   }
 
   doc.save('puppybot-stats-report.pdf');
