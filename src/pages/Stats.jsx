@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { useData } from '../context/DataContext';
 import { formatShortDate } from '../utils/helpers';
 import { exportStatsPdf } from '../utils/pdfExport';
+import html2canvas from 'html2canvas';
 import {
   BarChart,
   Bar,
@@ -14,7 +15,7 @@ import {
   Line,
   Legend,
 } from 'recharts';
-import { TrendingUp, BarChart3, FileDown, ChevronDown } from 'lucide-react';
+import { TrendingUp, BarChart3, FileDown, ChevronDown, Loader2 } from 'lucide-react';
 
 const RANGE_OPTIONS = [
   { value: 'all', label: 'All Time' },
@@ -364,6 +365,17 @@ export default function Stats() {
   const { allLogs } = useData();
   const [range, setRange] = useState('all');
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  const chartRefs = {
+    successRate: useRef(null),
+    pee: useRef(null),
+    poop: useRef(null),
+    pottySchedule: useRef(null),
+    napSchedule: useRef(null),
+    sleepSchedule: useRef(null),
+    calories: useRef(null),
+  };
 
   const allLogDates = useMemo(() => Object.keys(allLogs), [allLogs]);
   const dateRange = useMemo(() => getDateRange(range, allLogDates), [range, allLogDates]);
@@ -466,9 +478,42 @@ export default function Stats() {
   const rangeLabel = getRangeLabel(range);
   const dayCount = dateRange.length;
 
-  const handleExportPdf = () => {
-    exportStatsPdf(pottyData, calorieData, [], { successRate, totalPotty, totalAccidents });
-  };
+  const handleExportPdf = useCallback(async () => {
+    setExporting(true);
+    try {
+      const order = [
+        { key: 'successRate', label: 'Potty Success Rate' },
+        { key: 'pee', label: 'Pee' },
+        { key: 'poop', label: 'Poop' },
+        { key: 'pottySchedule', label: 'Potty Schedule' },
+        { key: 'napSchedule', label: 'Nap Schedule' },
+        { key: 'sleepSchedule', label: 'Sleep Schedule' },
+        { key: 'calories', label: 'Calories Eaten' },
+      ];
+
+      const chartImages = [];
+      for (const item of order) {
+        const el = chartRefs[item.key]?.current;
+        if (!el) continue;
+        const canvas = await html2canvas(el, {
+          backgroundColor: '#ffffff',
+          scale: 2,
+          useCORS: true,
+          logging: false,
+        });
+        chartImages.push({
+          label: item.label,
+          dataUrl: canvas.toDataURL('image/png'),
+          width: canvas.width,
+          height: canvas.height,
+        });
+      }
+
+      exportStatsPdf({ chartImages, rangeLabel });
+    } finally {
+      setExporting(false);
+    }
+  }, [rangeLabel, chartRefs]);
 
   const tooltipStyle = {
     borderRadius: '12px', border: '1px solid #EBE6DE', fontSize: '12px',
@@ -516,8 +561,8 @@ export default function Stats() {
                 </>
               )}
             </div>
-            <button onClick={handleExportPdf} className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-steel-500 rounded-xl hover:bg-steel-600 transition-colors shadow-sm">
-              <FileDown size={15} /> Export PDF
+            <button onClick={handleExportPdf} disabled={exporting} className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-steel-500 rounded-xl hover:bg-steel-600 transition-colors shadow-sm disabled:opacity-60">
+              {exporting ? <><Loader2 size={15} className="animate-spin" /> Generating…</> : <><FileDown size={15} /> Export PDF</>}
             </button>
           </div>
         )}
@@ -532,7 +577,7 @@ export default function Stats() {
       ) : (
         <>
           {/* Potty Success Rate — Line Chart */}
-          <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+          <div ref={chartRefs.successRate} className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
             <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
               <TrendingUp size={14} className="text-sand-400" />
               Potty Success Rate ({dayCount}d)
@@ -551,7 +596,7 @@ export default function Stats() {
           </div>
 
           {/* Pee Chart */}
-          <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+          <div ref={chartRefs.pee} className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
             <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
               <TrendingUp size={14} className="text-sand-400" />
               Pee ({dayCount}d)
@@ -573,7 +618,7 @@ export default function Stats() {
           </div>
 
           {/* Poop Chart */}
-          <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+          <div ref={chartRefs.poop} className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
             <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
               <TrendingUp size={14} className="text-sand-400" />
               Poop ({dayCount}d)
@@ -595,7 +640,7 @@ export default function Stats() {
           </div>
 
           {/* Potty Schedule Heatmap */}
-          <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+          <div ref={chartRefs.pottySchedule} className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
             <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
               <TrendingUp size={14} className="text-sand-400" />
               Potty Schedule ({dayCount}d)
@@ -604,7 +649,7 @@ export default function Stats() {
           </div>
 
           {/* Nap Heatmap */}
-          <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+          <div ref={chartRefs.napSchedule} className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
             <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
               <TrendingUp size={14} className="text-sand-400" />
               Nap Schedule ({dayCount}d)
@@ -613,7 +658,7 @@ export default function Stats() {
           </div>
 
           {/* Sleep Schedule Chart */}
-          <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+          <div ref={chartRefs.sleepSchedule} className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
             <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
               <TrendingUp size={14} className="text-sand-400" />
               Sleep Schedule ({dayCount}d)
@@ -633,7 +678,7 @@ export default function Stats() {
           </div>
 
           {/* Calories Chart */}
-          <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+          <div ref={chartRefs.calories} className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
             <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
               <TrendingUp size={14} className="text-sand-400" />
               Calories Eaten ({dayCount}d)

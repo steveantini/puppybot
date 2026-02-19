@@ -35,69 +35,62 @@ function addSectionTitle(doc, y, title) {
   return y + 6;
 }
 
-// ─── STATS PDF ───────────────────────────────────────────────
-export function exportStatsPdf(pottyData, mealData, napData, summary) {
+// ─── PAW ICON (inline SVG → data URL for PDF embedding) ─────
+const PAW_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23388BCB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/></svg>`;
+const PAW_DATA_URL = `data:image/svg+xml;charset=utf-8,${PAW_SVG}`;
+
+// ─── STATS PDF (graph images) ────────────────────────────────
+export function exportStatsPdf({ chartImages, rangeLabel }) {
   const doc = new jsPDF();
-  let y = addHeader(doc, 'Stats Report (Last 7 Days)', `Generated ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`);
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 14;
+  const contentW = pageW - margin * 2;
+  let y = margin;
 
-  // Summary
-  y = addSectionTitle(doc, y, 'Summary');
-  autoTable(doc, {
-    startY: y,
-    head: [['Metric', 'Value']],
-    body: [
-      ['Potty Success Rate', `${summary.successRate}%`],
-      ['Total Potty Breaks', String(summary.totalPotty)],
-      ['Total Accidents', String(summary.totalAccidents)],
-    ],
-    theme: 'grid',
-    headStyles: { fillColor: COLORS.primary, fontSize: 9 },
-    bodyStyles: { fontSize: 9 },
-    margin: { left: 14, right: 14 },
-  });
+  // Branded header
+  try {
+    doc.addImage(PAW_DATA_URL, 'SVG', margin, y - 2, 8, 8);
+  } catch {
+    // fallback: skip icon if SVG not supported in this jsPDF build
+  }
+  doc.setFontSize(14);
+  doc.setTextColor(...COLORS.primary);
+  doc.text('Powered by PuppyBot.ai', margin + 10, y + 5);
+  y += 14;
 
-  y = doc.lastAutoTable.finalY + 10;
+  // Date range + timestamp
+  doc.setFontSize(10);
+  doc.setTextColor(...COLORS.dark);
+  doc.text(`${rangeLabel}`, margin, y);
+  doc.setFontSize(9);
+  doc.setTextColor(...COLORS.medium);
+  const now = new Date();
+  const stamp = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) +
+    ' at ' + now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  doc.text(stamp, pageW - margin, y, { align: 'right' });
+  y += 4;
 
-  // Potty data
-  y = addSectionTitle(doc, y, 'Potty Breaks by Day');
-  autoTable(doc, {
-    startY: y,
-    head: [['Date', 'Good', 'Accidents', 'Total']],
-    body: pottyData.map((d) => [d.date, String(d.good), String(d.accidents), String(d.total)]),
-    theme: 'grid',
-    headStyles: { fillColor: COLORS.primary, fontSize: 9 },
-    bodyStyles: { fontSize: 9 },
-    margin: { left: 14, right: 14 },
-  });
+  // Divider
+  doc.setDrawColor(...COLORS.light);
+  doc.line(margin, y, pageW - margin, y);
+  y += 8;
 
-  y = doc.lastAutoTable.finalY + 10;
+  // Add each chart image
+  for (const chart of chartImages) {
+    const aspectRatio = chart.height / chart.width;
+    const imgW = contentW;
+    const imgH = imgW * aspectRatio;
 
-  // Meal data
-  y = addSectionTitle(doc, y, 'Meals by Day');
-  autoTable(doc, {
-    startY: y,
-    head: [['Date', 'Meals', 'Fully Eaten']],
-    body: mealData.map((d) => [d.date, String(d.meals), String(d.fullyEaten)]),
-    theme: 'grid',
-    headStyles: { fillColor: COLORS.primary, fontSize: 9 },
-    bodyStyles: { fontSize: 9 },
-    margin: { left: 14, right: 14 },
-  });
+    // If the image won't fit on the current page, add a new page
+    if (y + imgH > pageH - margin) {
+      doc.addPage();
+      y = margin;
+    }
 
-  y = doc.lastAutoTable.finalY + 10;
-
-  // Nap data
-  if (y > 240) { doc.addPage(); y = 20; }
-  y = addSectionTitle(doc, y, 'Naps by Day');
-  autoTable(doc, {
-    startY: y,
-    head: [['Date', 'Naps']],
-    body: napData.map((d) => [d.date, String(d.naps)]),
-    theme: 'grid',
-    headStyles: { fillColor: COLORS.primary, fontSize: 9 },
-    bodyStyles: { fontSize: 9 },
-    margin: { left: 14, right: 14 },
-  });
+    doc.addImage(chart.dataUrl, 'PNG', margin, y, imgW, imgH);
+    y += imgH + 8;
+  }
 
   doc.save('puppybot-stats-report.pdf');
 }
