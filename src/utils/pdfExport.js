@@ -325,5 +325,5 @@ export function exportHistoryPdf({ allLogs, selectedDates, puppyName, categoryLa
     drawBrandedLogo(doc, pageW - margin, footerY, 8, pawPng);
   }
 
-  doc.save('puppybot-daily-log.pdf');
+  doc.save('puppybot-history-report.pdf');
 }
