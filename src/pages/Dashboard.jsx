@@ -7,6 +7,7 @@ import NapForm from '../components/forms/NapForm';
 import WakeUpForm from '../components/forms/WakeUpForm';
 import SkillsNotesForm from '../components/forms/SkillsNotesForm';
 import DashboardChat from '../components/DashboardChat';
+import TodaySnapshot from '../components/TodaySnapshot';
 import {
   Droplets,
   UtensilsCrossed,
@@ -93,6 +94,9 @@ export default function Dashboard() {
           >
             <SkillsNotesForm onClose={() => setActiveModal(null)} />
           </Modal>
+
+      {/* Today's Snapshot */}
+      <TodaySnapshot />
 
       {/* AI Chat Assistant */}
       <div className="mt-16">
