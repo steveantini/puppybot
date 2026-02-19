@@ -144,21 +144,52 @@ export function exportStatsPdf({ chartImages, rangeLabel, pawPng, puppyName }) {
 }
 
 // ─── HISTORY PDF ─────────────────────────────────────────────
-export function exportHistoryPdf(allLogs, selectedDates, puppyName) {
+export function exportHistoryPdf({ allLogs, selectedDates, puppyName, categoryLabel, pawPng }) {
   const doc = new jsPDF();
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 14;
+  const footerY = pageH - 10;
   const sortedDates = [...selectedDates].sort((a, b) => a.localeCompare(b));
+  const name = puppyName || 'Puppy';
 
-  let y = addHeader(
-    doc,
-    `Daily Log Report${puppyName ? ` — ${puppyName}` : ''}`,
-    `${sortedDates.length} day${sortedDates.length !== 1 ? 's' : ''} · Generated ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
-  );
+  let y = margin;
+
+  // Header line: title left, branded logo right
+  const headerBaseline = y + 6;
+  doc.setFontSize(16);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(...COLORS.dark);
+  doc.text(`${name}'s History Report`, margin, headerBaseline);
+  drawBrandedLogo(doc, pageW - margin, headerBaseline, 12, pawPng);
+  y += 12;
+
+  // Category + timestamp
+  doc.setFontSize(10);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(...COLORS.dark);
+  doc.text('Category: ', margin, y);
+  const catLabelW = doc.getTextWidth('Category: ');
+  doc.setFont(undefined, 'normal');
+  doc.text(categoryLabel || 'All Categories', margin + catLabelW, y);
+
+  doc.setFontSize(9);
+  doc.setTextColor(...COLORS.medium);
+  const now = new Date();
+  const stamp = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) +
+    ' at ' + now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  doc.text(stamp, pageW - margin, y, { align: 'right' });
+  y += 4;
+
+  // Divider
+  doc.setDrawColor(...COLORS.light);
+  doc.line(margin, y, pageW - margin, y);
+  y += 8;
 
   sortedDates.forEach((date, idx) => {
     const log = allLogs[date];
     if (!log) return;
 
-    // Check if we need a new page (leave room for at least a header + small table)
     if (y > 240) {
       doc.addPage();
       y = 20;
@@ -168,11 +199,11 @@ export function exportHistoryPdf(allLogs, selectedDates, puppyName) {
     doc.setFontSize(12);
     doc.setTextColor(...COLORS.dark);
     doc.setFont(undefined, 'bold');
-    doc.text(formatDate(date), 14, y);
+    doc.text(formatDate(date), margin, y);
     doc.setFont(undefined, 'normal');
     y += 2;
     doc.setDrawColor(...COLORS.light);
-    doc.line(14, y, 196, y);
+    doc.line(margin, y, pageW - margin, y);
     y += 6;
 
     // Schedule
@@ -192,7 +223,7 @@ export function exportHistoryPdf(allLogs, selectedDates, puppyName) {
         theme: 'grid',
         headStyles: { fillColor: COLORS.primary, fontSize: 8 },
         bodyStyles: { fontSize: 8 },
-        margin: { left: 14, right: 14 },
+        margin: { left: margin, right: margin },
       });
       y = doc.lastAutoTable.finalY + 6;
     }
@@ -215,7 +246,7 @@ export function exportHistoryPdf(allLogs, selectedDates, puppyName) {
         headStyles: { fillColor: COLORS.primary, fontSize: 8 },
         bodyStyles: { fontSize: 8 },
         columnStyles: { 4: { cellWidth: 50 } },
-        margin: { left: 14, right: 14 },
+        margin: { left: margin, right: margin },
       });
       y = doc.lastAutoTable.finalY + 6;
     }
@@ -237,7 +268,7 @@ export function exportHistoryPdf(allLogs, selectedDates, puppyName) {
         headStyles: { fillColor: COLORS.primary, fontSize: 8 },
         bodyStyles: { fontSize: 8 },
         columnStyles: { 3: { cellWidth: 50 } },
-        margin: { left: 14, right: 14 },
+        margin: { left: margin, right: margin },
       });
       y = doc.lastAutoTable.finalY + 6;
     }
@@ -257,7 +288,7 @@ export function exportHistoryPdf(allLogs, selectedDates, puppyName) {
         theme: 'grid',
         headStyles: { fillColor: COLORS.primary, fontSize: 8 },
         bodyStyles: { fontSize: 8 },
-        margin: { left: 14, right: 14 },
+        margin: { left: margin, right: margin },
       });
       y = doc.lastAutoTable.finalY + 6;
     }
@@ -269,7 +300,7 @@ export function exportHistoryPdf(allLogs, selectedDates, puppyName) {
       doc.setFontSize(9);
       doc.setTextColor(...COLORS.medium);
       const lines = doc.splitTextToSize(log.skills, 180);
-      doc.text(lines, 14, y);
+      doc.text(lines, margin, y);
       y += lines.length * 4 + 4;
     }
     if (log.notes) {
@@ -278,15 +309,21 @@ export function exportHistoryPdf(allLogs, selectedDates, puppyName) {
       doc.setFontSize(9);
       doc.setTextColor(...COLORS.medium);
       const lines = doc.splitTextToSize(log.notes, 180);
-      doc.text(lines, 14, y);
+      doc.text(lines, margin, y);
       y += lines.length * 4 + 4;
     }
 
-    // Spacer between days
     if (idx < sortedDates.length - 1) {
       y += 8;
     }
   });
+
+  // Footer on every page
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    drawBrandedLogo(doc, pageW - margin, footerY, 8, pawPng);
+  }
 
   doc.save('puppybot-daily-log.pdf');
 }
