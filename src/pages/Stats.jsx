@@ -478,6 +478,41 @@ export default function Stats() {
   const rangeLabel = getRangeLabel(range);
   const dayCount = dateRange.length;
 
+  const rasterizeSvg = useCallback((svg) => {
+    return new Promise((resolve) => {
+      try {
+        const rect = svg.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
+        if (w < 50 || h < 10) { resolve(null); return; }
+
+        let svgStr = new XMLSerializer().serializeToString(svg);
+        if (!svgStr.includes('xmlns=')) {
+          svgStr = svgStr.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+        }
+        const base64 = btoa(unescape(encodeURIComponent(svgStr)));
+        const dataUrl = `data:image/svg+xml;base64,${base64}`;
+
+        const img = new Image();
+        img.onload = () => {
+          const c = document.createElement('canvas');
+          c.width = w * 2;
+          c.height = h * 2;
+          c.style.width = w + 'px';
+          c.style.height = h + 'px';
+          const ctx = c.getContext('2d');
+          ctx.scale(2, 2);
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(c);
+        };
+        img.onerror = () => resolve(null);
+        img.src = dataUrl;
+      } catch {
+        resolve(null);
+      }
+    });
+  }, []);
+
   const handleExportPdf = useCallback(async () => {
     setExporting(true);
     try {
@@ -499,27 +534,8 @@ export default function Stats() {
         const swapped = [];
         const svgs = el.querySelectorAll('svg');
         for (const svg of svgs) {
-          const svgData = new XMLSerializer().serializeToString(svg);
-          const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-          const url = URL.createObjectURL(blob);
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-          await new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = reject;
-            img.src = url;
-          });
-          const c = document.createElement('canvas');
-          const w = svg.clientWidth || svg.getBoundingClientRect().width;
-          const h = svg.clientHeight || svg.getBoundingClientRect().height;
-          c.width = w * 2;
-          c.height = h * 2;
-          c.style.width = w + 'px';
-          c.style.height = h + 'px';
-          const ctx = c.getContext('2d');
-          ctx.scale(2, 2);
-          ctx.drawImage(img, 0, 0, w, h);
-          URL.revokeObjectURL(url);
+          const c = await rasterizeSvg(svg);
+          if (!c) continue;
           svg.parentNode.insertBefore(c, svg);
           svg.style.display = 'none';
           swapped.push({ svg, canvas: c });
@@ -548,11 +564,11 @@ export default function Stats() {
       exportStatsPdf({ chartImages, rangeLabel });
     } catch (err) {
       console.error('PDF export failed:', err);
-      alert('PDF export failed. Please try again.');
+      alert('PDF export failed: ' + (err.message || 'Unknown error'));
     } finally {
       setExporting(false);
     }
-  }, [rangeLabel, chartRefs]);
+  }, [rangeLabel, chartRefs, rasterizeSvg]);
 
   const tooltipStyle = {
     borderRadius: '12px', border: '1px solid #EBE6DE', fontSize: '12px',
