@@ -4,6 +4,8 @@ import { formatTime, formatDate } from './helpers';
 
 const COLORS = {
   primary: [56, 139, 203],    // sky-500
+  steel400: [42, 122, 217],   // #2A7AD9 — "Puppy"
+  steel500: [26, 99, 198],    // #1A63C6 — "Bot"
   dark: [41, 37, 36],         // stone-800
   medium: [120, 113, 108],    // stone-500
   light: [231, 229, 228],     // stone-200
@@ -35,19 +37,8 @@ function addSectionTitle(doc, y, title) {
   return y + 6;
 }
 
-// ─── PAW ICON (drawn with jsPDF primitives) ─────────────────
-function drawPawIcon(doc, x, y, size) {
-  const s = size / 10;
-  doc.setFillColor(...COLORS.primary);
-  doc.circle(x + 3.5 * s, y + 1.5 * s, 0.9 * s, 'F');
-  doc.circle(x + 6.5 * s, y + 3 * s, 0.9 * s, 'F');
-  doc.circle(x + 7.5 * s, y + 6 * s, 0.9 * s, 'F');
-  doc.circle(x + 1.2 * s, y + 3.5 * s, 0.8 * s, 'F');
-  doc.ellipse(x + 3.8 * s, y + 7 * s, 2 * s, 2.5 * s, 'F');
-}
-
 // ─── STATS PDF (graph images) ────────────────────────────────
-export function exportStatsPdf({ chartImages, rangeLabel }) {
+export function exportStatsPdf({ chartImages, rangeLabel, pawPng }) {
   const doc = new jsPDF();
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
@@ -55,11 +46,37 @@ export function exportStatsPdf({ chartImages, rangeLabel }) {
   const contentW = pageW - margin * 2;
   let y = margin;
 
-  // Branded header
-  drawPawIcon(doc, margin, y - 2, 10);
-  doc.setFontSize(14);
-  doc.setTextColor(...COLORS.primary);
-  doc.text('Powered by PuppyBot.ai', margin + 12, y + 5);
+  // Branded header: "Powered by  <paw>  PuppyBot"
+  const fontSize = 16;
+  const baseline = y + 7;
+  let x = margin;
+
+  doc.setFontSize(11);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(...COLORS.medium);
+  doc.text('Powered by', x, baseline);
+  x += doc.getTextWidth('Powered by') + 3;
+
+  if (pawPng) {
+    try { doc.addImage(pawPng, 'PNG', x, y - 1, 9, 9); } catch {}
+  }
+  x += 11;
+
+  doc.setFontSize(fontSize);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(...COLORS.steel400);
+  doc.text('Puppy', x, baseline);
+  x += doc.getTextWidth('Puppy');
+
+  doc.setTextColor(...COLORS.steel500);
+  doc.text('Bot', x, baseline);
+  x += doc.getTextWidth('Bot');
+
+  doc.setFontSize(9);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(...COLORS.steel400);
+  doc.text('.ai', x, baseline);
+
   y += 14;
 
   // Date range + timestamp
