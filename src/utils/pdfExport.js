@@ -129,16 +129,28 @@ export function exportStatsPdf({ chartImages, rangeLabel, pawPng, puppyName }) {
 
     const availH = chartAreaH - y;
     const aspectRatio = chart.height / chart.width;
-    let imgW = contentW;
-    let imgH = imgW * aspectRatio;
 
-    if (imgH > availH) {
+    const fitWidthW = contentW;
+    const fitWidthH = fitWidthW * aspectRatio;
+
+    const fitHeightH = availH;
+    const fitHeightW = fitHeightH / aspectRatio;
+
+    let imgW, imgH;
+    if (fitWidthH >= availH) {
       imgH = availH;
       imgW = imgH / aspectRatio;
+    } else if (fitHeightW <= contentW) {
+      imgW = fitHeightW;
+      imgH = fitHeightH;
+    } else {
+      imgW = fitWidthW;
+      imgH = fitWidthH;
     }
 
     const xOffset = margin + (contentW - imgW) / 2;
-    doc.addImage(chart.dataUrl, 'PNG', xOffset, y, imgW, imgH);
+    const yOffset = y + (availH - imgH) / 2;
+    doc.addImage(chart.dataUrl, 'PNG', xOffset, yOffset, imgW, imgH);
   });
 
   // Footer on every page
