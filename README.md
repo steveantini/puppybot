@@ -7,7 +7,7 @@ A clean, modern puppy behavior tracker built with React. Log potty breaks, meals
 ## Features
 
 - **Dashboard** — Clean welcome intro, large quick-add buttons for fast entry (3 taps or fewer), and a Claude-inspired AI chat input with time-aware greeting
-- **History** — Browse past days in a scrollable list; tap any day to expand full details. Expand All / Collapse All toggle to view everything at once. Filter by category (Potty, Meals, Naps, Schedule, Skills, Notes) to see all matching entries across all dates. Select individual dates or all dates and export to PDF.
+- **History** — Browse past days in a scrollable list; tap any day to expand full details. **Edit or delete** any individual entry (potty break, meal, nap, schedule, skills, notes) directly from the history view. Expand All / Collapse All toggle to view everything at once. Filter by category (Potty, Meals, Naps, Schedule, Skills, Notes) to see all matching entries across all dates. Select individual dates or all dates and export to PDF.
 - **Stats & Trends** — Comprehensive charts powered by Recharts with a date range selector (All Time, Last 7 Days, Last 30 Days, Year to Date):
   - Potty success rate line chart tracking daily % trend; hover shows total, good, accidents, and %
   - Separate Pee (yellow/red) and Poop (brown/red) bar charts with dual Y axes; tooltips show category-specific totals, accidents, and success rate
@@ -149,11 +149,11 @@ src/
 │   ├── AdminPanel.jsx         # Slide-out settings/admin panel
 │   ├── BottomNav.jsx          # 5-tab bottom nav (Home, History, Stats, Health, Puppy)
 │   ├── DashboardChat.jsx      # Claude-inspired AI chat interface
-│   ├── Modal.jsx              # Slide-up (mobile) / centered (desktop) modal
+│   ├── Modal.jsx              # Slide-up (mobile) / centered (desktop) modal (used by History edit)
 │   └── forms/
-│       ├── PottyForm.jsx      # Potty break logging (pee/poop/bell/accident)
-│       ├── MealForm.jsx       # Meal logging (amount given/eaten/notes)
-│       ├── NapForm.jsx        # Nap logging (start/end time)
+│       ├── PottyForm.jsx      # Potty break logging + editing (pee/poop/bell/accident)
+│       ├── MealForm.jsx       # Meal logging + editing (amount given/eaten/notes)
+│       ├── NapForm.jsx        # Nap logging + editing (start/end time)
 │       ├── WakeUpForm.jsx     # Wake up & bed time logging
 │       └── SkillsNotesForm.jsx # Treats count, skills & notes
 ├── context/
@@ -161,7 +161,7 @@ src/
 │   └── DataContext.jsx        # Auth-aware data provider — async Supabase state
 ├── pages/
 │   ├── Dashboard.jsx          # Welcome intro, quick-add buttons, AI chat
-│   ├── History.jsx            # Past days with expandable details + PDF export
+│   ├── History.jsx            # Past days with expandable details, inline edit/delete + PDF export
 │   ├── Stats.jsx              # Trend charts + heatmap + PDF export
 │   ├── PuppyProfile.jsx      # Puppy info, vet, microchip, insurance + weight log
 │   ├── HealthTracker.jsx     # Immunizations, vet visits, medications
@@ -344,6 +344,8 @@ The `weekly-insights` Edge Function can generate automated weekly summaries. To 
 - [x] Clickable header logo navigates to dashboard
 - [x] Custom domain (puppybot.ai)
 - [x] iOS app roadmap (Capacitor-based)
+- [x] Edit and delete individual entries from History page
+- [x] Custom paw print favicon (steel-blue)
 - [ ] Push notifications for feeding/potty reminders
 - [ ] Photo gallery per day
 - [ ] Two-factor authentication
