@@ -37,15 +37,10 @@ function addSectionTitle(doc, y, title) {
   return y + 6;
 }
 
-// Draws "powered by <paw> PuppyBot.ai" right-aligned at the given baseline y
+// Draws "powered by <paw> PuppyBot" right-aligned at the given baseline y
 function drawBrandedLogo(doc, rightEdge, baselineY, fontSize, pawPng) {
   const iconSize = fontSize * 0.55;
   const gap = 1.5;
-
-  // Measure total width right-to-left so we can right-align
-  doc.setFontSize(fontSize * 0.57);
-  doc.setFont(undefined, 'normal');
-  const dotAiW = doc.getTextWidth('.ai');
 
   doc.setFontSize(fontSize);
   doc.setFont(undefined, 'bold');
@@ -56,7 +51,7 @@ function drawBrandedLogo(doc, rightEdge, baselineY, fontSize, pawPng) {
   doc.setFont(undefined, 'normal');
   const poweredW = doc.getTextWidth('powered by');
 
-  const totalW = poweredW + gap + iconSize + gap + puppyW + botW + dotAiW;
+  const totalW = poweredW + gap + iconSize + gap + puppyW + botW;
   let x = rightEdge - totalW;
 
   doc.setFontSize(fontSize * 0.71);
@@ -78,12 +73,6 @@ function drawBrandedLogo(doc, rightEdge, baselineY, fontSize, pawPng) {
 
   doc.setTextColor(...COLORS.steel500);
   doc.text('Bot', x, baselineY);
-  x += botW;
-
-  doc.setFontSize(fontSize * 0.57);
-  doc.setFont(undefined, 'normal');
-  doc.setTextColor(...COLORS.steel400);
-  doc.text('.ai', x, baselineY);
 }
 
 // ─── STATS PDF (graph images) ────────────────────────────────
