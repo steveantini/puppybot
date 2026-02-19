@@ -20,7 +20,7 @@ A clean, modern puppy behavior tracker built with React. Log potty breaks, meals
 - **Treat Tracking** — Log number of treats per day (4 calories each); treat calories are shown separately in the Calories chart
 - **Wake/Bed Schedule** — Log morning wake, multiple night wakes, and bed time all at once in a single form
 - **Puppy Profile** — Store your puppy's name, breed, birthday (with auto-calculated age and dog years), gotcha day, breeder info, vet info, microchip number/company, insurance carrier/policy number, photo (shown as avatar in the header), and a running weight log. Collapsible "+More Info" section for reference details
-- **Health Tracker** — Record immunizations, vet visits, and medications with date, description, and filterable categories
+- **Health Tracker** — Record immunizations, vet visits, and medications with date, description, and filterable categories. **Edit or delete** any record directly from the list.
 - **Date Picker on All Forms** — Log entries for any date, not just today
 - **PDF Export** — Generate printable reports from both History and Stats pages
 - **Clickable Header** — Tap the PuppyBot logo/title from any page to return to the dashboard
@@ -344,7 +344,7 @@ The `weekly-insights` Edge Function can generate automated weekly summaries. To 
 - [x] Clickable header logo navigates to dashboard
 - [x] Custom domain (puppybot.ai)
 - [x] iOS app roadmap (Capacitor-based)
-- [x] Edit and delete individual entries from History page
+- [x] Edit and delete individual entries from History page and Health Tracker
 - [x] Custom paw print favicon (steel-blue)
 - [ ] Push notifications for feeding/potty reminders
 - [ ] Photo gallery per day
