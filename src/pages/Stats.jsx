@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useCallback } from 'react';
 import { useData } from '../context/DataContext';
 import { formatShortDate } from '../utils/helpers';
 import { exportStatsPdf } from '../utils/pdfExport';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import {
   BarChart,
   Bar,
@@ -478,41 +478,6 @@ export default function Stats() {
   const rangeLabel = getRangeLabel(range);
   const dayCount = dateRange.length;
 
-  const rasterizeSvg = useCallback((svg) => {
-    return new Promise((resolve) => {
-      try {
-        const rect = svg.getBoundingClientRect();
-        const w = rect.width;
-        const h = rect.height;
-        if (w < 50 || h < 10) { resolve(null); return; }
-
-        let svgStr = new XMLSerializer().serializeToString(svg);
-        if (!svgStr.includes('xmlns=')) {
-          svgStr = svgStr.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
-        }
-        const base64 = btoa(unescape(encodeURIComponent(svgStr)));
-        const dataUrl = `data:image/svg+xml;base64,${base64}`;
-
-        const img = new Image();
-        img.onload = () => {
-          const c = document.createElement('canvas');
-          c.width = w * 2;
-          c.height = h * 2;
-          c.style.width = w + 'px';
-          c.style.height = h + 'px';
-          const ctx = c.getContext('2d');
-          ctx.scale(2, 2);
-          ctx.drawImage(img, 0, 0, w, h);
-          resolve(c);
-        };
-        img.onerror = () => resolve(null);
-        img.src = dataUrl;
-      } catch {
-        resolve(null);
-      }
-    });
-  }, []);
-
   const handleExportPdf = useCallback(async () => {
     setExporting(true);
     try {
@@ -531,33 +496,24 @@ export default function Stats() {
         const el = chartRefs[item.key]?.current;
         if (!el) continue;
 
-        const swapped = [];
-        const svgs = el.querySelectorAll('svg');
-        for (const svg of svgs) {
-          const c = await rasterizeSvg(svg);
-          if (!c) continue;
-          svg.parentNode.insertBefore(c, svg);
-          svg.style.display = 'none';
-          swapped.push({ svg, canvas: c });
-        }
-
-        const captured = await html2canvas(el, {
+        const dataUrl = await toPng(el, {
           backgroundColor: '#ffffff',
-          scale: 2,
-          useCORS: true,
-          logging: false,
+          pixelRatio: 2,
+          skipFonts: true,
         });
 
-        for (const { svg, canvas: c } of swapped) {
-          svg.style.display = '';
-          c.parentNode.removeChild(c);
-        }
+        const img = new Image();
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = dataUrl;
+        });
 
         chartImages.push({
           label: item.label,
-          dataUrl: captured.toDataURL('image/png'),
-          width: captured.width,
-          height: captured.height,
+          dataUrl,
+          width: img.naturalWidth,
+          height: img.naturalHeight,
         });
       }
 
@@ -568,7 +524,7 @@ export default function Stats() {
     } finally {
       setExporting(false);
     }
-  }, [rangeLabel, chartRefs, rasterizeSvg]);
+  }, [rangeLabel, chartRefs]);
 
   const tooltipStyle = {
     borderRadius: '12px', border: '1px solid #EBE6DE', fontSize: '12px',
