@@ -495,21 +495,60 @@ export default function Stats() {
       for (const item of order) {
         const el = chartRefs[item.key]?.current;
         if (!el) continue;
-        const canvas = await html2canvas(el, {
+
+        const swapped = [];
+        const svgs = el.querySelectorAll('svg');
+        for (const svg of svgs) {
+          const svgData = new XMLSerializer().serializeToString(svg);
+          const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+            img.src = url;
+          });
+          const c = document.createElement('canvas');
+          const w = svg.clientWidth || svg.getBoundingClientRect().width;
+          const h = svg.clientHeight || svg.getBoundingClientRect().height;
+          c.width = w * 2;
+          c.height = h * 2;
+          c.style.width = w + 'px';
+          c.style.height = h + 'px';
+          const ctx = c.getContext('2d');
+          ctx.scale(2, 2);
+          ctx.drawImage(img, 0, 0, w, h);
+          URL.revokeObjectURL(url);
+          svg.parentNode.insertBefore(c, svg);
+          svg.style.display = 'none';
+          swapped.push({ svg, canvas: c });
+        }
+
+        const captured = await html2canvas(el, {
           backgroundColor: '#ffffff',
           scale: 2,
           useCORS: true,
           logging: false,
         });
+
+        for (const { svg, canvas: c } of swapped) {
+          svg.style.display = '';
+          c.parentNode.removeChild(c);
+        }
+
         chartImages.push({
           label: item.label,
-          dataUrl: canvas.toDataURL('image/png'),
-          width: canvas.width,
-          height: canvas.height,
+          dataUrl: captured.toDataURL('image/png'),
+          width: captured.width,
+          height: captured.height,
         });
       }
 
       exportStatsPdf({ chartImages, rangeLabel });
+    } catch (err) {
+      console.error('PDF export failed:', err);
+      alert('PDF export failed. Please try again.');
     } finally {
       setExporting(false);
     }

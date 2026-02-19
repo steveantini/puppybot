@@ -35,9 +35,16 @@ function addSectionTitle(doc, y, title) {
   return y + 6;
 }
 
-// ─── PAW ICON (inline SVG → data URL for PDF embedding) ─────
-const PAW_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23388BCB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/></svg>`;
-const PAW_DATA_URL = `data:image/svg+xml;charset=utf-8,${PAW_SVG}`;
+// ─── PAW ICON (drawn with jsPDF primitives) ─────────────────
+function drawPawIcon(doc, x, y, size) {
+  const s = size / 10;
+  doc.setFillColor(...COLORS.primary);
+  doc.circle(x + 3.5 * s, y + 1.5 * s, 0.9 * s, 'F');
+  doc.circle(x + 6.5 * s, y + 3 * s, 0.9 * s, 'F');
+  doc.circle(x + 7.5 * s, y + 6 * s, 0.9 * s, 'F');
+  doc.circle(x + 1.2 * s, y + 3.5 * s, 0.8 * s, 'F');
+  doc.ellipse(x + 3.8 * s, y + 7 * s, 2 * s, 2.5 * s, 'F');
+}
 
 // ─── STATS PDF (graph images) ────────────────────────────────
 export function exportStatsPdf({ chartImages, rangeLabel }) {
@@ -49,14 +56,10 @@ export function exportStatsPdf({ chartImages, rangeLabel }) {
   let y = margin;
 
   // Branded header
-  try {
-    doc.addImage(PAW_DATA_URL, 'SVG', margin, y - 2, 8, 8);
-  } catch {
-    // fallback: skip icon if SVG not supported in this jsPDF build
-  }
+  drawPawIcon(doc, margin, y - 2, 10);
   doc.setFontSize(14);
   doc.setTextColor(...COLORS.primary);
-  doc.text('Powered by PuppyBot.ai', margin + 10, y + 5);
+  doc.text('Powered by PuppyBot.ai', margin + 12, y + 5);
   y += 14;
 
   // Date range + timestamp
