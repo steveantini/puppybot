@@ -323,46 +323,93 @@ export function DataProvider({ children }) {
     }
   }, []);
 
-  // ─── Delete items from today's log ───────────────────────
+  // ─── Delete items from any day's log ─────────────────────
 
   const deletePottyBreak = useCallback(
-    (id) => {
-      updateTodayLog((prev) => ({
+    (id, date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({
         ...prev,
         pottyBreaks: prev.pottyBreaks.filter((p) => p.id !== id),
       }));
     },
-    [updateTodayLog]
+    [updateDayLog]
   );
 
   const deleteMeal = useCallback(
-    (id) => {
-      updateTodayLog((prev) => ({
+    (id, date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({
         ...prev,
         meals: prev.meals.filter((m) => m.id !== id),
       }));
     },
-    [updateTodayLog]
+    [updateDayLog]
   );
 
   const deleteNap = useCallback(
-    (id) => {
-      updateTodayLog((prev) => ({
+    (id, date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({
         ...prev,
         naps: prev.naps.filter((n) => n.id !== id),
       }));
     },
-    [updateTodayLog]
+    [updateDayLog]
   );
 
   const deleteWakeUpTime = useCallback(
-    (id) => {
-      updateTodayLog((prev) => ({
+    (id, date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({
         ...prev,
         wakeUpTimes: prev.wakeUpTimes.filter((w) => w.id !== id),
       }));
     },
-    [updateTodayLog]
+    [updateDayLog]
+  );
+
+  // ─── Update individual items in any day's log ──────────
+
+  const updatePottyBreak = useCallback(
+    (id, data, date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({
+        ...prev,
+        pottyBreaks: prev.pottyBreaks.map((p) => p.id === id ? { ...p, ...data } : p),
+      }));
+    },
+    [updateDayLog]
+  );
+
+  const updateMeal = useCallback(
+    (id, data, date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({
+        ...prev,
+        meals: prev.meals.map((m) => m.id === id ? { ...m, ...data } : m),
+      }));
+    },
+    [updateDayLog]
+  );
+
+  const updateNap = useCallback(
+    (id, data, date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({
+        ...prev,
+        naps: prev.naps.map((n) => n.id === id ? { ...n, ...data } : n),
+      }));
+    },
+    [updateDayLog]
+  );
+
+  const clearBedTime = useCallback(
+    (date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({ ...prev, bedTime: null }));
+    },
+    [updateDayLog]
   );
 
   const getDayLogByDate = useCallback(
@@ -396,6 +443,10 @@ export function DataProvider({ children }) {
     deleteMeal,
     deleteNap,
     deleteWakeUpTime,
+    updatePottyBreak,
+    updateMeal,
+    updateNap,
+    clearBedTime,
     allLogs,
     getDayLogByDate,
     healthRecords,

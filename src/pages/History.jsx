@@ -2,6 +2,11 @@ import { useState, useMemo } from 'react';
 import { useData } from '../context/DataContext';
 import { formatDate, formatTime } from '../utils/helpers';
 import { exportHistoryPdf } from '../utils/pdfExport';
+import Modal from '../components/Modal';
+import PottyForm from '../components/forms/PottyForm';
+import MealForm from '../components/forms/MealForm';
+import NapForm from '../components/forms/NapForm';
+import SkillsNotesForm from '../components/forms/SkillsNotesForm';
 import {
   ChevronDown,
   ChevronUp,
@@ -19,6 +24,8 @@ import {
   Filter,
   Plus,
   Minus,
+  Trash2,
+  Pencil,
 } from 'lucide-react';
 
 const CATEGORY_OPTIONS = [
@@ -51,14 +58,49 @@ function dateHasCategory(log, category) {
   }
 }
 
+function DeleteBtn({ onClick }) {
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); onClick(); }}
+      className="p-1 text-sand-300 hover:text-rose-400 transition-colors shrink-0"
+      title="Delete"
+    >
+      <Trash2 size={13} />
+    </button>
+  );
+}
+
+function EditBtn({ onClick }) {
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); onClick(); }}
+      className="p-1 text-sand-300 hover:text-steel-500 transition-colors shrink-0"
+      title="Edit"
+    >
+      <Pencil size={13} />
+    </button>
+  );
+}
+
 export default function History() {
-  const { allLogs, puppy } = useData();
+  const {
+    allLogs, puppy,
+    deletePottyBreak, deleteMeal, deleteNap, deleteWakeUpTime, clearBedTime,
+    updateDayLog,
+  } = useData();
+
   const [expandedDate, setExpandedDate] = useState(null);
   const [expandAll, setExpandAll] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedDates, setSelectedDates] = useState(new Set());
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
+
+  // Edit modal state
+  const [editModal, setEditModal] = useState(null);
+
+  const openEdit = (type, data, date) => setEditModal({ type, data, date });
+  const closeEdit = () => setEditModal(null);
 
   const allSortedDates = useMemo(() => {
     return Object.keys(allLogs).sort((a, b) => b.localeCompare(a));
@@ -109,6 +151,10 @@ export default function History() {
     setSelectedDates(new Set());
   };
 
+  const handleDeleteConfirm = (action) => {
+    if (confirm('Delete this entry?')) action();
+  };
+
   if (allSortedDates.length === 0) {
     return (
       <div className="space-y-4 pb-4">
@@ -124,40 +170,44 @@ export default function History() {
     );
   }
 
-  const renderSchedule = (log) => {
+  const renderSchedule = (log, date) => {
     if (!log.wakeUpTimes?.length && !log.bedTime) return null;
     return (
       <div>
         <h4 className="text-xs font-semibold text-sand-500 uppercase tracking-widest mb-2">Schedule</h4>
         {log.wakeUpTimes?.map((w, i) => (
-          <div key={i} className="flex items-center gap-2 text-sm text-sand-800 mb-1">
+          <div key={i} className="flex items-center gap-2 text-sm text-sand-800 mb-1 group">
             {w.label === 'Night Wake' ? (
               <Moon size={13} className="text-steel-500" />
             ) : (
               <Sun size={13} className="text-warm-500" />
             )}
-            {w.label || 'Wake Up'}: {formatTime(w.time)}
-            {w.notes && <span className="text-xs text-sand-400 italic">— {w.notes}</span>}
+            <span className="flex-1">
+              {w.label || 'Wake Up'}: {formatTime(w.time)}
+              {w.notes && <span className="text-xs text-sand-400 italic ml-1">— {w.notes}</span>}
+            </span>
+            <DeleteBtn onClick={() => handleDeleteConfirm(() => deleteWakeUpTime(w.id, date))} />
           </div>
         ))}
         {log.bedTime && (
-          <div className="flex items-center gap-2 text-sm text-sand-800">
+          <div className="flex items-center gap-2 text-sm text-sand-800 group">
             <BedDouble size={13} className="text-steel-500" />
-            Bed Time: {formatTime(log.bedTime)}
+            <span className="flex-1">Bed Time: {formatTime(log.bedTime)}</span>
+            <DeleteBtn onClick={() => handleDeleteConfirm(() => clearBedTime(date))} />
           </div>
         )}
       </div>
     );
   };
 
-  const renderPotty = (log) => {
+  const renderPotty = (log, date) => {
     if (!log.pottyBreaks?.length) return null;
     return (
       <div>
         <h4 className="text-xs font-semibold text-sand-500 uppercase tracking-widest mb-2">Potty Breaks</h4>
         <div className="space-y-1.5">
           {log.pottyBreaks.map((p, i) => (
-            <div key={i} className="flex items-center gap-2 text-sm flex-wrap">
+            <div key={i} className="flex items-center gap-2 text-sm flex-wrap group">
               <Droplets size={13} className="text-steel-400" />
               <span className="text-sand-500 w-16 shrink-0">{formatTime(p.time)}</span>
               {p.pee === 'good' && <span className="text-emerald-600 text-xs bg-emerald-50 px-1.5 py-0.5 rounded-md font-medium">Pee ✓</span>}
@@ -165,6 +215,10 @@ export default function History() {
               {p.poop === 'good' && <span className="text-emerald-600 text-xs bg-emerald-50 px-1.5 py-0.5 rounded-md font-medium">Poop ✓</span>}
               {p.poop === 'accident' && <span className="text-rose-500 text-xs bg-rose-50 px-1.5 py-0.5 rounded-md font-medium">Poop ✗</span>}
               {p.ringBell && <span className="text-steel-500 text-xs bg-steel-50 px-1.5 py-0.5 rounded-md font-medium">Bell 🔔</span>}
+              <span className="ml-auto flex items-center gap-0.5">
+                <EditBtn onClick={() => openEdit('potty', p, date)} />
+                <DeleteBtn onClick={() => handleDeleteConfirm(() => deletePottyBreak(p.id, date))} />
+              </span>
             </div>
           ))}
         </div>
@@ -172,18 +226,22 @@ export default function History() {
     );
   };
 
-  const renderMeals = (log) => {
+  const renderMeals = (log, date) => {
     if (!log.meals?.length) return null;
     return (
       <div>
         <h4 className="text-xs font-semibold text-sand-500 uppercase tracking-widest mb-2">Meals</h4>
         <div className="space-y-1.5">
           {log.meals.map((m, i) => (
-            <div key={i} className="text-sm text-sand-800">
+            <div key={i} className="text-sm text-sand-800 group">
               <div className="flex items-center gap-2">
                 <UtensilsCrossed size={13} className="text-warm-500" />
                 <span className="text-sand-500 w-16 shrink-0">{formatTime(m.time)}</span>
-                <span>{m.foodGiven}{m.foodEaten ? ` → ${m.foodEaten}` : ''}</span>
+                <span className="flex-1">{m.foodGiven}{m.foodEaten ? ` → ${m.foodEaten}` : ''}</span>
+                <span className="flex items-center gap-0.5">
+                  <EditBtn onClick={() => openEdit('meal', m, date)} />
+                  <DeleteBtn onClick={() => handleDeleteConfirm(() => deleteMeal(m.id, date))} />
+                </span>
               </div>
               {m.notes && <p className="text-xs text-sand-400 ml-8 italic">{m.notes}</p>}
             </div>
@@ -193,16 +251,20 @@ export default function History() {
     );
   };
 
-  const renderNaps = (log) => {
+  const renderNaps = (log, date) => {
     if (!log.naps?.length) return null;
     return (
       <div>
         <h4 className="text-xs font-semibold text-sand-500 uppercase tracking-widest mb-2">Naps</h4>
         <div className="space-y-1.5">
           {log.naps.map((n, i) => (
-            <div key={i} className="flex items-center gap-2 text-sm text-sand-800">
+            <div key={i} className="flex items-center gap-2 text-sm text-sand-800 group">
               <Moon size={13} className="text-steel-500" />
-              {formatTime(n.startTime)} – {formatTime(n.endTime)}
+              <span className="flex-1">{formatTime(n.startTime)} – {formatTime(n.endTime)}</span>
+              <span className="flex items-center gap-0.5">
+                <EditBtn onClick={() => openEdit('nap', n, date)} />
+                <DeleteBtn onClick={() => handleDeleteConfirm(() => deleteNap(n.id, date))} />
+              </span>
             </div>
           ))}
         </div>
@@ -210,50 +272,68 @@ export default function History() {
     );
   };
 
-  const renderSkills = (log) => {
+  const renderSkills = (log, date) => {
     if (!log.skills) return null;
     return (
       <div>
-        <h4 className="text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1">Skills</h4>
+        <div className="flex items-center justify-between mb-1">
+          <h4 className="text-xs font-semibold text-sand-500 uppercase tracking-widest">Skills</h4>
+          <span className="flex items-center gap-0.5">
+            <EditBtn onClick={() => openEdit('skills', null, date)} />
+            <DeleteBtn onClick={() => handleDeleteConfirm(() => updateDayLog(date, (prev) => ({ ...prev, skills: '' })))} />
+          </span>
+        </div>
         <p className="text-sm text-sand-800">{log.skills}</p>
       </div>
     );
   };
 
-  const renderNotes = (log) => {
+  const renderNotes = (log, date) => {
     if (!log.notes) return null;
     return (
       <div>
-        <h4 className="text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1">Notes</h4>
+        <div className="flex items-center justify-between mb-1">
+          <h4 className="text-xs font-semibold text-sand-500 uppercase tracking-widest">Notes</h4>
+          <span className="flex items-center gap-0.5">
+            <EditBtn onClick={() => openEdit('skills', null, date)} />
+            <DeleteBtn onClick={() => handleDeleteConfirm(() => updateDayLog(date, (prev) => ({ ...prev, notes: '' })))} />
+          </span>
+        </div>
         <p className="text-sm text-sand-800">{log.notes}</p>
       </div>
     );
   };
 
-  const renderExpandedContent = (log) => {
+  const renderExpandedContent = (log, date) => {
     if (isFiltered) {
       switch (categoryFilter) {
-        case 'schedule': return renderSchedule(log);
-        case 'potty': return renderPotty(log);
-        case 'meals': return renderMeals(log);
-        case 'naps': return renderNaps(log);
-        case 'skills': return renderSkills(log);
-        case 'notes': return renderNotes(log);
+        case 'schedule': return renderSchedule(log, date);
+        case 'potty': return renderPotty(log, date);
+        case 'meals': return renderMeals(log, date);
+        case 'naps': return renderNaps(log, date);
+        case 'skills': return renderSkills(log, date);
+        case 'notes': return renderNotes(log, date);
         default: return null;
       }
     }
 
     return (
       <>
-        {renderSchedule(log)}
-        {renderPotty(log)}
-        {renderMeals(log)}
-        {renderNaps(log)}
-        {renderSkills(log)}
-        {renderNotes(log)}
+        {renderSchedule(log, date)}
+        {renderPotty(log, date)}
+        {renderMeals(log, date)}
+        {renderNaps(log, date)}
+        {renderSkills(log, date)}
+        {renderNotes(log, date)}
       </>
     );
   };
+
+  const editModalTitle = editModal?.type === 'potty' ? 'Edit Potty Break'
+    : editModal?.type === 'meal' ? 'Edit Meal'
+    : editModal?.type === 'nap' ? 'Edit Nap'
+    : editModal?.type === 'skills' ? 'Edit Skills & Notes'
+    : '';
 
   return (
     <div className="space-y-3 pb-4">
@@ -451,12 +531,37 @@ export default function History() {
 
             {isExpanded && !selectMode && (
               <div className="border-t border-sand-100 px-5 py-4 space-y-4">
-                {renderExpandedContent(log)}
+                {renderExpandedContent(log, date)}
               </div>
             )}
           </div>
         );
       })}
+
+      {/* Edit Modals */}
+      <Modal isOpen={editModal?.type === 'potty'} onClose={closeEdit} title={editModalTitle}>
+        {editModal?.type === 'potty' && (
+          <PottyForm onClose={closeEdit} editData={editModal.data} editDate={editModal.date} />
+        )}
+      </Modal>
+
+      <Modal isOpen={editModal?.type === 'meal'} onClose={closeEdit} title={editModalTitle}>
+        {editModal?.type === 'meal' && (
+          <MealForm onClose={closeEdit} editData={editModal.data} editDate={editModal.date} />
+        )}
+      </Modal>
+
+      <Modal isOpen={editModal?.type === 'nap'} onClose={closeEdit} title={editModalTitle}>
+        {editModal?.type === 'nap' && (
+          <NapForm onClose={closeEdit} editData={editModal.data} editDate={editModal.date} />
+        )}
+      </Modal>
+
+      <Modal isOpen={editModal?.type === 'skills'} onClose={closeEdit} title={editModalTitle}>
+        {editModal?.type === 'skills' && (
+          <SkillsNotesForm onClose={closeEdit} editDate={editModal.date} />
+        )}
+      </Modal>
     </div>
   );
 }

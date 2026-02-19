@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { getTodayKey } from '../../utils/helpers';
 
-export default function SkillsNotesForm({ onClose }) {
+export default function SkillsNotesForm({ onClose, editDate }) {
   const { getDayLogByDate, updateSkills, updateNotes, updateSnacks } = useData();
-  const [date, setDate] = useState(getTodayKey());
+  const [date, setDate] = useState(editDate || getTodayKey());
 
   const dayLog = getDayLogByDate(date);
   const [snacks, setSnacks] = useState(dayLog.snacks || 0);

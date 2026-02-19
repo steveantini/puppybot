@@ -2,29 +2,37 @@ import { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { getCurrentTime, getTodayKey } from '../../utils/helpers';
 
-export default function NapForm({ onClose }) {
-  const { addNap } = useData();
-  const [date, setDate] = useState(getTodayKey());
-  const [startTime, setStartTime] = useState(getCurrentTime());
-  const [endTime, setEndTime] = useState('');
-  const [notes, setNotes] = useState('');
+export default function NapForm({ onClose, editData, editDate }) {
+  const { addNap, updateNap } = useData();
+  const isEdit = !!editData;
+  const [date, setDate] = useState(editDate || getTodayKey());
+  const [startTime, setStartTime] = useState(editData?.startTime || getCurrentTime());
+  const [endTime, setEndTime] = useState(editData?.endTime || '');
+  const [notes, setNotes] = useState(editData?.notes || '');
 
   const handleSave = () => {
-    addNap({ startTime, endTime, notes: notes.trim() || undefined }, date);
+    const entry = { startTime, endTime, notes: notes.trim() || undefined };
+    if (isEdit) {
+      updateNap(editData.id, entry, date);
+    } else {
+      addNap(entry, date);
+    }
     onClose();
   };
 
   return (
     <div className="space-y-5">
-      <div>
-        <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Date</label>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
-        />
-      </div>
+      {!isEdit && (
+        <div>
+          <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Date</label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -62,7 +70,7 @@ export default function NapForm({ onClose }) {
         onClick={handleSave}
         className="w-full py-3 bg-steel-500 hover:bg-steel-600 text-white font-semibold rounded-xl transition-colors active:scale-[0.98] shadow-sm"
       >
-        Save Nap
+        {isEdit ? 'Update Nap' : 'Save Nap'}
       </button>
     </div>
   );

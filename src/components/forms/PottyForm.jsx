@@ -2,31 +2,39 @@ import { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { getCurrentTime, getTodayKey } from '../../utils/helpers';
 
-export default function PottyForm({ onClose }) {
-  const { addPottyBreak } = useData();
-  const [date, setDate] = useState(getTodayKey());
-  const [time, setTime] = useState(getCurrentTime());
-  const [pee, setPee] = useState(null);
-  const [poop, setPoop] = useState(null);
-  const [ringBell, setRingBell] = useState(false);
-  const [notes, setNotes] = useState('');
+export default function PottyForm({ onClose, editData, editDate }) {
+  const { addPottyBreak, updatePottyBreak } = useData();
+  const isEdit = !!editData;
+  const [date, setDate] = useState(editDate || getTodayKey());
+  const [time, setTime] = useState(editData?.time || getCurrentTime());
+  const [pee, setPee] = useState(editData?.pee || null);
+  const [poop, setPoop] = useState(editData?.poop || null);
+  const [ringBell, setRingBell] = useState(editData?.ringBell || false);
+  const [notes, setNotes] = useState(editData?.notes || '');
 
   const handleSave = () => {
-    addPottyBreak({ time, pee, poop, ringBell, notes: notes.trim() || undefined }, date);
+    const entry = { time, pee, poop, ringBell, notes: notes.trim() || undefined };
+    if (isEdit) {
+      updatePottyBreak(editData.id, entry, date);
+    } else {
+      addPottyBreak(entry, date);
+    }
     onClose();
   };
 
   return (
     <div className="space-y-5">
-      <div>
-        <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Date</label>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
-        />
-      </div>
+      {!isEdit && (
+        <div>
+          <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Date</label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+          />
+        </div>
+      )}
 
       <div>
         <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Time</label>
@@ -125,7 +133,7 @@ export default function PottyForm({ onClose }) {
         onClick={handleSave}
         className="w-full py-3 bg-steel-500 hover:bg-steel-600 text-white font-semibold rounded-xl transition-colors active:scale-[0.98] shadow-sm"
       >
-        Save Potty Break
+        {isEdit ? 'Update Potty Break' : 'Save Potty Break'}
       </button>
     </div>
   );

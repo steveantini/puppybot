@@ -5,30 +5,38 @@ import { getCurrentTime, getTodayKey } from '../../utils/helpers';
 const foodAmounts = ['1/4 cup', '1/3 cup', '1/2 cup', '3/4 cup', '1 cup'];
 const eatenAmounts = ['None', '1/4 of it', '1/2 of it', '3/4 of it', 'All of it'];
 
-export default function MealForm({ onClose }) {
-  const { addMeal } = useData();
-  const [date, setDate] = useState(getTodayKey());
-  const [time, setTime] = useState(getCurrentTime());
-  const [foodGiven, setFoodGiven] = useState('');
-  const [foodEaten, setFoodEaten] = useState('');
-  const [notes, setNotes] = useState('');
+export default function MealForm({ onClose, editData, editDate }) {
+  const { addMeal, updateMeal } = useData();
+  const isEdit = !!editData;
+  const [date, setDate] = useState(editDate || getTodayKey());
+  const [time, setTime] = useState(editData?.time || getCurrentTime());
+  const [foodGiven, setFoodGiven] = useState(editData?.foodGiven || '');
+  const [foodEaten, setFoodEaten] = useState(editData?.foodEaten || '');
+  const [notes, setNotes] = useState(editData?.notes || '');
 
   const handleSave = () => {
-    addMeal({ time, foodGiven, foodEaten, notes: notes.trim() || undefined }, date);
+    const entry = { time, foodGiven, foodEaten, notes: notes.trim() || undefined };
+    if (isEdit) {
+      updateMeal(editData.id, entry, date);
+    } else {
+      addMeal(entry, date);
+    }
     onClose();
   };
 
   return (
     <div className="space-y-5">
-      <div>
-        <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Date</label>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
-        />
-      </div>
+      {!isEdit && (
+        <div>
+          <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Date</label>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+          />
+        </div>
+      )}
 
       <div>
         <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Time</label>
@@ -100,7 +108,7 @@ export default function MealForm({ onClose }) {
         onClick={handleSave}
         className="w-full py-3 bg-steel-500 hover:bg-steel-600 text-white font-semibold rounded-xl transition-colors active:scale-[0.98] shadow-sm"
       >
-        Save Meal
+        {isEdit ? 'Update Meal' : 'Save Meal'}
       </button>
     </div>
   );
