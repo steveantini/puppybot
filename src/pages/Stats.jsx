@@ -362,7 +362,7 @@ function NapHeatmap({ dateRange, allLogs }) {
 }
 
 export default function Stats() {
-  const { allLogs } = useData();
+  const { allLogs, puppy } = useData();
   const [range, setRange] = useState('all');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -531,7 +531,7 @@ export default function Stats() {
         img.src = `data:image/svg+xml;base64,${btoa(svgStr)}`;
       });
 
-      exportStatsPdf({ chartImages, rangeLabel, pawPng });
+      exportStatsPdf({ chartImages, rangeLabel, pawPng, puppyName: puppy?.name || 'Puppy' });
     } catch (err) {
       console.error('PDF export failed:', err);
       alert('PDF export failed: ' + (err.message || 'Unknown error'));

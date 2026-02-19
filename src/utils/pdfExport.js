@@ -38,7 +38,7 @@ function addSectionTitle(doc, y, title) {
 }
 
 // ─── STATS PDF (graph images) ────────────────────────────────
-export function exportStatsPdf({ chartImages, rangeLabel, pawPng }) {
+export function exportStatsPdf({ chartImages, rangeLabel, pawPng, puppyName }) {
   const doc = new jsPDF();
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
@@ -46,43 +46,56 @@ export function exportStatsPdf({ chartImages, rangeLabel, pawPng }) {
   const contentW = pageW - margin * 2;
   let y = margin;
 
-  // Branded header: "Powered by  <paw>  PuppyBot"
-  const fontSize = 16;
-  const baseline = y + 7;
+  // Line 1: "<name>'s Daily Progress Report"
+  doc.setFontSize(16);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(...COLORS.dark);
+  doc.text(`${puppyName}'s Daily Progress Report`, margin, y + 6);
+  y += 12;
+
+  // Line 2: "powered by <paw> PuppyBot.ai"
+  const logoSize = 14;
+  const logoBaseline = y + 5;
   let x = margin;
 
-  doc.setFontSize(11);
+  doc.setFontSize(10);
   doc.setFont(undefined, 'normal');
   doc.setTextColor(...COLORS.medium);
-  doc.text('Powered by', x, baseline);
-  x += doc.getTextWidth('Powered by') + 3;
+  doc.text('powered by', x, logoBaseline);
+  x += doc.getTextWidth('powered by') + 2.5;
 
+  const iconSize = logoSize * 0.55;
   if (pawPng) {
-    try { doc.addImage(pawPng, 'PNG', x, y - 1, 9, 9); } catch {}
+    try { doc.addImage(pawPng, 'PNG', x, y + 0.5, iconSize, iconSize); } catch {}
   }
-  x += 11;
+  x += iconSize + 1.5;
 
-  doc.setFontSize(fontSize);
+  doc.setFontSize(logoSize);
   doc.setFont(undefined, 'bold');
   doc.setTextColor(...COLORS.steel400);
-  doc.text('Puppy', x, baseline);
+  doc.text('Puppy', x, logoBaseline);
   x += doc.getTextWidth('Puppy');
 
   doc.setTextColor(...COLORS.steel500);
-  doc.text('Bot', x, baseline);
+  doc.text('Bot', x, logoBaseline);
   x += doc.getTextWidth('Bot');
 
-  doc.setFontSize(9);
+  doc.setFontSize(8);
   doc.setFont(undefined, 'normal');
   doc.setTextColor(...COLORS.steel400);
-  doc.text('.ai', x, baseline);
+  doc.text('.ai', x, logoBaseline);
 
-  y += 14;
+  y += 12;
 
   // Date range + timestamp
   doc.setFontSize(10);
+  doc.setFont(undefined, 'bold');
   doc.setTextColor(...COLORS.dark);
-  doc.text(`${rangeLabel}`, margin, y);
+  doc.text('Date Range: ', margin, y);
+  const labelW = doc.getTextWidth('Date Range: ');
+  doc.setFont(undefined, 'normal');
+  doc.text(rangeLabel, margin + labelW, y);
+
   doc.setFontSize(9);
   doc.setTextColor(...COLORS.medium);
   const now = new Date();
