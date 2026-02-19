@@ -3,7 +3,7 @@ import { X, User, Dog, Users, CreditCard, Lock, Bell, Settings as SettingsIcon, 
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-export default function AdminPanel({ isOpen, onClose }) {
+export default function AdminPanel({ isOpen, onClose, canEdit = true }) {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -21,9 +21,9 @@ export default function AdminPanel({ isOpen, onClose }) {
   if (!isOpen) return null;
 
   const menuItems = [
-    { icon: User, label: 'Account Settings', desc: 'Profile, email, password', path: '/settings/account', active: true },
-    { icon: Dog, label: 'My Puppies', desc: 'Add, edit, manage puppies', path: '/settings/puppies', active: true },
-    { icon: Users, label: 'Family & Sharing', desc: 'Invite family, manage access', path: '/settings/sharing', active: true },
+    { icon: User, label: 'Account Settings', desc: 'Profile, email, password', path: '/settings/account', active: canEdit },
+    { icon: Dog, label: 'My Puppies', desc: 'Add, edit, manage puppies', path: '/settings/puppies', active: canEdit },
+    { icon: Users, label: 'Family & Sharing', desc: 'Invite family, manage access', path: '/settings/sharing', active: canEdit },
     { divider: true },
     { icon: CreditCard, label: 'Subscription & Billing', desc: 'Coming soon', path: null, active: false },
     { icon: Lock, label: 'Security', desc: 'Coming soon', path: null, active: false },

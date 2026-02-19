@@ -64,13 +64,8 @@ function AppShell() {
                       )}
                     </Link>
                     <button
-                      onClick={() => canEdit && setShowAdminPanel(true)}
-                      disabled={!canEdit}
-                      className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors ${
-                        canEdit
-                          ? 'text-sand-600 hover:bg-sand-100'
-                          : 'text-sand-300 cursor-not-allowed'
-                      }`}
+                      onClick={() => setShowAdminPanel(true)}
+                      className="w-10 h-10 flex items-center justify-center rounded-lg transition-colors text-sand-600 hover:bg-sand-100"
                       aria-label="Open settings"
                     >
                       <Menu size={24} />
@@ -80,7 +75,7 @@ function AppShell() {
               </header>
 
               {/* Admin Panel */}
-              <AdminPanel isOpen={showAdminPanel} onClose={() => setShowAdminPanel(false)} />
+              <AdminPanel isOpen={showAdminPanel} onClose={() => setShowAdminPanel(false)} canEdit={canEdit} />
 
               {/* Page content */}
               <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24">
