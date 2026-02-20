@@ -15,7 +15,7 @@ import {
   Line,
   Legend,
 } from 'recharts';
-import { TrendingUp, BarChart3, FileDown, ChevronDown, Loader2 } from 'lucide-react';
+import { TrendingUp, BarChart3, FileDown, ChevronDown, Loader2, CircleCheck, MoonStar } from 'lucide-react';
 
 const RANGE_OPTIONS = [
   { value: 'all', label: 'All Time' },
@@ -106,23 +106,6 @@ function parseEatenFraction(foodEaten) {
   const match = lower.match(/(\d+)\s*\/\s*(\d+)/);
   if (match) return parseInt(match[1], 10) / parseInt(match[2], 10);
   return 0;
-}
-
-function ScheduleTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null;
-  const items = payload.filter((p) => p.value != null);
-  if (items.length === 0) return null;
-  return (
-    <div style={{ borderRadius: '12px', border: '1px solid #EBE6DE', fontSize: '12px', fontFamily: 'DM Sans, system-ui, sans-serif', boxShadow: '0 4px 16px rgba(42, 35, 29, 0.08)', background: '#fff', padding: '10px 14px' }}>
-      <div style={{ fontWeight: 600, marginBottom: 4, color: '#4A3F35' }}>{label}</div>
-      {items.map((item, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-          <span style={{ width: 8, height: 8, borderRadius: '50%', background: item.stroke || item.color, display: 'inline-block' }} />
-          <span style={{ color: '#6B5D4F' }}>{item.name}: <strong>{minutesToTimeLabel(item.value)}</strong></span>
-        </div>
-      ))}
-    </div>
-  );
 }
 
 function PeeTooltip({ active, payload, label }) {
@@ -361,6 +344,189 @@ function NapHeatmap({ dateRange, allLogs }) {
   );
 }
 
+const SLEEP_SPAN = 900; // 6pm to 9am = 15 hours = 900 minutes
+const SLEEP_TICKS = [0, 180, 360, 540, 720, 900]; // 6p, 9p, 12a, 3a, 6a, 9a
+
+function normalizeToOvernight(minutes) {
+  if (minutes >= 1080) return minutes - 1080;
+  if (minutes < 540) return minutes + 360;
+  return null;
+}
+
+function sleepTickLabel(norm) {
+  const actual = norm < 360 ? norm + 1080 : norm - 360;
+  const h = Math.floor(actual / 60);
+  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+  const suffix = h >= 12 && h < 24 ? 'p' : 'a';
+  return `${h12}${suffix}`;
+}
+
+function SleepHeatmap({ dateRange, allLogs }) {
+  const [hoveredSleep, setHoveredSleep] = useState(null);
+
+  const sleepRows = useMemo(() => {
+    const sorted = [...dateRange].sort();
+    const rows = [];
+
+    for (let i = 0; i < sorted.length; i++) {
+      const date = sorted[i];
+      const prevDate = i > 0 ? sorted[i - 1] : null;
+      const log = allLogs[date];
+      const prevLog = prevDate ? allLogs[prevDate] : null;
+
+      const wakes = log?.wakeUpTimes || [];
+      const morningWake = wakes.find((w) => w.label !== 'Night Wake');
+      const nightWake = wakes.find((w) => w.label === 'Night Wake');
+
+      const bedMin = prevLog?.bedTime ? timeToMinutes(prevLog.bedTime) : null;
+      const wakeMin = morningWake ? timeToMinutes(morningWake.time) : null;
+      const nightWakeMin = nightWake ? timeToMinutes(nightWake.time) : null;
+
+      if (bedMin == null && wakeMin == null) continue;
+
+      const bedNorm = bedMin != null ? normalizeToOvernight(bedMin) : null;
+      const wakeNorm = wakeMin != null ? normalizeToOvernight(wakeMin) : null;
+      const nightWakeNorm = nightWakeMin != null ? normalizeToOvernight(nightWakeMin) : null;
+
+      const segments = [];
+      const sleptThrough = nightWakeNorm == null;
+
+      if (bedNorm != null && wakeNorm != null) {
+        if (nightWakeNorm != null && nightWakeNorm > bedNorm && nightWakeNorm < wakeNorm) {
+          segments.push({ left: bedNorm, right: nightWakeNorm, type: 'sleep' });
+          segments.push({ left: nightWakeNorm, right: wakeNorm, type: 'after-wake' });
+        } else {
+          segments.push({ left: bedNorm, right: wakeNorm, type: 'sleep' });
+        }
+      } else if (bedNorm != null) {
+        const endNorm = Math.min(bedNorm + 180, SLEEP_SPAN);
+        segments.push({ left: bedNorm, right: endNorm, type: 'sleep' });
+      } else if (wakeNorm != null) {
+        const startNorm = Math.max(wakeNorm - 180, 0);
+        segments.push({ left: startNorm, right: wakeNorm, type: 'sleep' });
+      }
+
+      const totalMin = (bedNorm != null && wakeNorm != null && wakeNorm > bedNorm)
+        ? wakeNorm - bedNorm
+        : null;
+      const totalLabel = totalMin != null
+        ? (totalMin >= 60 ? `${Math.floor(totalMin / 60)}h ${totalMin % 60}m` : `${totalMin}m`)
+        : '—';
+
+      const dateLabel = new Date(date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+      rows.push({
+        date,
+        dateLabel,
+        segments,
+        sleptThrough,
+        bedMin,
+        wakeMin,
+        nightWakeMin,
+        totalLabel,
+      });
+    }
+
+    return rows.reverse();
+  }, [dateRange, allLogs]);
+
+  if (sleepRows.length === 0) return <p className="text-sm text-sand-400 italic text-center py-6">No data in range.</p>;
+
+  return (
+    <div className="overflow-x-auto">
+      <div style={{ minWidth: 600 }}>
+        <div className="flex items-end mb-1">
+          <div className="shrink-0" style={{ width: 70 }} />
+          <div className="flex-1 relative" style={{ height: 20 }}>
+            {SLEEP_TICKS.map((norm) => {
+              const pct = (norm / SLEEP_SPAN) * 100;
+              return (
+                <span key={norm} className="absolute text-[10px] text-sand-400 font-medium" style={{ left: `${pct}%`, transform: 'translateX(-50%)' }}>
+                  {sleepTickLabel(norm)}
+                </span>
+              );
+            })}
+          </div>
+          <div className="shrink-0" style={{ width: 80 }} />
+        </div>
+
+        {sleepRows.map((row) => (
+          <div key={row.date} className="flex items-center" style={{ height: 28 }}>
+            <div className="shrink-0 text-[11px] text-sand-600 font-medium truncate pr-2" style={{ width: 70 }}>{row.dateLabel}</div>
+            <div className="flex-1 relative bg-sand-100/60 rounded-sm" style={{ height: 18 }}>
+              {SLEEP_TICKS.map((norm) => (
+                <div key={norm} className="absolute top-0 bottom-0" style={{ left: `${(norm / SLEEP_SPAN) * 100}%`, width: 1, background: norm === 360 ? 'rgba(160, 140, 120, 0.35)' : 'rgba(209, 199, 186, 0.4)' }} />
+              ))}
+              {row.segments.map((seg, i) => {
+                const leftPct = (seg.left / SLEEP_SPAN) * 100;
+                const widthPct = ((seg.right - seg.left) / SLEEP_SPAN) * 100;
+                const color = seg.type === 'sleep' ? '#3B6179' : '#6A9ABF';
+                return (
+                  <div
+                    key={i}
+                    className="absolute top-0 bottom-0 rounded-sm cursor-default"
+                    style={{ left: `${leftPct}%`, width: `${widthPct}%`, background: color, opacity: seg.type === 'sleep' ? 0.85 : 0.55, minWidth: 2 }}
+                    onMouseEnter={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setHoveredSleep({
+                        bed: row.bedMin != null ? minutesToTimeLabel(row.bedMin) : null,
+                        wake: row.wakeMin != null ? minutesToTimeLabel(row.wakeMin) : null,
+                        nightWake: row.nightWakeMin != null ? minutesToTimeLabel(row.nightWakeMin) : null,
+                        total: row.totalLabel,
+                        sleptThrough: row.sleptThrough,
+                        x: rect.left + rect.width / 2,
+                        y: rect.top,
+                      });
+                    }}
+                    onMouseLeave={() => setHoveredSleep(null)}
+                  />
+                );
+              })}
+              {row.nightWakeMin != null && (() => {
+                const norm = normalizeToOvernight(row.nightWakeMin);
+                if (norm == null) return null;
+                const pct = (norm / SLEEP_SPAN) * 100;
+                return <div className="absolute top-0 bottom-0" style={{ left: `${pct}%`, width: 3, background: '#E8A838', transform: 'translateX(-50%)', borderRadius: 1 }} />;
+              })()}
+            </div>
+            <div className="shrink-0 flex items-center justify-end gap-1.5 pl-2" style={{ width: 80 }}>
+              {row.sleptThrough ? (
+                <CircleCheck size={13} className="text-emerald-400" />
+              ) : (
+                <MoonStar size={13} className="text-amber-400" />
+              )}
+              <span className="text-[11px] font-semibold text-sand-700">{row.totalLabel}</span>
+            </div>
+          </div>
+        ))}
+
+        {/* Legend */}
+        <div className="flex items-center justify-center gap-5 mt-3 text-[10px] text-sand-500">
+          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm" style={{ background: '#3B6179', opacity: 0.85 }} /> Sleep</span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm" style={{ background: '#6A9ABF', opacity: 0.55 }} /> After Night Wake</span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-1 h-3 rounded-sm" style={{ background: '#E8A838' }} /> Night Wake</span>
+          <span className="flex items-center gap-1.5"><CircleCheck size={11} className="text-emerald-400" /> Slept Through</span>
+          <span className="flex items-center gap-1.5"><MoonStar size={11} className="text-amber-400" /> Disrupted</span>
+        </div>
+      </div>
+
+      {hoveredSleep && (
+        <div className="fixed z-50 pointer-events-none" style={{ left: hoveredSleep.x, top: hoveredSleep.y - 8, transform: 'translate(-50%, -100%)' }}>
+          <div style={{ borderRadius: '10px', border: '1px solid #EBE6DE', fontSize: '11px', fontFamily: 'DM Sans, system-ui, sans-serif', boxShadow: '0 4px 16px rgba(42, 35, 29, 0.12)', background: '#fff', padding: '8px 12px', whiteSpace: 'nowrap' }}>
+            {hoveredSleep.bed && <div style={{ color: '#4A3F35' }}><strong>Bed:</strong> {hoveredSleep.bed}</div>}
+            {hoveredSleep.nightWake && <div style={{ color: '#E8A838', marginTop: 2 }}><strong>Night Wake:</strong> {hoveredSleep.nightWake}</div>}
+            {hoveredSleep.wake && <div style={{ color: '#4A3F35', marginTop: 2 }}><strong>Wake:</strong> {hoveredSleep.wake}</div>}
+            <div style={{ color: '#918272', marginTop: 3, borderTop: '1px solid #EBE6DE', paddingTop: 3 }}>
+              {hoveredSleep.total !== '—' ? `Total: ${hoveredSleep.total}` : 'Partial data'}
+              {hoveredSleep.sleptThrough ? ' · Slept through ✓' : ' · Night wake'}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Stats() {
   const { allLogs, puppy } = useData();
   const [range, setRange] = useState('all');
@@ -432,35 +598,6 @@ export default function Stats() {
       return { date: formatShortDate(date), foodCal, snackCal };
     });
   }, [allLogs, dateRange]);
-
-  const scheduleData = useMemo(() => {
-    return dateRange.map((date) => {
-      const log = allLogs[date];
-      const wakes = log?.wakeUpTimes || [];
-      const morningWakes = wakes.filter((w) => w.label !== 'Night Wake');
-      const nightWakes = wakes.filter((w) => w.label === 'Night Wake');
-      return {
-        date: formatShortDate(date),
-        morning: morningWakes.length > 0 ? timeToMinutes(morningWakes[0].time) : null,
-        nightWake: nightWakes.length > 0 ? timeToMinutes(nightWakes[0].time) : null,
-        bed: log?.bedTime ? timeToMinutes(log.bedTime) : null,
-      };
-    });
-  }, [allLogs, dateRange]);
-
-  const scheduleDomain = useMemo(() => {
-    const allMinutes = scheduleData.flatMap((d) => [d.morning, d.nightWake, d.bed].filter((v) => v != null));
-    if (allMinutes.length === 0) return [0, 1440];
-    const min = Math.min(...allMinutes);
-    const max = Math.max(...allMinutes);
-    return [Math.max(0, Math.floor(min / 60) * 60 - 60), Math.min(1440, Math.ceil(max / 60) * 60 + 60)];
-  }, [scheduleData]);
-
-  const scheduleTicks = useMemo(() => {
-    const ticks = [];
-    for (let m = scheduleDomain[0]; m <= scheduleDomain[1]; m += 120) ticks.push(m);
-    return ticks;
-  }, [scheduleDomain]);
 
   const totalPee = pottyData.reduce((sum, d) => sum + d.peeGood + d.peeAccident, 0);
   const totalPoop = pottyData.reduce((sum, d) => sum + d.poopGood + d.poopAccident, 0);
@@ -682,24 +819,13 @@ export default function Stats() {
             <NapHeatmap dateRange={dateRange} allLogs={allLogs} />
           </div>
 
-          {/* Sleep Schedule Chart */}
+          {/* Sleep Schedule Heatmap */}
           <div ref={chartRefs.sleepSchedule} className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
             <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
               <TrendingUp size={14} className="text-sand-400" />
               Sleep Schedule ({dayCount}d)
             </h3>
-            <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={scheduleData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
-                <XAxis {...xAxisProps} />
-                <YAxis {...yAxisProps} domain={scheduleDomain} ticks={scheduleTicks} tickFormatter={minutesToTimeLabel} width={62} />
-                <Tooltip content={<ScheduleTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#918272' }} />
-                <Line type="monotone" dataKey="morning" stroke="#9F8362" strokeWidth={2.5} dot={dayCount <= 31 ? { fill: '#9F8362', r: 3.5, strokeWidth: 0 } : false} name="Morning Wake" connectNulls />
-                <Line type="monotone" dataKey="nightWake" stroke="#3B6179" strokeWidth={2.5} strokeDasharray="6 3" dot={dayCount <= 31 ? { fill: '#3B6179', r: 3.5, strokeWidth: 0 } : false} name="Night Wake" connectNulls />
-                <Line type="monotone" dataKey="bed" stroke="#48778F" strokeWidth={2.5} dot={dayCount <= 31 ? { fill: '#48778F', r: 3.5, strokeWidth: 0 } : false} name="Bed Time" connectNulls />
-              </LineChart>
-            </ResponsiveContainer>
+            <SleepHeatmap dateRange={dateRange} allLogs={allLogs} />
           </div>
 
           {/* Calories Chart */}
