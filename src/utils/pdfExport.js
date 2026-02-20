@@ -118,40 +118,60 @@ export function exportStatsPdf({ chartImages, rangeLabel, pawPng, puppyName }) {
   doc.line(margin, y, pageW - margin, y);
   y += 6;
 
-  // One chart per page, scaled to fill the available space
-  const chartAreaH = pageH - footerY > 0 ? footerY - 4 : pageH - margin - 12;
+  const chartAreaH = footerY - 4;
+  const gap = 6;
 
-  chartImages.forEach((chart, idx) => {
-    if (idx > 0) {
+  const nonSchedule = chartImages.filter((c) => !c.isSchedule);
+  const schedule = chartImages.filter((c) => c.isSchedule);
+
+  // Non-schedule charts: two per page, stacked vertically
+  for (let i = 0; i < nonSchedule.length; i += 2) {
+    const isFirstPage = (i === 0);
+    if (!isFirstPage) {
       doc.addPage();
       y = margin;
     }
 
+    const pair = nonSchedule.slice(i, i + 2);
     const availH = chartAreaH - y;
-    const aspectRatio = chart.height / chart.width;
+    const slotH = pair.length === 2 ? (availH - gap) / 2 : availH;
 
-    let imgW, imgH;
+    pair.forEach((chart, j) => {
+      const aspectRatio = chart.height / chart.width;
+      let imgW = contentW;
+      let imgH = imgW * aspectRatio;
 
-    if (chart.isSchedule) {
-      imgW = contentW;
-      imgH = imgW * aspectRatio;
-      if (imgH > availH) {
-        imgH = availH;
+      if (imgH > slotH) {
+        imgH = slotH;
         imgW = imgH / aspectRatio;
       }
-    } else {
+
+      const xOffset = margin + (contentW - imgW) / 2;
+      const slotTop = y + j * (slotH + gap);
+      const yOffset = slotTop + (slotH - imgH) / 2;
+      doc.addImage(chart.dataUrl, 'PNG', xOffset, yOffset, imgW, imgH);
+    });
+  }
+
+  // Schedule charts: one per page, width-first
+  for (const chart of schedule) {
+    doc.addPage();
+    y = margin;
+
+    const availH = chartAreaH - y;
+    const aspectRatio = chart.height / chart.width;
+    let imgW = contentW;
+    let imgH = imgW * aspectRatio;
+
+    if (imgH > availH) {
       imgH = availH;
       imgW = imgH / aspectRatio;
-      if (imgW > contentW) {
-        imgW = contentW;
-        imgH = imgW * aspectRatio;
-      }
     }
 
     const xOffset = margin + (contentW - imgW) / 2;
     const yOffset = y + (availH - imgH) / 2;
     doc.addImage(chart.dataUrl, 'PNG', xOffset, yOffset, imgW, imgH);
-  });
+  }
 
   // Footer on every page
   const totalPages = doc.internal.getNumberOfPages();
