@@ -68,7 +68,7 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 - [x] Welcome text on page background (no card wrapper)
 - [x] Clean spacing between sections
 - [x] Renamed "Snacks" to "Treats" throughout UI and charts
-- [x] Updated calorie calculation (381 cal/cup)
+- [x] Updated calorie calculation (409 cal/cup)
 
 #### 1.6 AI Chat Assistant ✅ Deployed & Working
 - [x] Supabase Edge Function (`chat-assistant`)
@@ -343,7 +343,7 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 - AI Edge Function rewritten for reliability (direct API, no SDK)
 - Clickable header logo returns to dashboard
 - Renamed "Snacks" to "Treats" throughout
-- Updated calorie calculation to 381 cal/cup
+- Updated calorie calculation to 409 cal/cup
 - Custom domain: puppybot.ai
 
 ### v0.1.0 — Personal App

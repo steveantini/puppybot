@@ -239,7 +239,7 @@ Meals and treats are tracked in calories on the Stats page:
 
 | Source | Conversion |
 |--------|-----------|
-| Meals | 1 cup of food = **381 calories** (calculated from food given × fraction eaten) |
+| Meals | 1 cup of food = **409 calories** (calculated from food given × fraction eaten) |
 | Treats | 1 treat = **4 calories** |
 
 The Calories chart shows food and treat calories as separate stacked bars with a combined total in the tooltip.

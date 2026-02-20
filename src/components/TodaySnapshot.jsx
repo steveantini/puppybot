@@ -12,7 +12,7 @@ import {
   Cookie,
 } from 'lucide-react';
 
-const CAL_PER_CUP = 381;
+const CAL_PER_CUP = 409;
 const CAL_PER_SNACK = 4;
 
 function parseCups(foodGiven) {
