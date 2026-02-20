@@ -130,22 +130,22 @@ export function exportStatsPdf({ chartImages, rangeLabel, pawPng, puppyName }) {
     const availH = chartAreaH - y;
     const aspectRatio = chart.height / chart.width;
 
-    const fitWidthW = contentW;
-    const fitWidthH = fitWidthW * aspectRatio;
-
-    const fitHeightH = availH;
-    const fitHeightW = fitHeightH / aspectRatio;
-
     let imgW, imgH;
-    if (fitWidthH >= availH) {
+
+    if (chart.isSchedule) {
+      imgW = contentW;
+      imgH = imgW * aspectRatio;
+      if (imgH > availH) {
+        imgH = availH;
+        imgW = imgH / aspectRatio;
+      }
+    } else {
       imgH = availH;
       imgW = imgH / aspectRatio;
-    } else if (fitHeightW <= contentW) {
-      imgW = fitHeightW;
-      imgH = fitHeightH;
-    } else {
-      imgW = fitWidthW;
-      imgH = fitWidthH;
+      if (imgW > contentW) {
+        imgW = contentW;
+        imgH = imgW * aspectRatio;
+      }
     }
 
     const xOffset = margin + (contentW - imgW) / 2;

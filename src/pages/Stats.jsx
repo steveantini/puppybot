@@ -619,13 +619,13 @@ export default function Stats() {
     setExporting(true);
     try {
       const order = [
+        { key: 'calories', label: 'Calories Eaten' },
         { key: 'successRate', label: 'Potty Success Rate' },
         { key: 'pee', label: 'Pee' },
         { key: 'poop', label: 'Poop' },
-        { key: 'pottySchedule', label: 'Potty Schedule' },
-        { key: 'napSchedule', label: 'Nap Schedule' },
-        { key: 'sleepSchedule', label: 'Sleep Schedule' },
-        { key: 'calories', label: 'Calories Eaten' },
+        { key: 'pottySchedule', label: 'Potty Schedule', isSchedule: true },
+        { key: 'napSchedule', label: 'Nap Schedule', isSchedule: true },
+        { key: 'sleepSchedule', label: 'Sleep Schedule', isSchedule: true },
       ];
 
       const chartImages = [];
@@ -651,6 +651,7 @@ export default function Stats() {
           dataUrl,
           width: img.naturalWidth,
           height: img.naturalHeight,
+          isSchedule: !!item.isSchedule,
         });
       }
 
@@ -738,6 +739,28 @@ export default function Stats() {
         </div>
       ) : (
         <>
+          {/* Calories Chart */}
+          <div ref={chartRefs.calories} className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
+            <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
+              <TrendingUp size={14} className="text-sand-400" />
+              Calories Eaten ({dayCount}d)
+            </h3>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={calorieData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
+                <XAxis {...xAxisProps} />
+                <YAxis {...yAxisProps} allowDecimals={false} domain={[0, maxCalPerDay]} />
+                <YAxis yAxisId="right" orientation="right" {...yAxisProps} allowDecimals={false} domain={[0, maxCalPerDay]} />
+                <Tooltip content={<CaloriesTooltip />} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#918272' }} />
+                <Bar dataKey="foodCal" stackId="cal" fill="#2B6AAF" name="Food" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="snackCal" stackId="cal" fill="#96BDE0" name="Treats" radius={[4, 4, 0, 0]} />
+                <Bar yAxisId="right" dataKey="foodCal" stackId="cal-r" fill="transparent" legendType="none" />
+                <Bar yAxisId="right" dataKey="snackCal" stackId="cal-r" fill="transparent" legendType="none" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
           {/* Potty Success Rate — Line Chart */}
           <div ref={chartRefs.successRate} className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
             <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
@@ -828,27 +851,6 @@ export default function Stats() {
             <SleepHeatmap dateRange={dateRange} allLogs={allLogs} />
           </div>
 
-          {/* Calories Chart */}
-          <div ref={chartRefs.calories} className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-5">
-            <h3 className="text-xs font-semibold text-sand-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
-              <TrendingUp size={14} className="text-sand-400" />
-              Calories Eaten ({dayCount}d)
-            </h3>
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={calorieData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
-                <XAxis {...xAxisProps} />
-                <YAxis {...yAxisProps} allowDecimals={false} domain={[0, maxCalPerDay]} />
-                <YAxis yAxisId="right" orientation="right" {...yAxisProps} allowDecimals={false} domain={[0, maxCalPerDay]} />
-                <Tooltip content={<CaloriesTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#918272' }} />
-                <Bar dataKey="foodCal" stackId="cal" fill="#2B6AAF" name="Food" radius={[0, 0, 0, 0]} />
-                <Bar dataKey="snackCal" stackId="cal" fill="#96BDE0" name="Treats" radius={[4, 4, 0, 0]} />
-                <Bar yAxisId="right" dataKey="foodCal" stackId="cal-r" fill="transparent" legendType="none" />
-                <Bar yAxisId="right" dataKey="snackCal" stackId="cal-r" fill="transparent" legendType="none" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
         </>
       )}
     </div>
