@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useData } from '../context/DataContext';
 import { formatDate } from '../utils/helpers';
 import { exportHealthPdf } from '../utils/pdfExport';
@@ -98,6 +98,8 @@ export default function HealthTracker() {
   const [description, setDescription] = useState('');
   const [notes, setNotes] = useState('');
   const [clinicName, setClinicName] = useState('');
+  const [clinicFocused, setClinicFocused] = useState(false);
+  const clinicRef = useRef(null);
 
   const isFiltered = categoryFilter !== 'all';
   const filterLabel = CATEGORY_OPTIONS.find((o) => o.value === categoryFilter)?.label || 'All Categories';
@@ -308,15 +310,33 @@ export default function HealthTracker() {
               Clinic / Vet Name
               <span className="ml-1 text-sand-300 normal-case tracking-normal">(optional)</span>
             </label>
-            <div className="relative">
-              <Building2 size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-sand-300" />
+            <div className="relative" ref={clinicRef}>
+              <Building2 size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-sand-300 z-10" />
               <input
                 type="text"
                 value={clinicName}
                 onChange={(e) => setClinicName(e.target.value)}
-                placeholder="e.g., Happy Paws Vet Clinic"
+                onFocus={() => setClinicFocused(true)}
+                onBlur={() => setTimeout(() => setClinicFocused(false), 150)}
+                placeholder={puppy?.vet_name ? `e.g., ${puppy.vet_name}` : 'e.g., Happy Paws Vet Clinic'}
                 className="w-full pl-9 pr-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
               />
+              {clinicFocused && puppy?.vet_name && clinicName !== puppy.vet_name && (
+                <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-sand-200 rounded-xl shadow-lg z-50 py-1 overflow-hidden">
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => { setClinicName(puppy.vet_name); setClinicFocused(false); }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-sand-700 hover:bg-steel-50 transition-colors flex items-center gap-2"
+                  >
+                    <Building2 size={13} className="text-steel-400 shrink-0" />
+                    <span>
+                      <span className="font-medium text-sand-900">{puppy.vet_name}</span>
+                      <span className="text-xs text-sand-400 ml-1.5">from Puppy Profile</span>
+                    </span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
