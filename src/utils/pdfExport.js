@@ -367,3 +367,100 @@ export function exportHistoryPdf({ allLogs, selectedDates, puppyName, categoryLa
 
   doc.save('puppybot-history-report.pdf');
 }
+
+// ─── HEALTH PDF ──────────────────────────────────────────────
+export function exportHealthPdf({ recordsByDate, puppyName, categoryLabel, pawPng }) {
+  const doc = new jsPDF();
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 14;
+  const footerY = pageH - 10;
+  const sortedDates = Object.keys(recordsByDate).sort((a, b) => a.localeCompare(b));
+  const name = puppyName || 'Puppy';
+
+  let y = margin;
+
+  const headerBaseline = y + 6;
+  doc.setFontSize(16);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(...COLORS.dark);
+  doc.text(`${name}'s Health Report`, margin, headerBaseline);
+  drawBrandedLogo(doc, pageW - margin, headerBaseline, 12, pawPng);
+  y += 12;
+
+  doc.setFontSize(10);
+  doc.setFont(undefined, 'bold');
+  doc.setTextColor(...COLORS.dark);
+  doc.text('Category: ', margin, y);
+  const catLabelW = doc.getTextWidth('Category: ');
+  doc.setFont(undefined, 'normal');
+  doc.text(categoryLabel || 'All Categories', margin + catLabelW, y);
+
+  doc.setFontSize(9);
+  doc.setTextColor(...COLORS.medium);
+  const now = new Date();
+  const stamp = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) +
+    ' at ' + now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  doc.text(stamp, pageW - margin, y, { align: 'right' });
+  y += 4;
+
+  doc.setDrawColor(...COLORS.light);
+  doc.line(margin, y, pageW - margin, y);
+  y += 8;
+
+  sortedDates.forEach((date, idx) => {
+    const records = recordsByDate[date];
+    if (!records || records.length === 0) return;
+
+    if (y > 240) {
+      doc.addPage();
+      y = 20;
+    }
+
+    doc.setFontSize(12);
+    doc.setTextColor(...COLORS.dark);
+    doc.setFont(undefined, 'bold');
+    doc.text(formatDate(date), margin, y);
+    doc.setFont(undefined, 'normal');
+    y += 2;
+    doc.setDrawColor(...COLORS.light);
+    doc.line(margin, y, pageW - margin, y);
+    y += 6;
+
+    const tableBody = records.map((r) => [
+      r.title || '',
+      (r.type || '').replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+      r.clinic_name || '-',
+      r.description || '-',
+      r.notes || '-',
+    ]);
+
+    autoTable(doc, {
+      startY: y,
+      head: [['Title', 'Category', 'Clinic / Vet', 'Description', 'Notes']],
+      body: tableBody,
+      theme: 'grid',
+      headStyles: { fillColor: COLORS.primary, fontSize: 8 },
+      bodyStyles: { fontSize: 8 },
+      columnStyles: {
+        0: { cellWidth: 35 },
+        1: { cellWidth: 30 },
+        2: { cellWidth: 30 },
+        3: { cellWidth: 50 },
+        4: { cellWidth: 35 },
+      },
+      margin: { left: margin, right: margin },
+    });
+    y = doc.lastAutoTable.finalY + 6;
+
+    if (idx < sortedDates.length - 1) y += 4;
+  });
+
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    drawBrandedLogo(doc, pageW - margin, footerY, 8, pawPng);
+  }
+
+  doc.save('puppybot-health-report.pdf');
+}
