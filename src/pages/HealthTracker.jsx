@@ -1,37 +1,62 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useData } from '../context/DataContext';
 import {
   Syringe,
-  Stethoscope,
+  Bug,
   Pill,
+  Stethoscope,
   Plus,
   Trash2,
   Pencil,
   Calendar,
+  Building2,
 } from 'lucide-react';
 import Modal from '../components/Modal';
 
-const healthTypes = [
+const healthCategories = [
   {
-    id: 'immunization',
-    label: 'Immunization',
+    id: 'vaccination',
+    label: 'Vaccination',
     icon: Syringe,
     color: 'text-emerald-500',
     bgColor: 'bg-emerald-50',
+    borderColor: 'border-emerald-300',
+    activeText: 'text-emerald-600',
+    activeBg: 'bg-emerald-50',
+    placeholder: 'e.g., DHPP #2, Rabies, Bordetella...',
   },
   {
-    id: 'vet_visit',
-    label: 'Vet Visit',
-    icon: Stethoscope,
-    color: 'text-steel-500',
-    bgColor: 'bg-steel-50',
+    id: 'parasite_prevention',
+    label: 'Parasite Prevention',
+    icon: Bug,
+    color: 'text-amber-500',
+    bgColor: 'bg-amber-50',
+    borderColor: 'border-amber-300',
+    activeText: 'text-amber-600',
+    activeBg: 'bg-amber-50',
+    placeholder: 'e.g., Heartgard, NexGard, Panacur...',
   },
   {
     id: 'medication',
     label: 'Medication',
     icon: Pill,
-    color: 'text-warm-600',
-    bgColor: 'bg-warm-50',
+    color: 'text-blue-500',
+    bgColor: 'bg-blue-50',
+    borderColor: 'border-blue-300',
+    activeText: 'text-blue-600',
+    activeBg: 'bg-blue-50',
+    placeholder: 'e.g., Amoxicillin, Metronidazole...',
+  },
+  {
+    id: 'general',
+    label: 'General',
+    icon: Stethoscope,
+    color: 'text-steel-500',
+    bgColor: 'bg-steel-50',
+    borderColor: 'border-steel-300',
+    activeText: 'text-steel-600',
+    activeBg: 'bg-steel-50',
+    placeholder: 'e.g., Annual checkup, Weight check...',
   },
 ];
 
@@ -41,18 +66,20 @@ export default function HealthTracker() {
   const [editingRecord, setEditingRecord] = useState(null);
   const [filter, setFilter] = useState('all');
 
-  const [type, setType] = useState('immunization');
+  const [type, setType] = useState('vaccination');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [notes, setNotes] = useState('');
+  const [clinicName, setClinicName] = useState('');
 
   const resetForm = () => {
-    setType('immunization');
+    setType('vaccination');
     setDate(new Date().toISOString().split('T')[0]);
     setTitle('');
     setDescription('');
     setNotes('');
+    setClinicName('');
     setEditingRecord(null);
   };
 
@@ -68,6 +95,7 @@ export default function HealthTracker() {
     setTitle(record.title);
     setDescription(record.description || '');
     setNotes(record.notes || '');
+    setClinicName(record.clinic_name || '');
     setShowModal(true);
   };
 
@@ -84,6 +112,7 @@ export default function HealthTracker() {
       title: title.trim(),
       description: description.trim(),
       notes: notes.trim(),
+      clinic_name: clinicName.trim(),
     };
     if (editingRecord) {
       updateHealthRecord(editingRecord.id, data);
@@ -106,8 +135,10 @@ export default function HealthTracker() {
 
   const sorted = [...filtered].sort((a, b) => b.date.localeCompare(a.date));
 
-  const getTypeInfo = (typeId) =>
-    healthTypes.find((t) => t.id === typeId) || healthTypes[0];
+  const getCategoryInfo = (catId) =>
+    healthCategories.find((c) => c.id === catId) || healthCategories[3];
+
+  const activeCategory = getCategoryInfo(type);
 
   return (
     <div className="space-y-4 pb-4">
@@ -133,17 +164,17 @@ export default function HealthTracker() {
         >
           All
         </button>
-        {healthTypes.map((ht) => (
+        {healthCategories.map((cat) => (
           <button
-            key={ht.id}
-            onClick={() => setFilter(ht.id)}
+            key={cat.id}
+            onClick={() => setFilter(cat.id)}
             className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all whitespace-nowrap ${
-              filter === ht.id
+              filter === cat.id
                 ? 'bg-sand-900 text-white border-sand-900'
                 : 'bg-white border-sand-200 text-sand-500 hover:border-sand-300'
             }`}
           >
-            {ht.label}
+            {cat.label}
           </button>
         ))}
       </div>
@@ -157,8 +188,8 @@ export default function HealthTracker() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {sorted.map((record) => {
-            const typeInfo = getTypeInfo(record.type);
-            const Icon = typeInfo.icon;
+            const catInfo = getCategoryInfo(record.type);
+            const Icon = catInfo.icon;
             return (
               <div
                 key={record.id}
@@ -166,7 +197,7 @@ export default function HealthTracker() {
               >
                 <div className="flex items-start gap-3">
                   <div
-                    className={`p-2.5 rounded-xl ${typeInfo.bgColor} ${typeInfo.color}`}
+                    className={`p-2.5 rounded-xl ${catInfo.bgColor} ${catInfo.color}`}
                   >
                     <Icon size={16} />
                   </div>
@@ -176,7 +207,7 @@ export default function HealthTracker() {
                         {record.title}
                       </h4>
                       <span className="text-[10px] text-sand-500 bg-sand-100 px-2 py-0.5 rounded-md font-semibold uppercase tracking-wider">
-                        {typeInfo.label}
+                        {catInfo.label}
                       </span>
                     </div>
                     <div className="flex items-center gap-1 mt-1 text-xs text-sand-400">
@@ -189,6 +220,12 @@ export default function HealthTracker() {
                         year: 'numeric',
                       })}
                     </div>
+                    {record.clinic_name && (
+                      <div className="flex items-center gap-1 mt-1 text-xs text-steel-500">
+                        <Building2 size={10} />
+                        {record.clinic_name}
+                      </div>
+                    )}
                     {record.description && (
                       <p className="text-sm text-sand-700 mt-1.5 leading-relaxed">
                         {record.description}
@@ -230,24 +267,30 @@ export default function HealthTracker() {
         title={editingRecord ? 'Edit Health Record' : 'Add Health Record'}
       >
         <div className="space-y-4">
+          {/* Category selector */}
           <div>
             <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-2">
-              Type
+              Category
             </label>
-            <div className="flex gap-2">
-              {healthTypes.map((ht) => (
-                <button
-                  key={ht.id}
-                  onClick={() => setType(ht.id)}
-                  className={`flex-1 py-2.5 rounded-xl text-xs font-semibold border transition-all ${
-                    type === ht.id
-                      ? 'bg-steel-50 text-steel-600 border-steel-300'
-                      : 'bg-white border-sand-200 text-sand-400 hover:border-sand-300'
-                  }`}
-                >
-                  {ht.label}
-                </button>
-              ))}
+            <div className="grid grid-cols-2 gap-2">
+              {healthCategories.map((cat) => {
+                const CatIcon = cat.icon;
+                const isActive = type === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setType(cat.id)}
+                    className={`flex items-center gap-2 py-2.5 px-3 rounded-xl text-xs font-semibold border transition-all ${
+                      isActive
+                        ? `${cat.activeBg} ${cat.activeText} ${cat.borderColor}`
+                        : 'bg-white border-sand-200 text-sand-400 hover:border-sand-300'
+                    }`}
+                  >
+                    <CatIcon size={14} />
+                    {cat.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -271,14 +314,32 @@ export default function HealthTracker() {
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g., DHPP Vaccine, Annual Checkup..."
+              placeholder={activeCategory.placeholder}
               className="w-full px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
             />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">
-              Description (optional)
+              Clinic / Vet Name
+              <span className="ml-1 text-sand-300 normal-case tracking-normal">(optional)</span>
+            </label>
+            <div className="relative">
+              <Building2 size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-sand-300" />
+              <input
+                type="text"
+                value={clinicName}
+                onChange={(e) => setClinicName(e.target.value)}
+                placeholder="e.g., Happy Paws Vet Clinic"
+                className="w-full pl-9 pr-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 placeholder:text-sand-300 focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">
+              Description
+              <span className="ml-1 text-sand-300 normal-case tracking-normal">(optional)</span>
             </label>
             <textarea
               value={description}
@@ -291,7 +352,8 @@ export default function HealthTracker() {
 
           <div>
             <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">
-              Notes (optional)
+              Notes
+              <span className="ml-1 text-sand-300 normal-case tracking-normal">(optional)</span>
             </label>
             <input
               type="text"

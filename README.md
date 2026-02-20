@@ -20,7 +20,7 @@ A clean, modern puppy behavior tracker built with React. Log potty breaks, meals
 - **Treat Tracking** — Log number of treats per day (4 calories each); treat calories are shown separately in the Calories chart
 - **Wake/Bed Schedule** — Log morning wake, multiple night wakes, and bed time all at once in a single form
 - **Puppy Profile** — Store your puppy's name, breed, birthday (with auto-calculated age and dog years), gotcha day, breeder info, vet info, microchip number/company, insurance carrier/policy number, photo (shown as avatar in the header), and a running weight log. Collapsible "+More Info" section for reference details
-- **Health Tracker** — Record immunizations, vet visits, and medications with date, description, and filterable categories. **Edit or delete** any record directly from the list.
+- **Health Tracker** — Record vaccinations, parasite prevention, medications, and general health events with filterable categories, optional clinic/vet name, and date. **Edit or delete** any record directly from the list.
 - **Date Picker on All Forms** — Log entries for any date, not just today
 - **PDF Export** — Generate printable reports from both History and Stats pages
 - **Clickable Header** — Tap the PuppyBot logo/title from any page to return to the dashboard
@@ -83,7 +83,7 @@ Enable them for Production, Preview, and Development environments.
 | `puppies` | Puppy profile (name, breed, birthday, vet, microchip, insurance, photo) |
 | `weight_logs` | Weight entries linked to a puppy |
 | `daily_logs` | One row per day with JSONB columns for potty breaks, meals, naps, schedule, skills, notes, and treat count |
-| `health_records` | Immunizations, vet visits, and medications |
+| `health_records` | Vaccinations, parasite prevention, medications, and general health events (with optional clinic/vet name) |
 | `user_profiles` | User accounts (full name, subscription tier) |
 | `puppy_members` | Links users to puppies with roles (owner, editor, viewer) |
 | `puppy_invites` | Pending family sharing invitations |
@@ -219,7 +219,8 @@ weight_logs: [{ date, weight }]
 
 **Health Records** (`health_records`)
 ```
-[{ id, type, date, title, description, notes }]
+[{ id, type, date, title, description, notes, clinic_name }]
+// type: vaccination | parasite_prevention | medication | general
 ```
 
 ## Design

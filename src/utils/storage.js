@@ -243,6 +243,7 @@ function parseHealthRecords(data) {
     title: r.title,
     description: r.description || '',
     notes: r.notes || '',
+    clinic_name: r.clinic_name || '',
   }));
 }
 
@@ -253,6 +254,7 @@ export async function insertHealthRecord(record, userId) {
     title: record.title,
     description: record.description || '',
     notes: record.notes || '',
+    clinic_name: record.clinic_name || '',
   };
   if (userId) row.user_id = userId;
 
@@ -271,6 +273,7 @@ export async function insertHealthRecord(record, userId) {
     title: data.title,
     description: data.description || '',
     notes: data.notes || '',
+    clinic_name: data.clinic_name || '',
   };
 }
 
@@ -281,6 +284,7 @@ export async function updateHealthRecordById(id, record) {
     title: record.title,
     description: record.description || '',
     notes: record.notes || '',
+    clinic_name: record.clinic_name || '',
   };
 
   const { data, error } = await supabase
@@ -299,6 +303,7 @@ export async function updateHealthRecordById(id, record) {
     title: data.title,
     description: data.description || '',
     notes: data.notes || '',
+    clinic_name: data.clinic_name || '',
   };
 }
 

@@ -47,7 +47,7 @@ CREATE TABLE daily_logs (
   updated_at timestamptz DEFAULT now()
 );
 
--- Health records (immunizations, vet visits, medications)
+-- Health records (vaccinations, parasite prevention, medications, general)
 CREATE TABLE health_records (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   type text NOT NULL,
@@ -55,6 +55,7 @@ CREATE TABLE health_records (
   title text NOT NULL,
   description text DEFAULT '',
   notes text DEFAULT '',
+  clinic_name text DEFAULT '',
   created_at timestamptz DEFAULT now()
 );
 
