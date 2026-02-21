@@ -3,6 +3,15 @@ import { useData } from '../context/DataContext';
 import { Camera, Plus, Scale, Dog, ChevronDown, ChevronUp } from 'lucide-react';
 import Modal from '../components/Modal';
 
+function safeHref(url) {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url, 'https://placeholder.com');
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') return url;
+  } catch {}
+  return null;
+}
+
 export default function PuppyProfile() {
   const { puppy, updatePuppy, addWeightEntry } = useData();
   const [isEditing, setIsEditing] = useState(!puppy?.name);
@@ -190,9 +199,9 @@ export default function PuppyProfile() {
                       {puppy.breederName && (
                         <p className="text-sand-500">
                           <span className="text-sand-400">Breeder:</span>{' '}
-                          {puppy.breederWebsite ? (
+                          {safeHref(puppy.breederWebsite) ? (
                             <a 
-                              href={puppy.breederWebsite} 
+                              href={safeHref(puppy.breederWebsite)} 
                               target="_blank" 
                               rel="noopener noreferrer"
                               className="text-steel-500 hover:text-steel-600 underline font-medium"
@@ -219,9 +228,9 @@ export default function PuppyProfile() {
                       {puppy.vetName && (
                         <p className="text-sand-500">
                           <span className="text-sand-400">Veterinarian:</span>{' '}
-                          {puppy.vetWebsite ? (
+                          {safeHref(puppy.vetWebsite) ? (
                             <a 
-                              href={puppy.vetWebsite} 
+                              href={safeHref(puppy.vetWebsite)} 
                               target="_blank" 
                               rel="noopener noreferrer"
                               className="text-steel-500 hover:text-steel-600 underline font-medium"

@@ -16,7 +16,10 @@ Deno.serve(async (req) => {
     // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const authHeader = req.headers.get('Authorization')
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: authHeader ? { Authorization: authHeader } : {} },
+    })
 
     // Get the start of current week (Monday)
     const today = new Date()
@@ -29,9 +32,10 @@ Deno.serve(async (req) => {
 
     // Fetch puppy profile
     const { data: puppy } = await supabase
-      .from('puppy_profile')
+      .from('puppies')
       .select('*')
-      .single()
+      .limit(1)
+      .maybeSingle()
 
     // Fetch last week's data
     const { data: logs, error } = await supabase
@@ -133,14 +137,15 @@ function generateWeeklySummary(logs: any[]): string {
     const pottyBreaks = log.potty_breaks || []
     totalPotty += pottyBreaks.length
     totalAccidents += pottyBreaks.filter((p: any) => 
-      p.peeStatus === 'accident' || p.poopStatus === 'accident'
+      p.pee === 'accident' || p.poop === 'accident'
     ).length
 
     const naps = log.naps || []
     totalNapMinutes += naps.reduce((total: number, nap: any) => {
-      const start = new Date(nap.startTime)
-      const end = new Date(nap.endTime)
-      return total + (end.getTime() - start.getTime()) / (1000 * 60)
+      if (!nap.startTime || !nap.endTime) return total
+      const [sh, sm] = nap.startTime.split(':').map(Number)
+      const [eh, em] = nap.endTime.split(':').map(Number)
+      return total + ((eh * 60 + em) - (sh * 60 + sm))
     }, 0)
 
     const meals = log.meals || []
@@ -148,7 +153,8 @@ function generateWeeklySummary(logs: any[]): string {
     totalCalories += meals.reduce((sum: number, meal: any) => {
       const eaten = parseFraction(meal.foodEaten)
       const given = parseFraction(meal.foodGiven)
-      return sum + (eaten / given * 367)
+      if (given === 0) return sum
+      return sum + (given * eaten * 409)
     }, 0) + ((log.snacks || 0) * 4)
   })
 
@@ -177,7 +183,7 @@ function generateWeeklySummary(logs: any[]): string {
 ${logs.map((log) => {
   const potty = (log.potty_breaks || []).length
   const accidents = (log.potty_breaks || []).filter((p: any) => 
-    p.peeStatus === 'accident' || p.poopStatus === 'accident'
+    p.pee === 'accident' || p.poop === 'accident'
   ).length
   return `${log.date}: ${potty} potty (${accidents} acc), ${log.meals?.length || 0} meals, ${log.notes ? '✓ notes' : ''}`
 }).join('\n')}`

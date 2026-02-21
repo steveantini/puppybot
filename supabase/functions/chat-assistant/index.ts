@@ -27,9 +27,13 @@ Deno.serve(async (req) => {
       throw new Error('ANTHROPIC_API_KEY is not set')
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    // Pass the user's JWT so RLS policies apply
+    const authHeader = req.headers.get('Authorization')
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: authHeader ? { Authorization: authHeader } : {} },
+    })
 
-    // Fetch puppy profile
+    // Fetch puppy profile (scoped to authenticated user via RLS)
     const { data: puppy } = await supabase
       .from('puppies')
       .select('*')

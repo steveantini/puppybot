@@ -20,24 +20,12 @@ export function createEmptyDayLog(date) {
 
 export async function fetchPuppy(userId) {
   try {
-    // Try with user_id filter first
-    if (userId) {
-      const { data: puppy, error } = await supabase
-        .from('puppies')
-        .select('*')
-        .eq('user_id', userId)
-        .limit(1)
-        .maybeSingle();
+    if (!userId) return null;
 
-      if (!error && puppy) {
-        return await enrichPuppy(puppy);
-      }
-    }
-
-    // Fallback: get any puppy (for backward compatibility / pre-migration data)
     const { data: puppy, error } = await supabase
       .from('puppies')
       .select('*')
+      .eq('user_id', userId)
       .limit(1)
       .maybeSingle();
 
@@ -138,23 +126,12 @@ export async function addWeightLog(puppyId, entry, userId) {
 
 export async function fetchAllLogs(userId) {
   try {
-    // Try with user_id filter first
-    if (userId) {
-      const { data, error } = await supabase
-        .from('daily_logs')
-        .select('*')
-        .eq('user_id', userId)
-        .order('date', { ascending: false });
+    if (!userId) return {};
 
-      if (!error && data && data.length > 0) {
-        return parseLogs(data);
-      }
-    }
-
-    // Fallback: get all logs (backward compatibility)
     const { data, error } = await supabase
       .from('daily_logs')
       .select('*')
+      .eq('user_id', userId)
       .order('date', { ascending: false });
 
     if (error) throw error;
@@ -199,7 +176,7 @@ export async function upsertDayLog(date, dayLog, userId) {
   if (userId) row.user_id = userId;
 
   const { error } = await supabase.from('daily_logs').upsert(row, {
-    onConflict: 'date',
+    onConflict: 'user_id,date',
   });
   if (error) throw error;
 }
@@ -208,23 +185,12 @@ export async function upsertDayLog(date, dayLog, userId) {
 
 export async function fetchHealthRecords(userId) {
   try {
-    // Try with user_id filter first
-    if (userId) {
-      const { data, error } = await supabase
-        .from('health_records')
-        .select('*')
-        .eq('user_id', userId)
-        .order('date', { ascending: false });
+    if (!userId) return [];
 
-      if (!error && data && data.length > 0) {
-        return parseHealthRecords(data);
-      }
-    }
-
-    // Fallback
     const { data, error } = await supabase
       .from('health_records')
       .select('*')
+      .eq('user_id', userId)
       .order('date', { ascending: false });
 
     if (error) throw error;

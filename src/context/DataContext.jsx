@@ -149,8 +149,11 @@ export function DataProvider({ children }) {
 
   const updatePuppy = useCallback(async (data) => {
     if (isViewer()) return;
-    const updated = { ...puppy, ...data };
-    setPuppy(updated);
+    let updated;
+    setPuppy((prev) => {
+      updated = { ...prev, ...data };
+      return updated;
+    });
     try {
       const id = await storageSavePuppy(updated, userIdRef.current);
       if (!updated.id && id) {
@@ -159,7 +162,7 @@ export function DataProvider({ children }) {
     } catch (err) {
       console.error('Failed to save puppy:', err);
     }
-  }, [puppy]);
+  }, []);
 
   const addWeightEntry = useCallback(async (entry) => {
     if (isViewer()) return;
@@ -179,6 +182,10 @@ export function DataProvider({ children }) {
       }
     } catch (err) {
       console.error('Failed to save weight entry:', err);
+      setPuppy((prev) => ({
+        ...prev,
+        weightLog: (prev?.weightLog || []).filter((w) => w.id !== tempId),
+      }));
     }
   }, [puppy]);
 
@@ -311,28 +318,37 @@ export function DataProvider({ children }) {
       );
     } catch (err) {
       console.error('Failed to save health record:', err);
+      setHealthRecords((prev) => prev.filter((r) => r.id !== tempId));
     }
   }, []);
 
   const updateHealthRecord = useCallback(async (id, data) => {
     if (isViewer()) return;
-    setHealthRecords((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, ...data } : r))
-    );
+    let snapshot;
+    setHealthRecords((prev) => {
+      snapshot = prev;
+      return prev.map((r) => (r.id === id ? { ...r, ...data } : r));
+    });
     try {
       await updateHealthRecordById(id, data);
     } catch (err) {
       console.error('Failed to update health record:', err);
+      if (snapshot) setHealthRecords(snapshot);
     }
   }, []);
 
   const deleteHealthRecord = useCallback(async (id) => {
     if (isViewer()) return;
-    setHealthRecords((prev) => prev.filter((r) => r.id !== id));
+    let snapshot;
+    setHealthRecords((prev) => {
+      snapshot = prev;
+      return prev.filter((r) => r.id !== id);
+    });
     try {
       await deleteHealthRecordById(id);
     } catch (err) {
       console.error('Failed to delete health record:', err);
+      if (snapshot) setHealthRecords(snapshot);
     }
   }, []);
 

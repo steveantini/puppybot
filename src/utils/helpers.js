@@ -1,4 +1,4 @@
-const TZ = 'America/New_York';
+const TZ = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York';
 
 export function generateId() {
   return crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;

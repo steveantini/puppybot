@@ -12,7 +12,7 @@ const SUGGESTED_QUESTIONS = [
 ]
 
 export default function ChatAssistant() {
-  const { puppy, updateNotes } = useData()
+  const { puppy, updateNotes, todayLog } = useData()
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
@@ -142,7 +142,10 @@ export default function ChatAssistant() {
 
   const saveToNotes = async (content, messageIndex) => {
     try {
-      await updateNotes(content, getTodayKey())
+      const todayKey = getTodayKey();
+      const existing = todayLog?.notes || '';
+      const newNotes = existing ? `${existing}\n\n--- AI Insight ---\n${content}` : content;
+      updateNotes(newNotes, todayKey);
       setShowSaveMenu(null)
       // Show success feedback
       setMessages((prev) => 
