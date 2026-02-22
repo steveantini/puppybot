@@ -6,7 +6,7 @@ A clean, modern puppy behavior tracker built with React. Log potty breaks, meals
 
 ## Features
 
-- **Dashboard** — Clean welcome intro, large quick-add buttons for fast entry (3 taps or fewer), and a Claude-inspired AI chat input with time-aware greeting
+- **Dashboard** — Clean welcome intro, large quick-add buttons for fast entry (3 taps or fewer), Today's Snapshot with expandable Potty/Meals/Naps detail cards, and a Claude-inspired AI chat input with time-aware greeting
 - **History** — Browse past days in a scrollable list; tap any day to expand full details. **Edit or delete** any individual entry (potty break, meal, nap, schedule, skills, notes) directly from the history view. Expand All / Collapse All toggle to view everything at once. Filter by category (Potty, Meals, Naps, Schedule, Skills, Notes) to see all matching entries across all dates. Select individual dates or all dates and export to PDF.
 - **Stats & Trends** — Comprehensive charts powered by Recharts with a date range selector (All Time, Last 7 Days, Last 30 Days, Year to Date):
   - Potty success rate line chart tracking daily % trend; hover shows total, good, accidents, and %
@@ -20,7 +20,7 @@ A clean, modern puppy behavior tracker built with React. Log potty breaks, meals
 - **Treat Tracking** — Log number of treats per day (4 calories each); treat calories are shown separately in the Calories chart
 - **Wake/Bed Schedule** — Log morning wake, multiple night wakes, and bed time all at once in a single form
 - **Puppy Profile** — Store your puppy's name, breed, birthday (with auto-calculated age and dog years), gotcha day, breeder info, vet info, microchip number/company, insurance carrier/policy number, photo (shown as avatar in the header), and a running weight log. Collapsible "+More Info" section for reference details
-- **Health Tracker** — Record vaccinations, parasite prevention, medications, and general health events with filterable categories, optional clinic/vet name, and date. **Edit or delete** any record directly from the list.
+- **Health Tracker** — Record vaccinations, parasite prevention, medications, and general health events grouped by date in reverse chronological order with expandable rows, category dropdown filter, Expand All/Collapse All, optional clinic/vet name (with autofill from Puppy Profile), and PDF export. **Edit or delete** any record directly from the expanded view.
 - **Date Picker on All Forms** — Log entries for any date, not just today
 - **PDF Export** — Generate printable reports from both History and Stats pages
 - **Clickable Header** — Tap the PuppyBot logo/title from any page to return to the dashboard
