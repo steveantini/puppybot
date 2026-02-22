@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useData } from '../context/DataContext';
 import { formatTime, getTodayKey } from '../utils/helpers';
 import {
@@ -10,6 +10,8 @@ import {
   CircleCheck,
   CircleAlert,
   Cookie,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 const CAL_PER_CUP = 409;
@@ -36,14 +38,27 @@ function parseEatenFraction(foodEaten) {
   return 0;
 }
 
-function StatCard({ icon: Icon, iconColor, label, children }) {
+function StatCard({ icon: Icon, iconColor, label, expandable, expanded, onToggle, children, detail }) {
   return (
     <div className="bg-white rounded-2xl border border-sand-200/80 shadow-sm p-4 flex flex-col gap-1.5">
-      <div className="flex items-center gap-2 mb-1">
+      <button
+        onClick={expandable ? onToggle : undefined}
+        className={`flex items-center gap-2 mb-1 w-full ${expandable ? 'cursor-pointer' : 'cursor-default'}`}
+      >
         <Icon size={16} className={iconColor} />
-        <span className="text-[11px] font-semibold text-sand-500 uppercase tracking-widest">{label}</span>
-      </div>
+        <span className="text-[11px] font-semibold text-sand-500 uppercase tracking-widest flex-1 text-left">{label}</span>
+        {expandable && (
+          expanded
+            ? <ChevronUp size={14} className="text-sand-300" />
+            : <ChevronDown size={14} className="text-sand-300" />
+        )}
+      </button>
       <div className="space-y-1">{children}</div>
+      {expanded && detail && (
+        <div className="border-t border-sand-100 mt-2 pt-2 space-y-1.5">
+          {detail}
+        </div>
+      )}
     </div>
   );
 }
@@ -76,6 +91,11 @@ export default function TodaySnapshot() {
   const { allLogs } = useData();
   const todayKey = getTodayKey();
   const log = allLogs[todayKey];
+
+  const [expandedCards, setExpandedCards] = useState({});
+
+  const toggle = (key) =>
+    setExpandedCards((prev) => ({ ...prev, [key]: !prev[key] }));
 
   const pottyStats = useMemo(() => {
     const breaks = log?.pottyBreaks || [];
@@ -141,6 +161,62 @@ export default function TodaySnapshot() {
 
   if (isEmpty) return null;
 
+  const pottyBreaks = log?.pottyBreaks || [];
+  const meals = log?.meals || [];
+  const naps = log?.naps || [];
+
+  const pottyDetail = pottyBreaks.length > 0 && (
+    <div className="space-y-1.5">
+      {pottyBreaks.map((p, i) => (
+        <div key={p.id || i} className="flex items-center gap-2 text-[12px] flex-wrap">
+          <span className="text-sand-400 font-medium w-[52px] shrink-0">{formatTime(p.time)}</span>
+          {p.pee === 'good' && <span className="text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-medium">Pee ✓</span>}
+          {p.pee === 'accident' && <span className="text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded font-medium">Pee ✗</span>}
+          {p.poop === 'good' && <span className="text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-medium">Poop ✓</span>}
+          {p.poop === 'accident' && <span className="text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded font-medium">Poop ✗</span>}
+          {p.ringBell && <span className="text-steel-500 bg-steel-50 px-1.5 py-0.5 rounded font-medium">🔔</span>}
+        </div>
+      ))}
+    </div>
+  );
+
+  const mealDetail = meals.length > 0 && (
+    <div className="space-y-1.5">
+      {meals.map((m, i) => (
+        <div key={m.id || i} className="text-[12px]">
+          <div className="flex items-center gap-2">
+            <span className="text-sand-400 font-medium w-[52px] shrink-0">{formatTime(m.time)}</span>
+            <span className="text-sand-700">
+              {m.foodGiven}{m.foodEaten ? ` → ${m.foodEaten}` : ''}
+            </span>
+          </div>
+          {m.notes && <p className="text-[11px] text-sand-400 italic ml-[60px]">{m.notes}</p>}
+        </div>
+      ))}
+    </div>
+  );
+
+  const napDetail = naps.length > 0 && (
+    <div className="space-y-1.5">
+      {naps.map((n, i) => {
+        let dur = '';
+        if (n.startTime && n.endTime) {
+          const [sh, sm] = n.startTime.split(':').map(Number);
+          const [eh, em] = n.endTime.split(':').map(Number);
+          const mins = (eh * 60 + em) - (sh * 60 + sm);
+          if (mins > 0) dur = mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`;
+        }
+        return (
+          <div key={n.id || i} className="flex items-center gap-2 text-[12px]">
+            <Moon size={11} className="text-steel-400 shrink-0" />
+            <span className="text-sand-700">{formatTime(n.startTime)} – {formatTime(n.endTime)}</span>
+            {dur && <span className="text-sand-400">({dur})</span>}
+          </div>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div className="max-w-3xl mx-auto mt-8">
       <h3 className="text-xs font-semibold text-sand-500 uppercase tracking-widest mb-3 flex items-center gap-2 px-1">
@@ -150,7 +226,15 @@ export default function TodaySnapshot() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {/* Potty */}
-        <StatCard icon={Droplets} iconColor="text-steel-400" label="Potty">
+        <StatCard
+          icon={Droplets}
+          iconColor="text-steel-400"
+          label="Potty"
+          expandable={pottyBreaks.length > 0}
+          expanded={expandedCards.potty}
+          onToggle={() => toggle('potty')}
+          detail={pottyDetail}
+        >
           <Metric value={pottyStats.breaks} unit={pottyStats.breaks === 1 ? 'break' : 'breaks'} />
           {pottyStats.breaks > 0 && (
             <>
@@ -174,7 +258,15 @@ export default function TodaySnapshot() {
         </StatCard>
 
         {/* Meals */}
-        <StatCard icon={UtensilsCrossed} iconColor="text-warm-500" label="Meals">
+        <StatCard
+          icon={UtensilsCrossed}
+          iconColor="text-warm-500"
+          label="Meals"
+          expandable={meals.length > 0}
+          expanded={expandedCards.meals}
+          onToggle={() => toggle('meals')}
+          detail={mealDetail}
+        >
           <Metric
             value={mealStats.count}
             unit={mealStats.count === 1 ? 'meal' : 'meals'}
@@ -193,7 +285,15 @@ export default function TodaySnapshot() {
         </StatCard>
 
         {/* Naps */}
-        <StatCard icon={Moon} iconColor="text-steel-500" label="Naps">
+        <StatCard
+          icon={Moon}
+          iconColor="text-steel-500"
+          label="Naps"
+          expandable={naps.length > 0}
+          expanded={expandedCards.naps}
+          onToggle={() => toggle('naps')}
+          detail={napDetail}
+        >
           <Metric
             value={napStats.count}
             unit={napStats.count === 1 ? 'nap' : 'naps'}
