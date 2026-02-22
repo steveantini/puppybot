@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '../utils/supabase';
+import { supabase, setRememberMe } from '../utils/supabase';
 import { PawPrint, Mail, Lock, AlertCircle } from 'lucide-react';
 
 export default function Login() {
@@ -9,6 +9,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [rememberMe, setRememberMeState] = useState(true);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -16,6 +17,7 @@ export default function Login() {
     setLoading(true);
 
     try {
+      setRememberMe(rememberMe);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -96,7 +98,12 @@ export default function Login() {
 
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="rounded border-sand-300 text-steel-500 focus:ring-steel-300" />
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMeState(e.target.checked)}
+                  className="rounded border-sand-300 text-steel-500 focus:ring-steel-300"
+                />
                 <span className="text-sand-600">Remember me</span>
               </label>
               <Link to="/forgot-password" className="text-steel-500 hover:text-steel-600 font-medium">
