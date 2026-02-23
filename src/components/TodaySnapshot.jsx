@@ -92,7 +92,7 @@ export default function TodaySnapshot() {
   const todayKey = getTodayKey();
   const log = allLogs[todayKey];
 
-  const [expandedCards, setExpandedCards] = useState({});
+  const [expandedCards, setExpandedCards] = useState({ potty: true, meals: true, naps: true });
 
   const toggle = (key) =>
     setExpandedCards((prev) => ({ ...prev, [key]: !prev[key] }));
