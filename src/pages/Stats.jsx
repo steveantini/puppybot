@@ -565,8 +565,8 @@ export default function Stats() {
       };
     });
     return base.map((d, i) => {
-      const peeSamples = base.slice(Math.max(0, i - 2), i + 1).map((x) => x.totalPee);
-      const poopSamples = base.slice(Math.max(0, i - 2), i + 1).map((x) => x.totalPoop);
+      const peeSamples = base.slice(Math.max(0, i - 6), i + 1).map((x) => x.totalPee);
+      const poopSamples = base.slice(Math.max(0, i - 6), i + 1).map((x) => x.totalPoop);
       const peeTrend = Math.round((peeSamples.reduce((s, v) => s + v, 0) / peeSamples.length) * 10) / 10;
       const poopTrend = Math.round((poopSamples.reduce((s, v) => s + v, 0) / poopSamples.length) * 10) / 10;
       return { ...d, peeTrend, poopTrend };
@@ -574,7 +574,7 @@ export default function Stats() {
   }, [allLogs, dateRange]);
 
   const pottyComboData = useMemo(() => {
-    return dateRange.map((date) => {
+    const base = dateRange.map((date) => {
       const log = allLogs[date];
       const breaks = log?.pottyBreaks || [];
       let totalOutcomes = 0;
@@ -594,6 +594,13 @@ export default function Stats() {
         successPct: pct,
       };
     });
+    return base.map((d, i) => {
+      const samples = base.slice(Math.max(0, i - 6), i + 1).filter((x) => x.successPct !== null);
+      const successTrend = samples.length > 0
+        ? Math.round(samples.reduce((s, v) => s + v.successPct, 0) / samples.length)
+        : null;
+      return { ...d, successTrend };
+    });
   }, [allLogs, dateRange]);
 
   const calorieData = useMemo(() => {
@@ -611,7 +618,7 @@ export default function Stats() {
       return { date: formatShortDate(date), foodCal, snackCal, totalCal: foodCal + snackCal };
     });
     return base.map((d, i) => {
-      const samples = base.slice(Math.max(0, i - 2), i + 1).map((x) => x.totalCal);
+      const samples = base.slice(Math.max(0, i - 6), i + 1).map((x) => x.totalCal);
       const calTrend = Math.round(samples.reduce((s, v) => s + v, 0) / samples.length);
       return { ...d, calTrend };
     });
@@ -775,7 +782,7 @@ export default function Stats() {
                 <Bar dataKey="snackCal" stackId="cal" fill="#96BDE0" name="Treats" radius={[4, 4, 0, 0]} />
                 <Bar yAxisId="right" dataKey="foodCal" stackId="cal-r" fill="transparent" legendType="none" />
                 <Bar yAxisId="right" dataKey="snackCal" stackId="cal-r" fill="transparent" legendType="none" />
-                <Line type="monotone" dataKey="calTrend" stroke="#1A4D7C" strokeWidth={2} dot={false} name="3-day Avg" connectNulls />
+                <Line type="monotone" dataKey="calTrend" stroke="#1A4D7C" strokeWidth={2} dot={false} name="7-day Avg" connectNulls />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
@@ -793,7 +800,9 @@ export default function Stats() {
                 <YAxis {...yAxisProps} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                 <YAxis yAxisId="right" orientation="right" {...yAxisProps} domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
                 <Tooltip content={<SuccessComboTooltip />} />
+                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px', color: '#918272' }} />
                 <Line type="monotone" dataKey="successPct" stroke="#2B6AAF" strokeWidth={2.5} dot={{ fill: '#2B6AAF', r: 4, strokeWidth: 0 }} name="Success %" connectNulls activeDot={{ r: 6, fill: '#2B6AAF', strokeWidth: 2, stroke: '#fff' }} />
+                <Line type="monotone" dataKey="successTrend" stroke="#1A4D7C" strokeWidth={2} strokeDasharray="6 3" dot={false} name="7-day Avg" connectNulls />
                 <Line yAxisId="right" type="monotone" dataKey="successPct" stroke="transparent" dot={false} activeDot={false} legendType="none" />
               </LineChart>
             </ResponsiveContainer>
@@ -817,7 +826,7 @@ export default function Stats() {
                 <Bar dataKey="peeAccident" stackId="pee" fill="#D4726A" name="Pee (Accident)" radius={[4, 4, 0, 0]} />
                 <Bar yAxisId="right" dataKey="peeGood" stackId="pee-r" fill="transparent" legendType="none" />
                 <Bar yAxisId="right" dataKey="peeAccident" stackId="pee-r" fill="transparent" legendType="none" />
-                <Line type="monotone" dataKey="peeTrend" stroke="#B8960A" strokeWidth={2} dot={false} name="3-day Avg" connectNulls />
+                <Line type="monotone" dataKey="peeTrend" stroke="#B8960A" strokeWidth={2} dot={false} name="7-day Avg" connectNulls />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
@@ -840,7 +849,7 @@ export default function Stats() {
                 <Bar dataKey="poopAccident" stackId="poop" fill="#D4726A" name="Poop (Accident)" radius={[4, 4, 0, 0]} />
                 <Bar yAxisId="right" dataKey="poopGood" stackId="poop-r" fill="transparent" legendType="none" />
                 <Bar yAxisId="right" dataKey="poopAccident" stackId="poop-r" fill="transparent" legendType="none" />
-                <Line type="monotone" dataKey="poopTrend" stroke="#6B4A2A" strokeWidth={2} dot={false} name="3-day Avg" connectNulls />
+                <Line type="monotone" dataKey="poopTrend" stroke="#6B4A2A" strokeWidth={2} dot={false} name="7-day Avg" connectNulls />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
