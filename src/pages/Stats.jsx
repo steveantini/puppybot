@@ -4,7 +4,7 @@ import { formatShortDate } from '../utils/helpers';
 import { exportStatsPdf } from '../utils/pdfExport';
 import { toPng } from 'html-to-image';
 import {
-  BarChart,
+  ComposedChart,
   Bar,
   XAxis,
   YAxis,
@@ -547,16 +547,29 @@ export default function Stats() {
   const dateRange = useMemo(() => getDateRange(range, allLogDates), [range, allLogDates]);
 
   const pottyData = useMemo(() => {
-    return dateRange.map((date) => {
+    const base = dateRange.map((date) => {
       const log = allLogs[date];
       const breaks = log?.pottyBreaks || [];
+      const peeGood = breaks.filter((p) => p.pee === 'good').length;
+      const peeAccident = breaks.filter((p) => p.pee === 'accident').length;
+      const poopGood = breaks.filter((p) => p.poop === 'good').length;
+      const poopAccident = breaks.filter((p) => p.poop === 'accident').length;
       return {
         date: formatShortDate(date),
-        peeGood: breaks.filter((p) => p.pee === 'good').length,
-        peeAccident: breaks.filter((p) => p.pee === 'accident').length,
-        poopGood: breaks.filter((p) => p.poop === 'good').length,
-        poopAccident: breaks.filter((p) => p.poop === 'accident').length,
+        peeGood,
+        peeAccident,
+        poopGood,
+        poopAccident,
+        totalPee: peeGood + peeAccident,
+        totalPoop: poopGood + poopAccident,
       };
+    });
+    return base.map((d, i) => {
+      const peeSamples = base.slice(Math.max(0, i - 2), i + 1).map((x) => x.totalPee);
+      const poopSamples = base.slice(Math.max(0, i - 2), i + 1).map((x) => x.totalPoop);
+      const peeTrend = Math.round((peeSamples.reduce((s, v) => s + v, 0) / peeSamples.length) * 10) / 10;
+      const poopTrend = Math.round((poopSamples.reduce((s, v) => s + v, 0) / poopSamples.length) * 10) / 10;
+      return { ...d, peeTrend, poopTrend };
     });
   }, [allLogs, dateRange]);
 
@@ -584,7 +597,7 @@ export default function Stats() {
   }, [allLogs, dateRange]);
 
   const calorieData = useMemo(() => {
-    return dateRange.map((date) => {
+    const base = dateRange.map((date) => {
       const log = allLogs[date];
       const meals = log?.meals || [];
       let totalCups = 0;
@@ -595,7 +608,12 @@ export default function Stats() {
       });
       const foodCal = Math.round(totalCups * CAL_PER_CUP);
       const snackCal = (log?.snacks || 0) * CAL_PER_SNACK;
-      return { date: formatShortDate(date), foodCal, snackCal };
+      return { date: formatShortDate(date), foodCal, snackCal, totalCal: foodCal + snackCal };
+    });
+    return base.map((d, i) => {
+      const samples = base.slice(Math.max(0, i - 2), i + 1).map((x) => x.totalCal);
+      const calTrend = Math.round(samples.reduce((s, v) => s + v, 0) / samples.length);
+      return { ...d, calTrend };
     });
   }, [allLogs, dateRange]);
 
@@ -746,7 +764,7 @@ export default function Stats() {
               Calories Eaten ({dayCount}d)
             </h3>
             <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={calorieData}>
+              <ComposedChart data={calorieData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
                 <XAxis {...xAxisProps} />
                 <YAxis {...yAxisProps} allowDecimals={false} domain={[0, maxCalPerDay]} />
@@ -757,7 +775,8 @@ export default function Stats() {
                 <Bar dataKey="snackCal" stackId="cal" fill="#96BDE0" name="Treats" radius={[4, 4, 0, 0]} />
                 <Bar yAxisId="right" dataKey="foodCal" stackId="cal-r" fill="transparent" legendType="none" />
                 <Bar yAxisId="right" dataKey="snackCal" stackId="cal-r" fill="transparent" legendType="none" />
-              </BarChart>
+                <Line type="monotone" dataKey="calTrend" stroke="#1A4D7C" strokeWidth={2} dot={false} name="3-day Avg" connectNulls />
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
 
@@ -787,7 +806,7 @@ export default function Stats() {
               Pee ({dayCount}d)
             </h3>
             <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={pottyData}>
+              <ComposedChart data={pottyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
                 <XAxis {...xAxisProps} />
                 <YAxis {...yAxisProps} domain={[0, maxPeePerDay]} />
@@ -798,7 +817,8 @@ export default function Stats() {
                 <Bar dataKey="peeAccident" stackId="pee" fill="#D4726A" name="Pee (Accident)" radius={[4, 4, 0, 0]} />
                 <Bar yAxisId="right" dataKey="peeGood" stackId="pee-r" fill="transparent" legendType="none" />
                 <Bar yAxisId="right" dataKey="peeAccident" stackId="pee-r" fill="transparent" legendType="none" />
-              </BarChart>
+                <Line type="monotone" dataKey="peeTrend" stroke="#B8960A" strokeWidth={2} dot={false} name="3-day Avg" connectNulls />
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
 
@@ -809,7 +829,7 @@ export default function Stats() {
               Poop ({dayCount}d)
             </h3>
             <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={pottyData}>
+              <ComposedChart data={pottyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#EBE6DE" />
                 <XAxis {...xAxisProps} />
                 <YAxis {...yAxisProps} domain={[0, maxPoopPerDay]} />
@@ -820,7 +840,8 @@ export default function Stats() {
                 <Bar dataKey="poopAccident" stackId="poop" fill="#D4726A" name="Poop (Accident)" radius={[4, 4, 0, 0]} />
                 <Bar yAxisId="right" dataKey="poopGood" stackId="poop-r" fill="transparent" legendType="none" />
                 <Bar yAxisId="right" dataKey="poopAccident" stackId="poop-r" fill="transparent" legendType="none" />
-              </BarChart>
+                <Line type="monotone" dataKey="poopTrend" stroke="#6B4A2A" strokeWidth={2} dot={false} name="3-day Avg" connectNulls />
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
 
