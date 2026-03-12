@@ -418,18 +418,16 @@ export default function PuppyProfile() {
                 Save Profile
               </button>
             </div>
-          ) : (
-            {!isDemo && (
-              <div className="p-5">
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="w-full py-2.5 border border-sand-200 text-sand-700 font-semibold rounded-xl hover:bg-sand-50 transition-colors text-sm"
-                >
-                  Edit Profile
-                </button>
-              </div>
-            )}
-          )}
+          ) : !isDemo ? (
+            <div className="p-5">
+              <button
+                onClick={() => setIsEditing(true)}
+                className="w-full py-2.5 border border-sand-200 text-sand-700 font-semibold rounded-xl hover:bg-sand-50 transition-colors text-sm"
+              >
+                Edit Profile
+              </button>
+            </div>
+          ) : null}
         </div>
 
         {/* Weight Log */}
