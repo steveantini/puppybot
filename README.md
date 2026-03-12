@@ -25,7 +25,7 @@ A clean, modern puppy behavior tracker built with React. Log potty breaks, meals
 - **PDF Export** — Generate printable reports from both History and Stats pages
 - **Clickable Header** — Tap the PuppyBot logo/title from any page to return to the dashboard
 - **AI Chat Assistant** — Claude-powered assistant on the dashboard with full access to granular daily log data (individual potty breaks, meals, naps), voice input, copy-to-clipboard, and per-user chat history persisted to Supabase
-- **Demo Mode** — A read-only demo account (`demo@puppybot.ai`) lets visitors explore the full UI with real data; all write operations are silently blocked
+- **Demo Mode** — One-click "Try Demo" button on the login page signs in as a read-only demo account; visitors can explore every page with real data while all write operations (log entries, edits, profile changes, AI chat) are blocked with a sign-up prompt
 - **Multi-User Auth** — Email/password login and signup via Supabase Auth with protected routes
 - **Admin Panel** — Slide-out settings menu with account management, puppy management, and family sharing
 - **Family Sharing** — Invite family members by email with role-based access (Owner, Editor, Viewer); auto-accept invites on signup/login
@@ -347,6 +347,7 @@ The `weekly-insights` Edge Function can generate automated weekly summaries. To 
 - [x] iOS app roadmap (Capacitor-based)
 - [x] Edit and delete individual entries from History page and Health Tracker
 - [x] Custom paw print favicon (steel-blue)
+- [ ] Public landing / marketing page with feature showcase and demo CTA
 - [ ] Push notifications for feeding/potty reminders
 - [ ] Photo gallery per day
 - [ ] Two-factor authentication

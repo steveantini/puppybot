@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../utils/supabase';
 import { useNavigate } from 'react-router-dom';
 
+const DEMO_USER_ID = import.meta.env.VITE_DEMO_USER_ID;
+
 const AuthContext = createContext({});
 
 export const useAuth = () => {
@@ -143,12 +145,15 @@ export function AuthProvider({ children }) {
     setProfile(null);
   };
 
+  const isDemo = !!user && !!DEMO_USER_ID && user.id === DEMO_USER_ID;
+
   const value = {
     user,
     profile,
     loading,
     signOut,
     isAuthenticated: !!user,
+    isDemo,
     isPremium: profile?.subscription_tier === 'premium' && profile?.subscription_status === 'active',
   };
 

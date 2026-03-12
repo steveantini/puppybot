@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import { PawPrint, Menu } from 'lucide-react';
-import { AuthProvider, ProtectedRoute } from './context/AuthContext';
+import { PawPrint, Menu, Eye } from 'lucide-react';
+import { AuthProvider, ProtectedRoute, useAuth } from './context/AuthContext';
 import { DataProvider, useData } from './context/DataContext';
 import BottomNav from './components/BottomNav';
 import AdminPanel from './components/AdminPanel';
+import { DemoToastProvider } from './components/DemoToast';
 import Dashboard from './pages/Dashboard';
 import History from './pages/History';
 import Stats from './pages/Stats';
@@ -17,7 +18,8 @@ import PuppyManagement from './pages/settings/PuppyManagement';
 import SharingManagement from './pages/settings/SharingManagement';
 
 function AppShell() {
-  const { isLoading, puppy, canEdit } = useData();
+  const { isLoading, puppy, canEdit, isDemo } = useData();
+  const { signOut } = useAuth();
   const [showAdminPanel, setShowAdminPanel] = useState(false);
 
   if (isLoading) {
@@ -40,6 +42,14 @@ function AppShell() {
         <Route path="/*" element={
           <ProtectedRoute>
             <div className="min-h-screen bg-sand-50">
+              {/* Demo Banner */}
+              {isDemo && (
+                <div className="bg-steel-500 text-white text-center text-sm py-2 px-4 flex items-center justify-center gap-3">
+                  <Eye size={15} />
+                  <span>You&apos;re viewing PuppyBot in demo mode — data is read-only</span>
+                  <Link to="/login" onClick={signOut} className="ml-2 underline font-semibold hover:text-steel-100">Sign up</Link>
+                </div>
+              )}
               {/* Header */}
               <header className="bg-white border-b border-sand-200/80 sticky top-0 z-50 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
@@ -106,7 +116,9 @@ function App() {
   return (
     <AuthProvider>
       <DataProvider>
-        <AppShell />
+        <DemoToastProvider>
+          <AppShell />
+        </DemoToastProvider>
       </DataProvider>
     </AuthProvider>
   );

@@ -58,7 +58,8 @@ function dateHasCategory(log, category) {
   }
 }
 
-function DeleteBtn({ onClick }) {
+function DeleteBtn({ onClick, hidden }) {
+  if (hidden) return null;
   return (
     <button
       onClick={(e) => { e.stopPropagation(); onClick(); }}
@@ -70,7 +71,8 @@ function DeleteBtn({ onClick }) {
   );
 }
 
-function EditBtn({ onClick }) {
+function EditBtn({ onClick, hidden }) {
+  if (hidden) return null;
   return (
     <button
       onClick={(e) => { e.stopPropagation(); onClick(); }}
@@ -84,7 +86,7 @@ function EditBtn({ onClick }) {
 
 export default function History() {
   const {
-    allLogs, puppy,
+    allLogs, puppy, isDemo,
     deletePottyBreak, deleteMeal, deleteNap, deleteWakeUpTime, clearBedTime,
     updateDayLog,
   } = useData();
@@ -198,14 +200,14 @@ export default function History() {
               {w.label || 'Wake Up'}: {formatTime(w.time)}
               {w.notes && <span className="text-xs text-sand-400 italic ml-1">— {w.notes}</span>}
             </span>
-            <DeleteBtn onClick={() => handleDeleteConfirm(() => deleteWakeUpTime(w.id, date))} />
+            <DeleteBtn hidden={isDemo} onClick={() => handleDeleteConfirm(() => deleteWakeUpTime(w.id, date))} />
           </div>
         ))}
         {log.bedTime && (
           <div className="flex items-center gap-2 text-sm text-sand-800 group">
             <BedDouble size={13} className="text-steel-500" />
             <span className="flex-1">Bed Time: {formatTime(log.bedTime)}</span>
-            <DeleteBtn onClick={() => handleDeleteConfirm(() => clearBedTime(date))} />
+            <DeleteBtn hidden={isDemo} onClick={() => handleDeleteConfirm(() => clearBedTime(date))} />
           </div>
         )}
       </div>
@@ -228,8 +230,8 @@ export default function History() {
               {p.poop === 'accident' && <span className="text-rose-500 text-xs bg-rose-50 px-1.5 py-0.5 rounded-md font-medium">Poop ✗</span>}
               {p.ringBell && <span className="text-steel-500 text-xs bg-steel-50 px-1.5 py-0.5 rounded-md font-medium">Bell 🔔</span>}
               <span className="ml-auto flex items-center gap-0.5">
-                <EditBtn onClick={() => openEdit('potty', p, date)} />
-                <DeleteBtn onClick={() => handleDeleteConfirm(() => deletePottyBreak(p.id, date))} />
+                <EditBtn hidden={isDemo} onClick={() => openEdit('potty', p, date)} />
+                <DeleteBtn hidden={isDemo} onClick={() => handleDeleteConfirm(() => deletePottyBreak(p.id, date))} />
               </span>
             </div>
           ))}
@@ -251,8 +253,8 @@ export default function History() {
                 <span className="text-sand-500 w-16 shrink-0">{formatTime(m.time)}</span>
                 <span className="flex-1">{m.foodGiven}{m.foodEaten ? ` → ${m.foodEaten}` : ''}</span>
                 <span className="flex items-center gap-0.5">
-                  <EditBtn onClick={() => openEdit('meal', m, date)} />
-                  <DeleteBtn onClick={() => handleDeleteConfirm(() => deleteMeal(m.id, date))} />
+                  <EditBtn hidden={isDemo} onClick={() => openEdit('meal', m, date)} />
+                  <DeleteBtn hidden={isDemo} onClick={() => handleDeleteConfirm(() => deleteMeal(m.id, date))} />
                 </span>
               </div>
               {m.notes && <p className="text-xs text-sand-400 ml-8 italic">{m.notes}</p>}
@@ -274,8 +276,8 @@ export default function History() {
               <Moon size={13} className="text-steel-500" />
               <span className="flex-1">{formatTime(n.startTime)} – {formatTime(n.endTime)}</span>
               <span className="flex items-center gap-0.5">
-                <EditBtn onClick={() => openEdit('nap', n, date)} />
-                <DeleteBtn onClick={() => handleDeleteConfirm(() => deleteNap(n.id, date))} />
+                <EditBtn hidden={isDemo} onClick={() => openEdit('nap', n, date)} />
+                <DeleteBtn hidden={isDemo} onClick={() => handleDeleteConfirm(() => deleteNap(n.id, date))} />
               </span>
             </div>
           ))}
@@ -291,8 +293,8 @@ export default function History() {
         <div className="flex items-center justify-between mb-1">
           <h4 className="text-xs font-semibold text-sand-500 uppercase tracking-widest">Skills</h4>
           <span className="flex items-center gap-0.5">
-            <EditBtn onClick={() => openEdit('skills', null, date)} />
-            <DeleteBtn onClick={() => handleDeleteConfirm(() => updateDayLog(date, (prev) => ({ ...prev, skills: '' })))} />
+            <EditBtn hidden={isDemo} onClick={() => openEdit('skills', null, date)} />
+            <DeleteBtn hidden={isDemo} onClick={() => handleDeleteConfirm(() => updateDayLog(date, (prev) => ({ ...prev, skills: '' })))} />
           </span>
         </div>
         <p className="text-sm text-sand-800">{log.skills}</p>
@@ -307,8 +309,8 @@ export default function History() {
         <div className="flex items-center justify-between mb-1">
           <h4 className="text-xs font-semibold text-sand-500 uppercase tracking-widest">Notes</h4>
           <span className="flex items-center gap-0.5">
-            <EditBtn onClick={() => openEdit('skills', null, date)} />
-            <DeleteBtn onClick={() => handleDeleteConfirm(() => updateDayLog(date, (prev) => ({ ...prev, notes: '' })))} />
+            <EditBtn hidden={isDemo} onClick={() => openEdit('skills', null, date)} />
+            <DeleteBtn hidden={isDemo} onClick={() => handleDeleteConfirm(() => updateDayLog(date, (prev) => ({ ...prev, notes: '' })))} />
           </span>
         </div>
         <p className="text-sm text-sand-800">{log.notes}</p>

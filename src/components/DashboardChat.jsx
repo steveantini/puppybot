@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import { supabase } from '../utils/supabase'
 
 export default function DashboardChat() {
-  const { puppy } = useData()
+  const { puppy, isDemo } = useData()
   const { user } = useAuth()
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
@@ -279,10 +279,10 @@ export default function DashboardChat() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={`Ask about ${puppyName}'s training, patterns, or advice...`}
+          placeholder={isDemo ? 'Sign up to chat with the AI assistant' : `Ask about ${puppyName}'s training, patterns, or advice...`}
           rows={1}
           className="w-full resize-none bg-transparent text-sm text-sand-900 placeholder:text-sand-300 focus:outline-none leading-relaxed px-1 py-1"
-          disabled={loading}
+          disabled={loading || isDemo}
         />
         <div className="flex items-center justify-between mt-1">
           <p className="text-[10px] text-sand-300 pl-1">
@@ -305,7 +305,7 @@ export default function DashboardChat() {
             )}
             <button
               onClick={() => handleSend()}
-              disabled={loading || !input.trim()}
+              disabled={loading || !input.trim() || isDemo}
               className={`p-2 rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
                 input.trim()
                   ? 'bg-steel-500 text-white hover:bg-steel-600'

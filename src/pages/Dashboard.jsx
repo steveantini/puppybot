@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useData } from '../context/DataContext';
+import { useDemoToast } from '../components/DemoToast';
 import Modal from '../components/Modal';
 import PottyForm from '../components/forms/PottyForm';
 import MealForm from '../components/forms/MealForm';
@@ -25,7 +26,8 @@ const quickAddButtons = [
 ];
 
 export default function Dashboard() {
-  const { puppy } = useData();
+  const { puppy, isDemo } = useData();
+  const showDemoToast = useDemoToast();
   const [activeModal, setActiveModal] = useState(null);
 
   const puppyName = puppy?.name || 'your puppy';
@@ -48,7 +50,7 @@ export default function Dashboard() {
           return (
             <button
               key={btn.id}
-              onClick={() => setActiveModal(btn.id)}
+              onClick={() => isDemo ? showDemoToast() : setActiveModal(btn.id)}
               className={`flex flex-col items-center justify-center gap-2 py-6 sm:py-8 rounded-2xl border text-sm font-bold whitespace-nowrap transition-all active:scale-[0.97] shadow-sm ${btn.color}`}
             >
               <Icon size={26} />

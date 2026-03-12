@@ -13,7 +13,7 @@ function safeHref(url) {
 }
 
 export default function PuppyProfile() {
-  const { puppy, updatePuppy, addWeightEntry } = useData();
+  const { puppy, updatePuppy, addWeightEntry, isDemo } = useData();
   const [isEditing, setIsEditing] = useState(!puppy?.name);
   const [showWeightModal, setShowWeightModal] = useState(false);
   const [showMoreInfo, setShowMoreInfo] = useState(false);
@@ -134,15 +134,17 @@ export default function PuppyProfile() {
                   <Dog size={38} className="text-sand-300" />
                 </div>
               )}
-              <label className="absolute bottom-0 right-0 w-9 h-9 bg-steel-500 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-steel-600 transition-colors">
-                <Camera size={14} className="text-white" />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoUpload}
-                  className="hidden"
-                />
-              </label>
+              {!isDemo && (
+                <label className="absolute bottom-0 right-0 w-9 h-9 bg-steel-500 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-steel-600 transition-colors">
+                  <Camera size={14} className="text-white" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                  />
+                </label>
+              )}
             </div>
             {!isEditing && puppy?.name && (
               <div className="mt-4 text-center">
@@ -417,14 +419,16 @@ export default function PuppyProfile() {
               </button>
             </div>
           ) : (
-            <div className="p-5">
-              <button
-                onClick={() => setIsEditing(true)}
-                className="w-full py-2.5 border border-sand-200 text-sand-700 font-semibold rounded-xl hover:bg-sand-50 transition-colors text-sm"
-              >
-                Edit Profile
-              </button>
-            </div>
+            {!isDemo && (
+              <div className="p-5">
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="w-full py-2.5 border border-sand-200 text-sand-700 font-semibold rounded-xl hover:bg-sand-50 transition-colors text-sm"
+                >
+                  Edit Profile
+                </button>
+              </div>
+            )}
           )}
         </div>
 
@@ -435,12 +439,14 @@ export default function PuppyProfile() {
               <Scale size={14} className="text-sand-400" />
               Weight Log
             </h3>
-            <button
-              onClick={() => setShowWeightModal(true)}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-steel-600 bg-steel-50 rounded-lg hover:bg-steel-100 transition-colors"
-            >
-              <Plus size={13} /> Add
-            </button>
+            {!isDemo && (
+              <button
+                onClick={() => setShowWeightModal(true)}
+                className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-steel-600 bg-steel-50 rounded-lg hover:bg-steel-100 transition-colors"
+              >
+                <Plus size={13} /> Add
+              </button>
+            )}
           </div>
 
           {sortedWeights.length === 0 ? (

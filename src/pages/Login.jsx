@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase, setRememberMe } from '../utils/supabase';
-import { PawPrint, Mail, Lock, AlertCircle } from 'lucide-react';
+import { PawPrint, Mail, Lock, AlertCircle, Eye } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState(false);
   const [error, setError] = useState('');
   const [rememberMe, setRememberMeState] = useState(true);
 
@@ -32,6 +33,31 @@ export default function Login() {
       setError(error.message || 'Failed to login. Please check your credentials.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    const demoEmail = import.meta.env.VITE_DEMO_EMAIL;
+    const demoPassword = import.meta.env.VITE_DEMO_PASSWORD;
+    if (!demoEmail || !demoPassword) {
+      setError('Demo account is not configured.');
+      return;
+    }
+    setError('');
+    setDemoLoading(true);
+    try {
+      setRememberMe(false);
+      const { error } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: demoPassword,
+      });
+      if (error) throw error;
+      navigate('/');
+    } catch (err) {
+      console.error('Demo login error:', err);
+      setError('Demo login failed. Please try again later.');
+    } finally {
+      setDemoLoading(false);
     }
   };
 
@@ -132,6 +158,25 @@ export default function Login() {
               </Link>
             </p>
           </div>
+
+          {/* Demo Divider */}
+          <div className="mt-5 flex items-center gap-3">
+            <div className="flex-1 h-px bg-sand-200" />
+            <span className="text-xs text-sand-400 font-medium">or</span>
+            <div className="flex-1 h-px bg-sand-200" />
+          </div>
+
+          {/* Try Demo Button */}
+          <button
+            type="button"
+            onClick={handleDemoLogin}
+            disabled={demoLoading || loading}
+            className="mt-4 w-full py-3 rounded-xl font-semibold transition-colors border border-sand-300 bg-sand-50 hover:bg-sand-100 text-sand-700 shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Eye size={18} />
+            {demoLoading ? 'Loading demo...' : 'Try Demo'}
+          </button>
+          <p className="text-xs text-sand-400 text-center mt-2">Explore PuppyBot with sample data — no sign-up needed</p>
         </div>
 
         {/* Footer */}

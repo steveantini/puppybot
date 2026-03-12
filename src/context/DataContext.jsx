@@ -18,7 +18,7 @@ import { useAuth } from './AuthContext';
 const DataContext = createContext(null);
 
 export function DataProvider({ children }) {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, isDemo } = useAuth();
   const userIdRef = useRef(null);
 
   const [puppy, setPuppy] = useState(null);
@@ -143,12 +143,15 @@ export function DataProvider({ children }) {
     return () => clearInterval(interval);
   }, [todayLog.date, allLogs]);
 
-  const isViewer = () => roleRef.current === 'viewer';
+  const isDemoRef = useRef(false);
+  useEffect(() => { isDemoRef.current = isDemo; }, [isDemo]);
+
+  const isReadOnly = () => roleRef.current === 'viewer' || isDemoRef.current;
 
   // ─── Puppy ───────────────────────────────────────────────
 
   const updatePuppy = useCallback(async (data) => {
-    if (isViewer()) return;
+    if (isReadOnly()) return;
     let updated;
     setPuppy((prev) => {
       updated = { ...prev, ...data };
@@ -165,7 +168,7 @@ export function DataProvider({ children }) {
   }, []);
 
   const addWeightEntry = useCallback(async (entry) => {
-    if (isViewer()) return;
+    if (isReadOnly()) return;
     const tempId = generateId();
     const tempEntry = { ...entry, id: tempId };
     setPuppy((prev) => ({
@@ -192,7 +195,7 @@ export function DataProvider({ children }) {
   // ─── Day logs ────────────────────────────────────────────
 
   const updateDayLog = useCallback((date, updater) => {
-    if (isViewer()) return;
+    if (isReadOnly()) return;
     setAllLogs((prevLogs) => {
       const currentLog = prevLogs[date] || createEmptyDayLog(date);
       const updated =
@@ -307,7 +310,7 @@ export function DataProvider({ children }) {
   // ─── Health records ──────────────────────────────────────
 
   const addHealthRecord = useCallback(async (record) => {
-    if (isViewer()) return;
+    if (isReadOnly()) return;
     const tempId = generateId();
     const tempRecord = { ...record, id: tempId };
     setHealthRecords((prev) => [...prev, tempRecord]);
@@ -323,7 +326,7 @@ export function DataProvider({ children }) {
   }, []);
 
   const updateHealthRecord = useCallback(async (id, data) => {
-    if (isViewer()) return;
+    if (isReadOnly()) return;
     let snapshot;
     setHealthRecords((prev) => {
       snapshot = prev;
@@ -338,7 +341,7 @@ export function DataProvider({ children }) {
   }, []);
 
   const deleteHealthRecord = useCallback(async (id) => {
-    if (isViewer()) return;
+    if (isReadOnly()) return;
     let snapshot;
     setHealthRecords((prev) => {
       snapshot = prev;
@@ -450,7 +453,7 @@ export function DataProvider({ children }) {
 
   // ─── Context value ──────────────────────────────────────
 
-  const canEdit = userRole === 'owner' || userRole === 'editor';
+  const canEdit = !isDemo && (userRole === 'owner' || userRole === 'editor');
 
   const value = {
     isLoading,
@@ -484,6 +487,7 @@ export function DataProvider({ children }) {
     deleteHealthRecord,
     userRole,
     canEdit,
+    isDemo,
   };
 
   return (
