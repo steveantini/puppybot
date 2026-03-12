@@ -319,41 +319,6 @@ The `weekly-insights` Edge Function can generate automated weekly summaries. To 
 2. Schedule it to run weekly (e.g., Monday at 8 AM)
 3. Or call it manually: `curl -X POST https://your-project.supabase.co/functions/v1/weekly-insights`
 
-## Roadmap
-
-- [x] Supabase backend for cloud sync and multi-device access
-- [x] Export daily log / stats as PDF
-- [x] Date picker for logging past days
-- [x] Calorie tracking (meals + treats)
-- [x] Nap schedule heatmap
-- [x] Sleep schedule chart (morning wake, night wake, bed time)
-- [x] Category filtering in History
-- [x] Date range selector for Stats (All Time, 7d, 30d, YTD)
-- [x] Expand All / Collapse All in History
-- [x] Vibrant, modern color palette (iteratively refined)
-- [x] Potty success rate combo chart (bars + trend line)
-- [x] AI Chat Assistant (Claude-powered, voice input, copy to clipboard, granular data context)
-- [x] Weekly insights generation with AI summaries
-- [x] User authentication (Supabase Auth, email/password)
-- [x] Multi-puppy support
-- [x] Admin panel with account, puppy, and sharing management
-- [x] Family sharing with auto-accept invites
-- [x] Puppy profile: microchip, insurance, vet, breeder, gotcha day
-- [x] Claude-inspired chat UI with time-aware greeting
-- [x] Per-user chat history persistence (Supabase)
-- [x] Demo mode (read-only viewer account)
-- [x] Clickable header logo navigates to dashboard
-- [x] Custom domain (puppybot.ai)
-- [x] iOS app roadmap (Capacitor-based)
-- [x] Edit and delete individual entries from History page and Health Tracker
-- [x] Custom paw print favicon (steel-blue)
-- [ ] Public landing / marketing page with feature showcase and demo CTA
-- [ ] Push notifications for feeding/potty reminders
-- [ ] Photo gallery per day
-- [ ] Two-factor authentication
-- [ ] Public shareable puppy profiles
-- [ ] Email invite notifications
-
 ## License
 
 Private project.

@@ -6,12 +6,16 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 
 - ✅ Core puppy tracking (potty, meals, naps, sleep, treats, skills, notes)
 - ✅ AI assistant powered by Claude Sonnet 4.5 (deployed Edge Function, Claude-inspired UI)
-- ✅ Stats and history visualization with Recharts
-- ✅ PDF export from History and Stats
-- ✅ Supabase Auth (email/password login/signup)
+- ✅ Stats and history visualization with Recharts (combo charts with 7-day trend lines)
+- ✅ PDF export from History, Stats, and Health Tracker
+- ✅ Supabase Auth (email/password login/signup, Remember Me)
 - ✅ Admin panel with account, puppy, and sharing management
 - ✅ Family sharing with role-based access and auto-accept invites
 - ✅ Puppy profile: microchip, insurance, vet, breeder, gotcha day, dog years
+- ✅ Health Tracker with category filter, date grouping, and PDF export
+- ✅ Demo mode (read-only one-click demo account)
+- ✅ Edit and delete individual entries from History and Health Tracker
+- ✅ Today's Snapshot with expandable detail cards on Dashboard
 - ✅ Clickable header logo navigates to dashboard
 - ✅ Custom domain: **puppybot.ai**
 
@@ -216,6 +220,17 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 - [ ] Biometric auth (Face ID / Touch ID)
 - [ ] Haptic feedback on quick-add buttons
 
+#### 5.5 Photo Gallery
+- [ ] Daily photo gallery (attach photos to each day's log)
+- [ ] Photo timeline view
+- [ ] Storage via Supabase Storage
+
+#### 5.6 Public Landing Page
+- [ ] Marketing page with feature showcase and screenshots
+- [ ] "Try Demo" call-to-action linking to demo account
+- [ ] SEO-optimized content for organic discovery
+- [ ] Testimonials and social proof
+
 ---
 
 ### **Phase 6: Community & Content** 🌐 Future
@@ -329,7 +344,13 @@ This document outlines the development roadmap for transforming PuppyBot from a 
 - AI now receives granular data (individual potty breaks, meals, naps) for precise answers
 - Copy-to-clipboard replaces save-to-notes and export on AI responses
 - Per-user chat history persistence (Supabase)
-- Demo mode (read-only viewer account)
+- Demo mode with one-click "Try Demo" button (read-only viewer account)
+- Remember Me checkbox on login (localStorage vs sessionStorage)
+- Health Tracker redesign: category filter, date grouping, expandable rows, PDF export
+- Today's Snapshot on Dashboard with expandable Potty/Meals/Naps detail cards
+- 7-day rolling average trend lines on Calories, Pee, Poop, and Potty Success Rate charts
+- Edit and delete individual entries from History and Health Tracker
+- Security fixes: RLS hardening, JWT auth on Edge Functions, XSS protection
 - Custom paw print favicon (steel-blue)
 - "Beta" badge in header
 - iOS app roadmap (Capacitor-based)
