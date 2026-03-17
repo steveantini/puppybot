@@ -25,7 +25,9 @@ const RANGE_OPTIONS = [
 ];
 
 const CAL_PER_CUP = 409;
-const CAL_PER_SNACK = 4;
+const CAL_PER_SNACK = 2;
+const CAL_PER_WHIMZEE = 24;
+const CAL_PER_KONG_ZIGGY = 42;
 
 function getDateRange(range, allLogDates) {
   const today = new Date();
@@ -614,7 +616,9 @@ export default function Stats() {
         totalCups += given * eaten;
       });
       const foodCal = Math.round(totalCups * CAL_PER_CUP);
-      const snackCal = (log?.snacks || 0) * CAL_PER_SNACK;
+      const snackCal = (log?.snacks || 0) * CAL_PER_SNACK
+        + (log?.whimzees || 0) * CAL_PER_WHIMZEE
+        + (log?.kongZiggies || 0) * CAL_PER_KONG_ZIGGY;
       return { date: formatShortDate(date), foodCal, snackCal, totalCal: foodCal + snackCal };
     });
     return base.map((d, i) => {

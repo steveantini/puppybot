@@ -307,6 +307,22 @@ export function DataProvider({ children }) {
     [updateDayLog]
   );
 
+  const updateWhimzees = useCallback(
+    (whimzees, date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({ ...prev, whimzees }));
+    },
+    [updateDayLog]
+  );
+
+  const updateKongZiggies = useCallback(
+    (kongZiggies, date) => {
+      const targetDate = date || getTodayKey();
+      updateDayLog(targetDate, (prev) => ({ ...prev, kongZiggies }));
+    },
+    [updateDayLog]
+  );
+
   // ─── Health records ──────────────────────────────────────
 
   const addHealthRecord = useCallback(async (record) => {
@@ -471,6 +487,8 @@ export function DataProvider({ children }) {
     updateSkills,
     updateNotes,
     updateSnacks,
+    updateWhimzees,
+    updateKongZiggies,
     deletePottyBreak,
     deleteMeal,
     deleteNap,

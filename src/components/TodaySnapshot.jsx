@@ -15,7 +15,9 @@ import {
 } from 'lucide-react';
 
 const CAL_PER_CUP = 409;
-const CAL_PER_SNACK = 4;
+const CAL_PER_SNACK = 2;
+const CAL_PER_WHIMZEE = 24;
+const CAL_PER_KONG_ZIGGY = 42;
 
 function parseCups(foodGiven) {
   if (!foodGiven) return 0;
@@ -119,8 +121,19 @@ export default function TodaySnapshot() {
     });
     const foodCal = Math.round(totalCups * CAL_PER_CUP);
     const snackCal = (log?.snacks || 0) * CAL_PER_SNACK;
-    return { count: meals.length, foodCal, snackCal, totalCal: foodCal + snackCal, treats: log?.snacks || 0 };
-  }, [log?.meals, log?.snacks]);
+    const whimzeesCal = (log?.whimzees || 0) * CAL_PER_WHIMZEE;
+    const kongZiggiesCal = (log?.kongZiggies || 0) * CAL_PER_KONG_ZIGGY;
+    const allTreatsCal = snackCal + whimzeesCal + kongZiggiesCal;
+    return {
+      count: meals.length,
+      foodCal,
+      snackCal: allTreatsCal,
+      totalCal: foodCal + allTreatsCal,
+      treats: log?.snacks || 0,
+      whimzees: log?.whimzees || 0,
+      kongZiggies: log?.kongZiggies || 0,
+    };
+  }, [log?.meals, log?.snacks, log?.whimzees, log?.kongZiggies]);
 
   const napStats = useMemo(() => {
     const naps = log?.naps || [];
@@ -277,9 +290,17 @@ export default function TodaySnapshot() {
               {mealStats.snackCal > 0 && <span className="text-sand-400"> ({mealStats.foodCal} food + {mealStats.snackCal} treats)</span>}
             </p>
           )}
-          {mealStats.treats > 0 && (
-            <div className="flex items-center gap-1 text-[11px] text-warm-500 font-medium mt-0.5">
-              <Cookie size={11} /> {mealStats.treats} treat{mealStats.treats !== 1 ? 's' : ''}
+          {(mealStats.treats > 0 || mealStats.whimzees > 0 || mealStats.kongZiggies > 0) && (
+            <div className="flex items-center gap-2 text-[11px] text-warm-500 font-medium mt-0.5 flex-wrap">
+              {mealStats.treats > 0 && (
+                <span className="flex items-center gap-1"><Cookie size={11} /> {mealStats.treats} treat{mealStats.treats !== 1 ? 's' : ''}</span>
+              )}
+              {mealStats.whimzees > 0 && (
+                <span>{mealStats.whimzees} whimzee{mealStats.whimzees !== 1 ? 's' : ''}</span>
+              )}
+              {mealStats.kongZiggies > 0 && (
+                <span>{mealStats.kongZiggies} ziggy{mealStats.kongZiggies !== 1 ? 'ies' : ''}</span>
+              )}
             </div>
           )}
         </StatCard>

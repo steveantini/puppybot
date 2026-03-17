@@ -155,7 +155,7 @@ function generateWeeklySummary(logs: any[]): string {
       const given = parseFraction(meal.foodGiven)
       if (given === 0) return sum
       return sum + (given * eaten * 409)
-    }, 0) + ((log.snacks || 0) * 4)
+    }, 0) + ((log.snacks || 0) * 2) + ((log.whimzees || 0) * 24) + ((log.kong_ziggies || 0) * 42)
   })
 
   const successRate = totalPotty > 0 ? Math.round(((totalPotty - totalAccidents) / totalPotty) * 100) : 0

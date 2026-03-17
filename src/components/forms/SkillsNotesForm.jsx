@@ -3,23 +3,29 @@ import { useData } from '../../context/DataContext';
 import { getTodayKey } from '../../utils/helpers';
 
 export default function SkillsNotesForm({ onClose, editDate }) {
-  const { getDayLogByDate, updateSkills, updateNotes, updateSnacks } = useData();
+  const { getDayLogByDate, updateSkills, updateNotes, updateSnacks, updateWhimzees, updateKongZiggies } = useData();
   const [date, setDate] = useState(editDate || getTodayKey());
 
   const dayLog = getDayLogByDate(date);
   const [snacks, setSnacks] = useState(dayLog.snacks || 0);
+  const [whimzees, setWhimzees] = useState(dayLog.whimzees || 0);
+  const [kongZiggies, setKongZiggies] = useState(dayLog.kongZiggies || 0);
   const [skills, setSkills] = useState(dayLog.skills || '');
   const [notes, setNotes] = useState(dayLog.notes || '');
 
   useEffect(() => {
     const log = getDayLogByDate(date);
     setSnacks(log.snacks || 0);
+    setWhimzees(log.whimzees || 0);
+    setKongZiggies(log.kongZiggies || 0);
     setSkills(log.skills || '');
     setNotes(log.notes || '');
   }, [date, getDayLogByDate]);
 
   const handleSave = () => {
     updateSnacks(Number(snacks) || 0, date);
+    updateWhimzees(Number(whimzees) || 0, date);
+    updateKongZiggies(Number(kongZiggies) || 0, date);
     updateSkills(skills.trim(), date);
     updateNotes(notes.trim(), date);
     onClose();
@@ -49,7 +55,41 @@ export default function SkillsNotesForm({ onClose, editDate }) {
             className="w-24 px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 text-center focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
           />
           <span className="text-xs text-sand-400">
-            = {(Number(snacks) || 0) * 4} calories
+            = {(Number(snacks) || 0) * 2} calories
+          </span>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Whimzees</label>
+        <div className="flex items-center gap-3">
+          <input
+            type="number"
+            min="0"
+            value={whimzees}
+            onChange={(e) => setWhimzees(e.target.value)}
+            placeholder="0"
+            className="w-24 px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 text-center focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+          />
+          <span className="text-xs text-sand-400">
+            = {(Number(whimzees) || 0) * 24} calories
+          </span>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-sand-500 uppercase tracking-widest mb-1.5">Kong Ziggies (Small)</label>
+        <div className="flex items-center gap-3">
+          <input
+            type="number"
+            min="0"
+            value={kongZiggies}
+            onChange={(e) => setKongZiggies(e.target.value)}
+            placeholder="0"
+            className="w-24 px-3.5 py-2.5 border border-sand-200 rounded-xl text-sand-900 text-center focus:outline-none focus:ring-2 focus:ring-steel-300 focus:border-steel-300 transition-colors"
+          />
+          <span className="text-xs text-sand-400">
+            = {(Number(kongZiggies) || 0) * 42} calories
           </span>
         </div>
       </div>

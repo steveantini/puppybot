@@ -173,7 +173,9 @@ function formatDataForClaude(logs: any[], _puppy: any): string {
       }).join('\n')
 
       const treats = log.snacks || 0
-      const treatCalories = treats * 4
+      const whimzees = log.whimzees || 0
+      const kongZiggies = log.kong_ziggies || 0
+      const treatCalories = treats * 2 + whimzees * 24 + kongZiggies * 42
 
       const wakeTimesStr = (log.wake_up_times || [])
         .map((w: any) => `${w.time} (${w.type})`)
@@ -183,7 +185,7 @@ function formatDataForClaude(logs: any[], _puppy: any): string {
       entry += `⏰ Wake: ${wakeTimesStr || 'Not logged'} | Bed: ${log.bed_time || 'Not logged'}\n`
       entry += `🚽 Potty Breaks (${pottyBreaks.length}):\n${pottyDetails || '  None logged'}\n`
       entry += `🍽️ Meals (${meals.length}):\n${mealDetails || '  None logged'}\n`
-      entry += `🦴 Treats: ${treats} (${treatCalories} cal)\n`
+      entry += `🦴 Treats: ${treats} (${treats * 2} cal) | Whimzees: ${whimzees} (${whimzees * 24} cal) | Kong Ziggies: ${kongZiggies} (${kongZiggies * 42} cal) — Total treat cal: ${treatCalories}\n`
       entry += `😴 Naps (${naps.length}):\n${napDetails || '  None logged'}\n`
       entry += `💪 Skills: ${log.skills || 'None logged'}\n`
       entry += `📝 Notes: ${log.notes || 'None'}`

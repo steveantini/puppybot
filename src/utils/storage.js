@@ -11,6 +11,8 @@ export function createEmptyDayLog(date) {
     naps: [],
     meals: [],
     snacks: 0,
+    whimzees: 0,
+    kongZiggies: 0,
     skills: '',
     notes: '',
   };
@@ -153,6 +155,8 @@ function parseLogs(data) {
       naps: row.naps || [],
       meals: row.meals || [],
       snacks: row.snacks || 0,
+      whimzees: row.whimzees || 0,
+      kongZiggies: row.kong_ziggies || 0,
       skills: row.skills || '',
       notes: row.notes || '',
     };
@@ -169,6 +173,8 @@ export async function upsertDayLog(date, dayLog, userId) {
     naps: dayLog.naps || [],
     meals: dayLog.meals || [],
     snacks: dayLog.snacks || 0,
+    whimzees: dayLog.whimzees || 0,
+    kong_ziggies: dayLog.kongZiggies || 0,
     skills: dayLog.skills || '',
     notes: dayLog.notes || '',
     updated_at: new Date().toISOString(),
