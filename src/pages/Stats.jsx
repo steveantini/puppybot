@@ -112,8 +112,9 @@ function parseEatenFraction(foodEaten) {
 
 function PeeTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
-  const good = payload.find((p) => p.dataKey === 'peeGood')?.value || 0;
-  const accident = payload.find((p) => p.dataKey === 'peeAccident')?.value || 0;
+  const row = payload[0]?.payload || {};
+  const good = row.peeGood || 0;
+  const accident = row.peeAccident || 0;
   const total = good + accident;
   const pct = total > 0 ? Math.round((good / total) * 100) : 0;
   return (
@@ -122,14 +123,16 @@ function PeeTooltip({ active, payload, label }) {
       <div style={{ color: '#6F5C48' }}>Total Pee: <strong>{total}</strong></div>
       <div style={{ color: '#D4726A', marginTop: 2 }}>Accidents: <strong>{accident}</strong></div>
       <div style={{ color: '#2B6AAF', marginTop: 3, fontWeight: 600 }}>Success: {pct}%</div>
+      {row.peeTrend != null && <div style={{ color: '#B8960A', marginTop: 3, borderTop: '1px solid #EBE6DE', paddingTop: 4 }}>7-day Avg: <strong>{row.peeTrend}</strong></div>}
     </div>
   );
 }
 
 function PoopTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
-  const good = payload.find((p) => p.dataKey === 'poopGood')?.value || 0;
-  const accident = payload.find((p) => p.dataKey === 'poopAccident')?.value || 0;
+  const row = payload[0]?.payload || {};
+  const good = row.poopGood || 0;
+  const accident = row.poopAccident || 0;
   const total = good + accident;
   const pct = total > 0 ? Math.round((good / total) * 100) : 0;
   return (
@@ -138,6 +141,7 @@ function PoopTooltip({ active, payload, label }) {
       <div style={{ color: '#6F5C48' }}>Total Poop: <strong>{total}</strong></div>
       <div style={{ color: '#D4726A', marginTop: 2 }}>Accidents: <strong>{accident}</strong></div>
       <div style={{ color: '#2B6AAF', marginTop: 3, fontWeight: 600 }}>Success: {pct}%</div>
+      {row.poopTrend != null && <div style={{ color: '#6B4A2A', marginTop: 3, borderTop: '1px solid #EBE6DE', paddingTop: 4 }}>7-day Avg: <strong>{row.poopTrend}</strong></div>}
     </div>
   );
 }
@@ -154,20 +158,23 @@ function SuccessComboTooltip({ active, payload, label }) {
       <div style={{ fontWeight: 600, marginBottom: 6, color: '#3E2F1E' }}>{label}</div>
       <div style={{ color: '#6F5C48' }}>Total: <strong>{total}</strong> ({good} good, {accidents} accident{accidents !== 1 ? 's' : ''})</div>
       {pct != null && <div style={{ color: '#2B6AAF', marginTop: 3, fontWeight: 600 }}>Success rate: {pct}%</div>}
+      {row.successTrend != null && <div style={{ color: '#1A4D7C', marginTop: 3, borderTop: '1px solid #EBE6DE', paddingTop: 4 }}>7-day Avg: <strong>{row.successTrend}%</strong></div>}
     </div>
   );
 }
 
 function CaloriesTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
-  const food = payload.find((p) => p.dataKey === 'foodCal')?.value || 0;
-  const snack = payload.find((p) => p.dataKey === 'snackCal')?.value || 0;
+  const row = payload[0]?.payload || {};
+  const food = row.foodCal || 0;
+  const snack = row.snackCal || 0;
   return (
     <div style={{ borderRadius: '12px', border: '1px solid #EBE6DE', fontSize: '12px', fontFamily: 'DM Sans, system-ui, sans-serif', boxShadow: '0 4px 16px rgba(42, 35, 29, 0.08)', background: '#fff', padding: '10px 14px' }}>
       <div style={{ fontWeight: 600, marginBottom: 6, color: '#4A3F35' }}>{label}</div>
       <div style={{ color: '#6B5D4F' }}>Food: <strong>{Math.round(food)} cal</strong></div>
       <div style={{ color: '#6B5D4F', marginTop: 2 }}>Treats: <strong>{Math.round(snack)} cal</strong></div>
       <div style={{ color: '#4A3F35', marginTop: 4, fontWeight: 600, borderTop: '1px solid #EBE6DE', paddingTop: 4 }}>Total: {Math.round(food + snack)} cal</div>
+      {row.calTrend != null && <div style={{ color: '#1A4D7C', marginTop: 3 }}>7-day Avg: <strong>{row.calTrend} cal</strong></div>}
     </div>
   );
 }
