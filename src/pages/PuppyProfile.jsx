@@ -77,14 +77,22 @@ export default function PuppyProfile() {
       return { primary: weeksStr, weeks: '' };
     }
 
-    const ageInMonths = ageInDays / 30.44;
+    let wholeMonths = (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth());
+    if (now.getDate() < birth.getDate()) wholeMonths--;
+    const monthStart = new Date(birth);
+    monthStart.setMonth(monthStart.getMonth() + wholeMonths);
+    const daysIntoMonth = Math.round((now - monthStart) / (1000 * 60 * 60 * 24));
+    const nextMonth = new Date(monthStart);
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    const daysInCurrentMonth = Math.round((nextMonth - monthStart) / (1000 * 60 * 60 * 24));
+    const ageInMonths = wholeMonths + daysIntoMonth / daysInCurrentMonth;
 
     let primary;
     if (ageInMonths < 12) {
       primary = `${ageInMonths.toFixed(1)} months old`;
     } else {
-      const years = Math.floor(ageInMonths / 12);
-      const remainingMonths = ageInMonths % 12;
+      const years = Math.floor(wholeMonths / 12);
+      const remainingMonths = ageInMonths - years * 12;
       primary = remainingMonths < 0.5
         ? `${years} yr${years !== 1 ? 's' : ''} old`
         : `${years} yr${years !== 1 ? 's' : ''} ${remainingMonths.toFixed(1)} mo old`;
