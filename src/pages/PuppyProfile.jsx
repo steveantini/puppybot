@@ -64,30 +64,32 @@ export default function PuppyProfile() {
   };
 
   const calculateAge = (bday) => {
-    if (!bday) return '';
+    if (!bday) return { primary: '', weeks: '' };
     const birth = new Date(bday + 'T12:00:00');
     const now = new Date();
     const ageInDays = Math.floor((now - birth) / (1000 * 60 * 60 * 24));
-    
+    const totalWeeks = Math.floor(ageInDays / 7);
+    const remainingDays = ageInDays % 7;
+    const weeksStr = `${totalWeeks} week${totalWeeks !== 1 ? 's' : ''}, ${remainingDays} day${remainingDays !== 1 ? 's' : ''} old`;
+
     if (ageInDays < 30) {
-      return `${ageInDays} day${ageInDays !== 1 ? 's' : ''} old`;
+      return { primary: weeksStr, weeks: '' };
     }
-    
-    // Calculate precise months as decimal
-    const ageInMonths = ageInDays / 30.44; // Average days per month
-    
+
+    const ageInMonths = ageInDays / 30.44;
+
+    let primary;
     if (ageInMonths < 12) {
-      return `${ageInMonths.toFixed(1)} months old`;
+      primary = `${ageInMonths.toFixed(1)} months old`;
+    } else {
+      const years = Math.floor(ageInMonths / 12);
+      const remainingMonths = ageInMonths % 12;
+      primary = remainingMonths < 0.5
+        ? `${years} yr${years !== 1 ? 's' : ''} old`
+        : `${years} yr${years !== 1 ? 's' : ''} ${remainingMonths.toFixed(1)} mo old`;
     }
-    
-    const years = Math.floor(ageInMonths / 12);
-    const remainingMonths = ageInMonths % 12;
-    
-    if (remainingMonths < 0.5) {
-      return `${years} yr${years !== 1 ? 's' : ''} old`;
-    }
-    
-    return `${years} yr${years !== 1 ? 's' : ''} ${remainingMonths.toFixed(1)} mo old`;
+
+    return { primary, weeks: weeksStr };
   };
 
   const calculateDogYears = (bday) => {
@@ -154,16 +156,18 @@ export default function PuppyProfile() {
                 {puppy.breed && (
                   <p className="text-sm text-sand-600 mt-0.5">{puppy.breed}</p>
                 )}
-                {puppy.birthday && (
-                  <>
-                    <p className="text-xs text-sand-400 mt-1">
-                      {calculateAge(puppy.birthday)}
-                    </p>
-                    <p className="text-xs text-sand-400 mt-0.5">
-                      {calculateDogYears(puppy.birthday)} (Dog Years)
-                    </p>
-                  </>
-                )}
+                {puppy.birthday && (() => {
+                  const age = calculateAge(puppy.birthday);
+                  return (
+                    <>
+                      {age.primary && <p className="text-xs text-sand-400 mt-1">{age.primary}</p>}
+                      {age.weeks && <p className="text-xs text-sand-400 mt-0.5">{age.weeks}</p>}
+                      <p className="text-xs text-sand-400 mt-0.5">
+                        {calculateDogYears(puppy.birthday)} (Dog Years)
+                      </p>
+                    </>
+                  );
+                })()}
                 
                 {/* More Info Collapsible Section */}
                 <div className="mt-3 w-full max-w-xs mx-auto">
