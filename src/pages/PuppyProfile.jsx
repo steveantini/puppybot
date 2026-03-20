@@ -65,9 +65,10 @@ export default function PuppyProfile() {
 
   const calculateAge = (bday) => {
     if (!bday) return { primary: '', weeks: '' };
-    const birth = new Date(bday + 'T12:00:00');
+    const birth = new Date(bday + 'T00:00:00');
     const now = new Date();
-    const ageInDays = Math.floor((now - birth) / (1000 * 60 * 60 * 24));
+    now.setHours(0, 0, 0, 0);
+    const ageInDays = Math.round((now - birth) / (1000 * 60 * 60 * 24));
     const totalWeeks = Math.floor(ageInDays / 7);
     const remainingDays = ageInDays % 7;
     const weeksStr = `${totalWeeks} week${totalWeeks !== 1 ? 's' : ''}, ${remainingDays} day${remainingDays !== 1 ? 's' : ''} old`;
@@ -94,9 +95,10 @@ export default function PuppyProfile() {
 
   const calculateDogYears = (bday) => {
     if (!bday) return '';
-    const birth = new Date(bday + 'T12:00:00');
+    const birth = new Date(bday + 'T00:00:00');
     const now = new Date();
-    const ageInDays = Math.floor((now - birth) / (1000 * 60 * 60 * 24));
+    now.setHours(0, 0, 0, 0);
+    const ageInDays = Math.round((now - birth) / (1000 * 60 * 60 * 24));
     const ageInYears = ageInDays / 365.25;
     
     // Standard calculation: first year = 15, second year = 9, each year after = 4
