@@ -160,8 +160,8 @@ export default function PuppyProfile() {
                   const age = calculateAge(puppy.birthday);
                   return (
                     <>
-                      {age.primary && <p className="text-xs text-sand-400 mt-1">{age.primary}</p>}
-                      {age.weeks && <p className="text-xs text-sand-400 mt-0.5">{age.weeks}</p>}
+                      {age.weeks && <p className="text-xs text-sand-400 mt-1">{age.weeks}</p>}
+                      {age.primary && <p className="text-xs text-sand-400 mt-0.5">{age.primary}</p>}
                       <p className="text-xs text-sand-400 mt-0.5">
                         {calculateDogYears(puppy.birthday)} (Dog Years)
                       </p>
